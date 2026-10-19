@@ -39,7 +39,9 @@ done
 # --- services / MCP ---
 mb=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 https://nielz-aspire-a315-53.tailb82a64.ts.net/mcp 2>/dev/null)
 [[ "$mb" == "200" || "$mb" == "202" ]] && OK+=("megabrain-http") || BAD+=("megabrain-http")
-docker info >/dev/null 2>&1 && OK+=("docker-daemon") || WARN+=("docker-daemon (needs docker group re-login)")
+if docker info >/dev/null 2>&1; then OK+=("docker-daemon")
+elif sudo -n docker info >/dev/null 2>&1; then OK+=("docker-daemon(sudo)")
+else WARN+=("docker-daemon"); fi
 have ollama >/dev/null 2>&1 && OK+=("ollama") || true
 
 # --- workspace tooling ---
