@@ -73,3 +73,15 @@ Encontrar e curar **conhecimento útil para trabalho autorizado MITR3**: exploit
 2. Índice `DARKWEB-SOURCES-v1.md`: ≥15 fontes entre engines, agregadores de exploit/PoC,
    fóruns de pesquisa e acervos; cada uma com veredito de alcance e descrição.
 3. Reportar ao maestro em ≤8 linhas.
+
+## 7. Anexo A — Fluxo do token anti-scrape do Ahmia (observação passiva, 2026-10-19, missão 3)
+
+Observado em 6 GETs espaçados 11–12 s, sem paralelismo:
+
+- `GET /` (200) devolve campo oculto `name="<6hex>" value="<6hex>"` — o token muda por sessão/circuito (já vistos `290b9f=e15aa0`, `1e92ec=d1e6fa`, `69726b=37acce`).
+- Dois GETs da home com 11 s de intervalo devolveram o **mesmo** token na mesma sessão/circuito.
+- `GET /search/?q=<termo>&<token>` com o token da home → **200** com resultados; o token foi **reusado 3×** com sucesso.
+- `GET /search/?q=<termo>` **sem** token → **302** para a home (corpo vazio) — causa raiz do scraper do `onionsearch` devolver 0 resultados.
+- A página de resultados emite um **novo** token (`b608fc=b76c19`), que também aparentou ser aceito.
+
+Protocolo educado adotado: 1 GET da home por sessão para obter o token; buscas espaçadas (≥10 s entre requisições); sem cookies, sem paralelismo, sem forjar/contornar tokens. Se o token expirar, refazer apenas o GET da home.
