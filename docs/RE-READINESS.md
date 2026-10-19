@@ -125,3 +125,41 @@ $ upx -d /tmp/opencode/true
 $ sha256sum /tmp/opencode/true
 8398af7d1f94a88be3303caa083616ad22a12783e4dfee0373298bc61aef0662  /tmp/opencode/true
 ```
+
+---
+
+## § A2-01 (2026-10-19) — Capability Proof (Ghidra Headless Native)
+
+**Escopo:** Prova de capacidade da lane RE (127.0.0.1 / lab local).  
+**Alvo:** Amostra C sintética com call-graph de 2 funções (`main` -> `target_calc`).  
+**Artefatos:**
+- Amostra C fonte: `/tmp/opencode/a2-01-sample/sample.c`
+- Binário compilado: `/tmp/opencode/a2-01-sample/sample`
+- Log de execução headless: `~/MITR3/reviews/re-lane/a2-01-headless.log`
+- Projeto Ghidra retido: `/tmp/opencode/a2-01-ghidra/proj/a2_01_proj.gpr` e `a2_01_proj.rep/`
+
+### Hashes SHA-256
+- **Amostra (`sample`):** `b5f98cab5b5fa98512219d66f2af4362c6a02dccd9d060ac3d218a6a29026cb9`
+- **Log headless (`a2-01-headless.log`):** `2a7aeed41c1aaa5ac3b9a2813dfe6ec20fc5f46f9596ce9cdefbba1cd2ddef96`
+
+### Timing de Execução
+- **Tempo total:** 7.258 s (7258 ms) incluindo inicialização da JVM, importação ELF64, análise completa do descompilador e execução do postScript.
+
+### Comandos Executados
+
+```bash
+# 1. Compilação da amostra C
+gcc -O0 -no-pie -fno-stack-protector -o /tmp/opencode/a2-01-sample/sample /tmp/opencode/a2-01-sample/sample.c
+
+# 2. Execução Headless com script nativo de iteração de funções
+/home/nielz/Tools/ghidra/support/analyzeHeadless /tmp/opencode/a2-01-ghidra/proj a2_01_proj \
+  -import /tmp/opencode/a2-01-sample/sample \
+  -postScript IterateFunctionsByAddressScript.java true \
+  -overwrite > ~/MITR3/reviews/re-lane/a2-01-headless.log 2>&1
+```
+
+### Validação do Call Graph e Funções
+O log confirmou análise bem-sucedida e listagem exata das funções alvo:
+- `target_calc @ 00401136`
+- `main @ 0040114a`
+- Total: 18 funções identificadas (incluindo stubs de runtime e inicialização).

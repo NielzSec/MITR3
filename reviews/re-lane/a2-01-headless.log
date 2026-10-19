@@ -1,0 +1,135 @@
+openjdk version "27" 2026-09-15
+OpenJDK Runtime Environment (build 27)
+OpenJDK 64-Bit Server VM (build 27, mixed mode)
+INFO  Using log config file: jar:file:/home/nielz/Tools/ghidra/Ghidra/Framework/Generic/lib/Generic.jar!/generic.log4j.xml (LoggingInitialization)  
+INFO  Using log file: /home/nielz/.config/ghidra/ghidra_12.1.4_PUBLIC/application.log (LoggingInitialization)  
+INFO  Loading user preferences: /home/nielz/.config/ghidra/ghidra_12.1.4_PUBLIC/preferences (Preferences)  
+INFO  Searching for classes... (ClassSearcher)  
+INFO  Class search complete (1285 ms) (ClassSearcher)  
+WARNING: Final field name in class ghidra.util.charset.CharsetInfo has been mutated reflectively by class com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$2 in unnamed module @3bf9ce3e (file:/home/nielz/Tools/ghidra/Ghidra/Framework/Generic/lib/gson-2.13.2.jar)
+WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning
+WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
+INFO  Initializing SSL Context (DefaultSSLContextInitializer)  
+INFO  Initializing Random Number Generator... (SecureRandomFactory)  
+INFO  Random Number Generator initialization complete: NativePRNGNonBlocking (SecureRandomFactory)  
+INFO  Trust manager disabled, cacerts have not been set (DefaultTrustManagerFactory)  
+INFO  Headless startup complete (2439 ms) (AnalyzeHeadless)  
+INFO  Class searcher loaded 59 extension points (20 false positives) (ClassSearcher)  
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldOffset has been called by org.apache.felix.framework.util.SecureAction (file:/home/nielz/Tools/ghidra/Ghidra/Features/Base/lib/org.apache.felix.framework-7.0.5.jar)
+WARNING: Please consider reporting this to the maintainers of class org.apache.felix.framework.util.SecureAction
+WARNING: sun.misc.Unsafe::staticFieldOffset will be removed in a future release
+INFO  HEADLESS Script Paths:
+    /home/nielz/Tools/ghidra/Ghidra/Features/BSim/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Processors/DATA/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Processors/Atmel/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Processors/JVM/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/VersionTracking/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/PDB/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Processors/8051/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Debug/Debugger/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/GnuDemangler/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/MicrosoftCodeAnalyzer/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/SystemEmulation/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Processors/PIC/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/DecompilerDependent/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/Decompiler/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/FileFormats/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/PyGhidra/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Debug/Debugger-rmi-trace/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/FunctionID/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/BytePatterns/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/SwiftDemangler/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/WildcardAssembler/ghidra_scripts
+    /home/nielz/Tools/ghidra/Ghidra/Features/Base/ghidra_scripts (HeadlessAnalyzer)  
+INFO  HEADLESS: execution starts (HeadlessAnalyzer)  
+INFO  Creating project: /tmp/opencode/a2-01-ghidra/proj/a2_01_proj (HeadlessAnalyzer)  
+INFO  Creating project: /tmp/opencode/a2-01-ghidra/proj/a2_01_proj (DefaultProject)  
+INFO  REPORT: Processing input files:  (HeadlessAnalyzer)  
+INFO       project: /tmp/opencode/a2-01-ghidra/proj/a2_01_proj (HeadlessAnalyzer)  
+INFO  IMPORTING: file:///tmp/opencode/a2-01-sample/sample (HeadlessAnalyzer)  
+INFO  Using Loader: Executable and Linking Format (ELF) (ProgramLoader)  
+INFO  Using Language/Compiler: x86:LE:64:default:gcc (ProgramLoader)  
+INFO  Using Library Search Path: [., /bin, /lib, /lib64, /lib/x86_64-linux-gnu, /lib/aarch64-linux-gnu, /usr/bin, /usr/lib, /usr/X11R6/bin, /usr/X11R6/lib, /tmp/.mount_MaestrMiCCOK/usr/lib, /usr/java/packages/lib, /usr/lib64] (ProgramLoader)  
+INFO  Additional info:
+Loading file:///tmp/opencode/a2-01-sample/sample?MD5=9e1cdbe9f00d1100b61d73be55e1f0f5...
+Failed to properly markup GNU Hash table at 004003c8: Insufficent memory at address 004003e4 (length: 20 bytes)
+Setting block .init_array to read-only
+Setting block .fini_array to read-only
+Setting block .dynamic to read-only
+------------------------------------------------
+
+Linking the External Programs of 'sample' to imported libraries...
+  [libc.so.6] -> not found in project
+------------------------------------------------
+
+Resolving External Symbols of [/sample] - 2 unresolved symbols, no external libraries configured - skipping
+ (ProgramLoader)  
+INFO  IMPORTING: Loaded 0 additional files (HeadlessAnalyzer)  
+INFO  ANALYZING all memory and code: file:///tmp/opencode/a2-01-sample/sample (HeadlessAnalyzer)  
+INFO  DWARF external debug information found: ExternalDebugInfo [filename=null, crc=0, hash=25526f23a61acf875ea9d5f438944aec940a03ae, objectType=DEBUGINFO, extra=null] (ExternalDebugFileSectionProvider)  
+INFO  Unable to find DWARF information, skipping DWARF analysis (DWARFAnalyzer)  
+WARN  Decompiling 004010c0, pcode error at 00405020: Unable to disassemble EXTERNAL block location: 00405020 (DecompileCallback)  
+WARN  Decompiling 00401090, pcode error at 00405008: Unable to disassemble EXTERNAL block location: 00405008 (DecompileCallback)  
+INFO  Packed database cache: /home/nielz/.cache/ghidra/packed-db-cache (PackedDatabaseCache)  
+INFO  Applied data type archive: generic_clib_64 (ApplyDataArchiveAnalyzer)  
+INFO  -----------------------------------------------------
+    ASCII Strings                              0.311 secs
+    Apply Data Archives                        0.199 secs
+    Call Convention ID                         0.232 secs
+    Call-Fixup Installer                       0.001 secs
+    Create Address Tables                      0.003 secs
+    Create Function                            0.001 secs
+    DWARF                                      0.007 secs
+    Data Reference                             0.002 secs
+    Decompiler Switch Analysis                 0.706 secs
+    Demangler GNU                              0.011 secs
+    Disassemble Entry Points                   0.064 secs
+    ELF Scalar Operand References              0.003 secs
+    Embedded Media                             0.003 secs
+    External Entry References                  0.001 secs
+    Function ID                                0.022 secs
+    Function Start Pre Search                  0.003 secs
+    Function Start Search                      0.027 secs
+    Function Start Search After Code           0.001 secs
+    Function Start Search After Data           0.001 secs
+    GCC Exception Handlers                     0.031 secs
+    Non-Returning Functions - Discovered       0.001 secs
+    Non-Returning Functions - Known            0.001 secs
+    Reference                                  0.008 secs
+    Shared Return Calls                        0.004 secs
+    Stack                                      0.011 secs
+    Subroutine References                      0.002 secs
+    Subroutine References - One Time           0.001 secs
+    x86 Constant Reference Analyzer            0.027 secs
+-----------------------------------------------------
+     Total Time   1 secs
+-----------------------------------------------------
+ (AutoAnalysisManager)  
+INFO  REPORT: Analysis succeeded for file: file:///tmp/opencode/a2-01-sample/sample (HeadlessAnalyzer)  
+INFO  REPORT: Execute script: IterateFunctionsByAddressScript.java 'true'  (HeadlessAnalyzer)  
+INFO  SCRIPT: /home/nielz/Tools/ghidra/Ghidra/Features/Base/ghidra_scripts/IterateFunctionsByAddressScript.java (HeadlessAnalyzer)  
+INFO  IterateFunctionsByAddressScript.java> 0  :  _init @ 00401000 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 1  :  FUN_00401020 @ 00401020 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 2  :  printf @ 00401030 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 3  :  _start @ 00401040 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 4  :  _dl_relocate_static_pie @ 00401070 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 5  :  _dl_relocate_static_pie_ifunc @ 00401080 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 6  :  deregister_tm_clones @ 00401090 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 7  :  register_tm_clones @ 004010c0 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 8  :  __do_global_dtors_aux @ 00401100 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 9  :  frame_dummy @ 00401130 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 10  :  target_calc @ 00401136 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 11  :  main @ 0040114a (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 12  :  _fini @ 00401180 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 13  :  __libc_start_main @ 00405000 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 14  :  _ITM_deregisterTMCloneTable @ 00405008 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 15  :  printf @ 00405010 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 16  :  __gmon_start__ @ 00405018 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> 17  :  _ITM_registerTMCloneTable @ 00405020 (GhidraScript)  
+INFO  IterateFunctionsByAddressScript.java> found 18 functions  (GhidraScript)  
+INFO  ANALYZING changes made by post scripts: file:///tmp/opencode/a2-01-sample/sample (HeadlessAnalyzer)  
+INFO  REPORT: Post-analysis succeeded for file: file:///tmp/opencode/a2-01-sample/sample (HeadlessAnalyzer)  
+INFO  /sample: file created (nielz) (LocalFileSystem)  
+INFO  REPORT: Save succeeded for: /sample (a2_01_proj:/sample) (HeadlessAnalyzer)  
+INFO  REPORT: Import succeeded (HeadlessAnalyzer)  
