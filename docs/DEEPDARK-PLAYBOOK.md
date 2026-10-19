@@ -85,3 +85,14 @@ Observado em 6 GETs espaçados 11–12 s, sem paralelismo:
 - A página de resultados emite um **novo** token (`b608fc=b76c19`), que também aparentou ser aceito.
 
 Protocolo educado adotado: 1 GET da home por sessão para obter o token; buscas espaçadas (≥10 s entre requisições); sem cookies, sem paralelismo, sem forjar/contornar tokens. Se o token expirar, refazer apenas o GET da home.
+
+## 8. Monitoramento diário (rotina 09:30)
+
+Alvos fixos: `wgruul` (Vigilant), `archive-db` (mirror Bitcoin), `dread-current`.
+
+1. Rodar `~/MITR3/bin/darkweb-monitor.sh` (3 GETs passivos, ≤50 s cada, espaçados; sem login/paralelismo).
+2. Conferir o resumo; o log TSV fica em `~/MITR3/docs/monitor/AAAA-MM-DD.log` (timestamp, http, rc, tempo, bytes, título, sha256).
+3. Classificar: VIVO ≤10 s · LENTO 10–50 s · TIMEOUT (rc=28).
+4. Dois dias consecutivos de TIMEOUT → marcar “morto provisório” no doc; se voltar, reabilitar.
+5. Título/tamanho mudou de forma relevante → abrir o frame da quarentena (hash já registrado), comparar e anotar.
+6. Atualizar doc + selo só quando houver mudança de estado. Captcha/login/JS → recuar e registrar (§5).
