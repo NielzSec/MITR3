@@ -52,3 +52,29 @@ Pilha WEB/API validada ponta a ponta em ambiente localhost: descoberta (nmap/ffu
 - Comando (contagem de templates): `nuclei -tl | wc -l` -> 13.619 templates carregados em ~/nuclei-templates.
 - Comando (scan): `nuclei -u http://127.0.0.1:8089 -tags tech -silent` -> 2 achados, ambos info: [tech-detect:simplehttp] [http] e [tech-detect:python] [http] contra 127.0.0.1:8089 (servidor python3 -m http.server 8089, timeout 180, em background; alvo restrito a 127.0.0.1).
 - Observação: contagem de templates via `-tl` (13.619) difere do find bruto de arquivos .yaml (14.036) — `-tl` lista apenas templates carregáveis/total efetivamente em uso pelo scanner.
+
+## re-run 11:15 (fechado pelo maestro)
+
+Motivo: o primeiro ciclo deixou um `python3 -m http.server` em foreground e a sessão do
+agente travou. O maestro repetiu o ciclo com o servidor em background e pidfile.
+
+Comandos exatos:
+
+```
+cd /home/nielz/.hermes/cache/scratch/webapi-val
+python3 -m http.server 8089 --bind 127.0.0.1 >/dev/null 2>&1 & echo $! > /tmp/srv.pid
+sleep 2
+nuclei -tl | wc -l
+nuclei -u http://127.0.0.1:8089 -tags tech -silent
+kill $(cat /tmp/srv.pid)
+```
+
+Resultado:
+
+- templates disponíveis: **13.619**
+- `-tags tech` contra 127.0.0.1:8089: **2 achados**, ambos info
+  - `tech-detect:simplehttp` — http://127.0.0.1:8089
+  - `tech-detect:python` — http://127.0.0.1:8089
+- servidor encerrado por pidfile; porta 8089 confirmada fechada
+
+Regra que fica: nunca subir servidor de teste em foreground dentro do shell do agente.
