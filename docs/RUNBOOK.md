@@ -66,3 +66,18 @@ Por dentro: `~/.local/share/pyghidra-venv/bin/pyghidra --install-dir ~/Tools/ghi
 `mitr3-nexus-re/scripts/ghidra_headless_dumper.py` (saída no formato Evidence v2).
 Receita de instalação: `python3 -m venv ~/.local/share/pyghidra-venv &&
 ~/.local/share/pyghidra-venv/bin/pip install pyghidra`.
+
+## Burp Suite Professional (loader v1.18 + JDK 21)
+
+Artefatos em `~/Tools/burp/` (selo `SHA256SUMS` no diretório):
+`BurpLoaderKeygen_v1.18.jar` (md5 `75321ccbab4bb4aa4e2f30314a824513`, sha1 `b2c5cab65fadcbef9c0ea286ae710115eb7c58c5` — confere com o recebido),
+`burpsuite_pro_v2026.3.3.jar` (PortSwigger, 659 MB), `jdk/` → symlink para `java-21-openjdk`.
+
+- Lançamento diário: `~/MITR3/bin/burp.sh [args]` — smoke test: `burp.sh --version` → `2026.3.3-47134`.
+  A licença é injetada em runtime pelo agente (`-javaagent:BurpLoaderKeygen_v1.18.jar`); a GUI do keygen
+  só é necessária para re-ativação. Comando idêntico ao botão "Run" do keygen (capturado por xdotool).
+- A ativação foi feita uma vez em 2026-10-19; o título da janela prova o estado: `- licensed to ...`.
+- v1.18 é obrigatório para JDK 25+ (removeu `jdk.internal.org.objectweb.asm`); por isso JDK 21.
+  `-noverify` emite aviso de deprecação no JDK 21 — esperado, mantido igual ao comando do keygen.
+- Headless/scanner via CLI: sem flag nativa de headless nesta versão; para automação futura, usar
+  `--config-file` (com "unpause spider and scanner") ou xvfb quando instalado.
