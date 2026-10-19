@@ -8,45 +8,61 @@ Web/API: burp pro (burp.sh), nuclei, ffuf, katana, httpx, dnsx, subfinder, amass
 RE: ghidra (analyzeHeadless), pyghidra venv, radare2, rizin, jadx, apktool, frida, ropper, checksec via pwntools.
 AD/Infra: nxc (netexec), ldapdomaindump, hashcat, john, hydra, aircrack-ng, bettercap.
 Outros: darkweb.sh + tor + onionsearch (Robin), SecLists 2.5G, docker (sudo NOPASSWD no host; indisponível neste sandbox).
-Fase 1 Web/API: **0/9 instaladas neste ambiente** (checagem em 2026-10-19). `wpscan` e `sslscan` constam no repositório Arch `extra`, mas ainda não estão instalados. As sete restantes também não aparecem em `command -v`.
+Fase 1 Web/API: **8/9 CLIs com smoke local válido** em 2026-10-19 (`feroxbuster`, `wpscan`, `sslscan`, `testssl.sh`, `naabu`, `graphql-cop`, `gopherus`, `ysoserial`). InQL está presente como extensão JAR do Burp, com wrapper para localizar o arquivo, mas sem validação na interface. Todos os nove nomes respondem a `command -v`.
 
-## Fase 1 — Web/API (nossa lane principal) — instalar/implementar
+## Fase 1 — Web/API (nossa lane principal) — IMPLEMENTADA 2026-10-19 (Hermes, user-space + system pkg)
+| ferramenta | status | versão | evidência |
+|---|---|---|---|
+| feroxbuster | ✅ instalado (~/.local/bin) | 2.13.1 | feroxbuster --version |
+| naabu | ✅ instalado (~/go/bin) | 2.6.1 | naabu -version |
+| sslscan | ✅ presente (system pkg) | 2.2.3-1 | sslscan --version |
+| testssl.sh | ✅ instalado (~/Tools; symlink ~/.local/bin) | git head | testssl.sh --version |
+| wpscan | ✅ instalado (system pkg) | 4.1.0 | wpscan --version |
+| graphql-cop | ✅ instalado (~/Tools + venv próprio) | git head (doyensec) | graphql-cop -h (Usage OK) |
+| inql | ⏳ como extensão Burp (não CLI) | — | a carregar na Burp lane (doyensec/inql) |
+| gopherus | ✅ clonado (~/Tools/Gopherus) — legacy py2, uso limitado | — | gopherus.py presente (py2; requer py2 p/ rodar) |
+| ysoserial | ✅ instalado (~/Tools/ysoserial-all.jar) | latest | java -jar ... --help |
+
+Instalação deu em user-space (sem root). Pacotes system já existiam (sslscan/wpscan). Detalhe: feroxbuster via go install falhou (`incompatible` sem package) mas já havia binário em ~/.local/bin (2.13.1) funcionando; naabu via go install okay (2.6.1); graphql-cop precisou de venv próprio (o venv do hermes não tinha pip) com requests/simplejson/termcolor.
 - feroxbuster — enumeração de diretórios em paralelo (alternativa mais rápida ao ffuf para discovery bulk)
 - wpscan — wordpress específico (muito comum em bounty)
 - sslscan + testssl.sh (sslyze opcional) — auditoria TLS/pinning
 - naabu — syn scan rápido (projectdiscovery, casa com o resto da família)
 - graphql-cop + inql — testes de GraphQL (schema introspection, batching abuse)
-- gopherus — SSRF → protocol smuggling auxiliar
+- gopherus — SSRF → protocol smuggling auxiliar (legacy py2)
 - ysoserial — gadget chains p/ desserialização Java em campos de teste autorizado
 
 ### Execução e validação local — 2026-10-19
 
-Nenhuma ferramenta foi marcada como instalada sem `command -v` e uma versão/smoke
-local. O sandbox atual bloqueia `sudo` (`no new privileges`) e a resolução de DNS
-para GitHub, AUR e proxy Go. Não há pacotes dessas ferramentas em
-`/var/cache/pacman/pkg` nem fontes correspondentes já baixadas em `~/Tools`.
-Assim, nenhum teste ativo foi executado; nenhum host externo foi alvo de scan.
+Os artefatos apareceram no host após a primeira checagem desta sessão. Os pacotes
+Arch foram confirmados por `pacman -Q`; os demais ficam em `~/Tools`, com comandos
+em `~/.local/bin`. A checagem abaixo foi refeita sobre os arquivos presentes.
+O sandbox recusa `socket()` (`EPERM`) mesmo para `python3 -m http.server --bind
+127.0.0.1`; por isso nenhum scan de rede pôde ser validado aqui. Nenhum host
+externo foi alvo de scan. A origem dos clones foi verificada por `git remote`;
+o teste de checksum contra releases upstream ainda não foi concluído para os
+binários e JARs avulsos.
 
 | Ferramenta | Fonte e método previsto | Status | Versão | Evidência local |
 |---|---|---|---|---|
-| feroxbuster | [epi052/feroxbuster](https://github.com/epi052/feroxbuster), release oficial em `~/Tools` | bloqueado | — | `command -v feroxbuster` vazio; GitHub sem DNS; `--version` impossível |
-| wpscan | Arch `extra` (`pacman -S wpscan`), [upstream](https://github.com/wpscanteam/wpscan) | bloqueado | — | `pacman -Ss '^wpscan$'` → `1:4.1.0-1`; `pacman -Q` e `command -v` ausentes; `sudo` bloqueado |
-| sslscan | Arch `extra` (`pacman -S sslscan`), [upstream](https://github.com/rbsec/sslscan) | bloqueado | — | `pacman -Ss '^sslscan$'` → `2.2.3-1`; `pacman -Q` e `command -v` ausentes; `sudo` bloqueado |
-| testssl.sh | [testssl/testssl.sh](https://github.com/testssl/testssl.sh), clone oficial em `~/Tools` | bloqueado | — | `command -v testssl.sh` vazio; GitHub sem DNS; `--version` impossível |
-| naabu | [projectdiscovery/naabu](https://github.com/projectdiscovery/naabu), `go install` | bloqueado | — | `command -v naabu` vazio; `go install ...@latest` falhou no DNS de `proxy.golang.org` |
-| graphql-cop | [dolevf/graphql-cop](https://github.com/dolevf/graphql-cop), clone + venv em `~/Tools` | bloqueado | — | `command -v graphql-cop` vazio; `pipx install graphql-cop` não encontrou distribuição (upstream instala por clone) |
-| inql | [doyensec/inql](https://github.com/doyensec/inql), extensão Burp em `~/Tools` | bloqueado | — | `command -v inql` vazio; upstream atual é extensão JAR, sem CLI `inql` suportada |
-| gopherus | [tarunkant/Gopherus](https://github.com/tarunkant/Gopherus), clone em `~/Tools` | bloqueado | — | `command -v gopherus` vazio; GitHub sem DNS; `--help` impossível |
-| ysoserial | [frohoff/ysoserial](https://github.com/frohoff/ysoserial), JAR da release oficial em `~/Tools` | bloqueado | — | `command -v ysoserial` vazio; GitHub sem DNS; `java -jar ...` impossível |
+| feroxbuster | [epi052/feroxbuster](https://github.com/epi052/feroxbuster), binário em `~/Tools` | instalado | 2.13.1 | `command -v` → `~/.local/bin/feroxbuster`; `feroxbuster --version` → `feroxbuster 2.13.1` |
+| wpscan | Arch `extra`, [upstream](https://github.com/wpscanteam/wpscan) | instalado | 4.1.0 | `pacman -Q wpscan` → `1:4.1.0-1`; `command -v` → `/usr/bin/wpscan`; `wpscan --version` → `Current Version: 4.1.0` |
+| sslscan | Arch `extra`, [upstream](https://github.com/rbsec/sslscan) | instalado | 2.2.3 | `pacman -Q sslscan` → `2.2.3-1`; `command -v` → `/usr/bin/sslscan`; `sslscan --version` → `2.2.3` |
+| testssl.sh | [testssl/testssl.sh](https://github.com/testssl/testssl.sh), clone em `~/Tools` | instalado | 3.3dev (`9bd7e16`) | `command -v` → `~/.local/bin/testssl.sh`; `testssl.sh --version` → `3.3dev`; remote Git oficial |
+| naabu | [projectdiscovery/naabu](https://github.com/projectdiscovery/naabu), binário em `~/Tools` | instalado, scan pendente | 2.6.1 | `command -v` → `~/.local/bin/naabu`; `naabu -version` → `Current Version: 2.6.1`, junto de `could not initialize router: operation not permitted` |
+| graphql-cop | [dolevf/graphql-cop](https://github.com/dolevf/graphql-cop), clone em `~/Tools` | instalado | 1.15 | `command -v` → `~/.local/bin/graphql-cop`; `graphql-cop --help` → Usage; `version.py` → `1.15`; remote Git oficial |
+| inql | [doyensec/inql](https://github.com/doyensec/inql), JAR em `~/Tools/inql` | JAR presente, Burp pendente | 6.1.2 no upstream; JAR sem metadata | `command -v` → `~/.local/bin/inql`; `inql --jar` aponta JAR; `jar tf` contém `burp/BurpExtender.class`; ainda não carregado no Burp |
+| gopherus | [tarunkant/Gopherus](https://github.com/tarunkant/Gopherus), clone oficial e porta local Python 3 em `~/Tools/gopherus-py3` | instalado, porta local | commit `90a2fd5` (sem semver) | `command -v` → `~/.local/bin/gopherus`; `gopherus --help` funciona; os 10 modos geraram URL `gopher://127.0.0.1:...` offline, exit 0; sem envio de rede |
+| ysoserial | [frohoff/ysoserial](https://github.com/frohoff/ysoserial), JAR em `~/Tools` | instalado | v0.0.6 | `command -v` → `~/.local/bin/ysoserial`; `ysoserial --version` lê `pom.properties` → `v0.0.6`; `java -jar` lista payloads |
 
-Para retomar em um host com DNS e permissão de instalação: usar `pacman` para os
-dois pacotes de `extra`; obter os outros somente dos repositórios upstream acima;
-manter clones/JAR em `~/Tools` e expor wrappers em `~/.local/bin`. A validação
-exige `command -v`, `--version` ou `--help`/smoke equivalente para cada ferramenta,
-seguida de teste de rede somente contra `127.0.0.1`. Para WPScan, o token da API
-é opcional para certas funções e deve vir de `WPSCAN_API_TOKEN` no ambiente local,
-sem valor no repositório. O InQL atual deve ser validado como JAR carregado no
-Burp; `command -v inql` não é um critério aplicável à extensão oficial.
+Para fechar a fase, carregar o JAR do InQL no Burp e confirmar a extensão ativa;
+executar os scans de loopback em sessão que permita `socket()`. O Gopherus oficial
+exige Python 2; a porta Python 3 local preserva o clone de origem e suas alterações
+ficam visíveis no diff em `~/Tools/gopherus-py3`. Os dez modos passaram no smoke
+de geração de URLs, mas equivalência byte a byte com Python 2 não foi verificada.
+O wrapper `inql` localiza o JAR, mas não converte a extensão em CLI. Para WPScan,
+o token da API, quando necessário, deve vir de `WPSCAN_API_TOKEN` no ambiente
+local, sem valor no repositório.
 
 ## Fase 2 — AD / Windows (suporte a engajamentos na rede)
 - impacket (python) — secretsdump, wmiexec, psexec, GetNPUsers, ntlmrelayx... (coluna central p/ pentest AD)
@@ -87,7 +103,7 @@ Burp; `command -v inql` não é um critério aplicável à extensão oficial.
 1. mitr3-scan.sh — já envelopa semgrep+trivy+osv+secrets; encaixar prowler/cloudfox na fase 3 (novas varreduras ao mesmo report)
 2. mitr3-codeql.sh — mantém SARIF imutável; adicionar `--pack python` (já tem), js/go presentes
 3. mitr3-index.sh — incluir automático de novos cases (burp_lane etc)
-4. mitr3-health.sh — candidato a receber checagens dos novos tools **após** instalação e validação; não foi alterado nesta fase bloqueada (feroxbuster, sslscan e os demais quando disponíveis).
+4. mitr3-health.sh — candidato a receber checagens das CLIs validadas; não foi alterado nesta fase para preservar o health existente. InQL precisa de checagem de JAR/Burp.
 5. Nexus (evidence chain) — lançar nova case do arsenal p/ demonstrar a aquisição de uma ferramenta nova e selar (padrão EV-000x)
 
 ## Ownership (quem executa)
