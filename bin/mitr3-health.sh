@@ -42,19 +42,23 @@ mb=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 https://nielz-aspire-a3
 docker info >/dev/null 2>&1 && OK+=("docker-daemon") || WARN+=("docker-daemon (needs docker group re-login)")
 have ollama >/dev/null 2>&1 && OK+=("ollama") || true
 
+# --- workspace tooling ---
+WS=()
+for s in mitr3-scan.sh mitr3-secrets-audit.py mitr3-index.sh; do
+  [[ -x "$HOME/MITR3/bin/$s" ]] && WS+=("$s") || BAD+=("ws:$s")
+done
+timer_state=$(systemctl --user is-active mitr3-health.timer 2>/dev/null || echo inactive)
+
 # --- thresholds ---
 (( mem_avail < 2000 )) && WARN+=("low-mem:${mem_avail}MB")
 (( disk_free < 20480 )) && WARN+=("low-disk:${disk_free}MB")
 
+arr() { if (( $# == 0 )); then echo '[]'; else printf '%s\n' "$@" | jq -R . | jq -s -c .; fi; }
+
 if (( JSON )); then
-  printf '{"ok":['
-  printf '"%s",' "${OK[@]}" | sed 's/,$//'
-  printf '],"missing":['
-  printf '"%s",' "${BAD[@]}" | sed 's/,$//'
-  printf '],"warn":['
-  printf '"%s",' "${WARN[@]}" | sed 's/,$//'
-  printf '],"mem_avail_mb":%d,"disk_free_mb":%d,"load":%s,"sudo_cached":%s}\n' \
-    "$mem_avail" "$disk_free" "$load" "$([[ $sudo_ok == Y ]] && echo true || echo false)"
+  printf '{"ok":%s,"missing":%s,"warn":%s,"workspace":%s,"timer":"%s","mem_avail_mb":%d,"disk_free_mb":%d,"load":%s,"sudo_cached":%s}\n' \
+    "$(arr "${OK[@]}")" "$(arr "${BAD[@]}")" "$(arr "${WARN[@]}")" "$(arr "${WS[@]}")" \
+    "$timer_state" "$mem_avail" "$disk_free" "$load" "$([[ $sudo_ok == Y ]] && echo true || echo false)"
   exit 0
 fi
 
@@ -62,6 +66,7 @@ printf '\nMITR3 — environment health\n'
 printf 'load %-6s mem free %-6sMB disk free %-7sMB\n\n' "$load" "$mem_avail" "$disk_free"
 printf '  ok      %2d  %s\n' "${#OK[@]}"  "$(printf '%s ' "${OK[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
 printf '  missing %2d  %s\n' "${#BAD[@]}" "$(printf '%s ' "${BAD[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
+printf '  workspace %2d  %s · timer %s\n' "${#WS[@]}" "$(printf '%s ' "${WS[@]}")" "$timer_state"
 if ((${#WARN[@]})); then
   printf '  warn    %2d  %s\n' "${#WARN[@]}" "$(printf '%s ' "${WARN[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
 fi

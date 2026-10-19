@@ -47,3 +47,8 @@ Observação: sem alteração de resultado do nuclei — novo run entregou os me
 
 ## Conclusão
 Pilha WEB/API validada ponta a ponta em ambiente localhost: descoberta (nmap/ffuf), detecção de tecnologia (nuclei), teste de injeção (sqlmap) e varredura de dependências (trivy). Infra pronta.
+
+## Re-run 11:15
+- Comando (contagem de templates): `nuclei -tl | wc -l` -> 13.619 templates carregados em ~/nuclei-templates.
+- Comando (scan): `nuclei -u http://127.0.0.1:8089 -tags tech -silent` -> 2 achados, ambos info: [tech-detect:simplehttp] [http] e [tech-detect:python] [http] contra 127.0.0.1:8089 (servidor python3 -m http.server 8089, timeout 180, em background; alvo restrito a 127.0.0.1).
+- Observação: contagem de templates via `-tl` (13.619) difere do find bruto de arquivos .yaml (14.036) — `-tl` lista apenas templates carregáveis/total efetivamente em uso pelo scanner.
