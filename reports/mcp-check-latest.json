@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-10-19T16:35:34.800150+00:00",
+  "config": "/home/nielz/.config/opencode/opencode.json",
+  "opencode_list_error": null,
+  "servers": [
+    {
+      "name": "megabrain",
+      "type": "remote",
+      "opencode": "connected",
+      "process_alive": null,
+      "boot": "pass",
+      "boot_detail": "HTTP 406",
+      "issues": []
+    },
+    {
+      "name": "rea",
+      "type": "local",
+      "opencode": "connected",
+      "process_alive": false,
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
+      "issues": []
+    },
+    {
+      "name": "chrome-devtools",
+      "type": "local",
+      "opencode": "connected",
+      "process_alive": false,
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
+      "issues": []
+    },
+    {
+      "name": "apisec-ng",
+      "type": "local",
+      "opencode": "connected",
+      "process_alive": false,
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
+      "issues": []
+    },
+    {
+      "name": "playwright",
+      "type": "local",
+      "opencode": "connected",
+      "process_alive": false,
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
+      "issues": []
+    },
+    {
+      "name": "context7",
+      "type": "remote",
+      "opencode": "connected",
+      "process_alive": null,
+      "boot": "pass",
+      "boot_detail": "HTTP 405",
+      "issues": []
+    },
+    {
+      "name": "mitr3-nexus",
+      "type": "local",
+      "opencode": "connected",
+      "process_alive": true,
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
+      "issues": []
+    }
+  ]
+}

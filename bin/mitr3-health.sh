@@ -44,6 +44,17 @@ elif sudo -n docker info >/dev/null 2>&1; then OK+=("docker-daemon(sudo)")
 else WARN+=("docker-daemon"); fi
 have ollama >/dev/null 2>&1 && OK+=("ollama") || true
 
+# --- configured MCP servers ---
+mcp_json=$($HOME/MITR3/bin/mitr3-mcp-check.sh --json 2>/dev/null) || mcp_json='null'
+if [[ "$mcp_json" != null ]]; then
+  mcp_pass=$(jq '[.servers[] | select(.boot == "pass" and (.issues | length) == 0)] | length' <<<"$mcp_json")
+  mcp_fail=$(jq '[.servers[] | select(.boot != "pass" or (.issues | length) > 0)] | length' <<<"$mcp_json")
+  (( mcp_fail > 0 )) && WARN+=("mcp:${mcp_fail}-problems")
+else
+  WARN+=("mcp:check-unavailable")
+  mcp_pass=0; mcp_fail=0
+fi
+
 # --- workspace tooling ---
 WS=()
 for s in mitr3-scan.sh mitr3-secrets-audit.py mitr3-index.sh; do
@@ -58,9 +69,9 @@ timer_state=$(systemctl --user is-active mitr3-health.timer 2>/dev/null || echo 
 arr() { if (( $# == 0 )); then echo '[]'; else printf '%s\n' "$@" | jq -R . | jq -s -c .; fi; }
 
 if (( JSON )); then
-  printf '{"ok":%s,"missing":%s,"warn":%s,"workspace":%s,"timer":"%s","mem_avail_mb":%d,"disk_free_mb":%d,"load":%s,"sudo_cached":%s}\n' \
+  printf '{"ok":%s,"missing":%s,"warn":%s,"workspace":%s,"mcp":%s,"timer":"%s","mem_avail_mb":%d,"disk_free_mb":%d,"load":%s,"sudo_cached":%s}\n' \
     "$(arr "${OK[@]}")" "$(arr "${BAD[@]}")" "$(arr "${WARN[@]}")" "$(arr "${WS[@]}")" \
-    "$timer_state" "$mem_avail" "$disk_free" "$load" "$([[ $sudo_ok == Y ]] && echo true || echo false)"
+    "$mcp_json" "$timer_state" "$mem_avail" "$disk_free" "$load" "$([[ $sudo_ok == Y ]] && echo true || echo false)"
   exit 0
 fi
 
@@ -69,6 +80,7 @@ printf 'load %-6s mem free %-6sMB disk free %-7sMB\n\n' "$load" "$mem_avail" "$d
 printf '  ok      %2d  %s\n' "${#OK[@]}"  "$(printf '%s ' "${OK[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
 printf '  missing %2d  %s\n' "${#BAD[@]}" "$(printf '%s ' "${BAD[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
 printf '  workspace %2d  %s · timer %s\n' "${#WS[@]}" "$(printf '%s ' "${WS[@]}")" "$timer_state"
+printf '  mcp     %2d passed, %2d problems · details: %s\n' "$mcp_pass" "$mcp_fail" "$HOME/MITR3/reports/mcp-check-latest.json"
 if ((${#WARN[@]})); then
   printf '  warn    %2d  %s\n' "${#WARN[@]}" "$(printf '%s ' "${WARN[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
 fi

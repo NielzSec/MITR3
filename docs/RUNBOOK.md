@@ -6,6 +6,29 @@ Comandos que resolvem os incidentes recorrentes. Cada item traz o sintoma, a cau
 
 Sintoma: ferramenta some do catálogo, `failed: Connection closed`, ou token antigo em uso.
 
+Diagnóstico completo:
+
+```bash
+~/MITR3/bin/mitr3-mcp-check.sh          # tabela dos MCPs configurados
+~/MITR3/bin/mitr3-mcp-check.sh --json   # mesmo resultado em JSON
+~/MITR3/bin/mitr3-health.sh --json | jq .mcp
+```
+
+O check lê `~/.config/opencode/opencode.json`, consulta `opencode mcp list`, verifica
+processos locais e inicia cada servidor local por 5 segundos com stdin aberto. Para
+MCPs remotos, tenta HTTP com timeout de 5 segundos. O relatório fica em
+`~/MITR3/reports/mcp-check-latest.json` (modo 600, sem tokens nem stderr bruto).
+`process_alive: false` indica que não há uma sessão OpenCode mantendo o servidor
+local ativo; o resultado `boot` testa sua capacidade de iniciar separadamente.
+Se `opencode mcp list` não conseguir abrir a porta local, a coluna mostra
+`unavailable`; isso não implica falha do servidor MCP.
+
+Problemas específicos verificados: workspace `MITR3_WORKSPACE` do Nexus em
+`~/.local/share/mitr3-nexus/workspaces/`; launcher do APIsec com tratamento do
+prefixo `secbolt:`; e `--executablePath` do chrome-devtools apontando para um
+browser executável. O smoke de 5 segundos confirma sobrevivência do processo,
+sem chamar ferramentas ou validar handshake MCP.
+
 ```
 opencode mcp list          # status por servidor
 opencode reload            # recarrega config e sobe os MCPs sem reiniciar a sessão

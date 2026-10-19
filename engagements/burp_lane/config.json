@@ -1,0 +1,86 @@
+{
+  "user_options": {
+    "connections": {
+      "host_resolver": {
+        "dns_over_https": {},
+        "options": {
+          "_action": "use_system",
+          "dns_server": "8.8.8.8",
+          "dns_server_2": "1.1.1.1",
+          "hostname": null,
+          "resolve_hostnames": false
+        },
+        "hostname_resolution": []
+      },
+      "platform": {
+        "fallback_ips": []
+      },
+      "proxy": {
+        "http_proxy": {
+          "options": { "_action": "use_http_proxy", "hostname": null, "port": 80 }
+        },
+        "socks_proxy": {
+          "options": { "_action": "use_socks_proxy", "hostname": null, "port": 1080 }
+        }
+      },
+      "release_conn_on_redirect": false,
+      "socket_history": {}
+    },
+    "etc": {
+      "_lastExecutedVersion": "2026.3.3-47134",
+      "update_interval": 0
+    },
+    "http": {
+      "http2": { "_http2EnginesEnabledByDefault": true, "http2_engine": "auto" },
+      "normalization": {
+        "http_path": { "_normalization": true },
+        "http_url": { "_normalization": false }
+      },
+      "status_100_continues": { "_action": "use_immediate_disconnect" },
+      "status_101_switching_protocols": { "_action": "use_configuration_2" },
+      "weblogin_java": { "_action": "use_default" }
+    },
+    "misc": {
+      "proxy": {
+        "cookies": { "_action": "none" },
+        "intercept_client_requests": { "_intercept": "add" },
+        "intercept_server_responses": { "_intercept": "add" },
+        "log_requests": false,
+        "log_responses": false,
+        "use_http2": false
+      },
+      "scanner": { "enabled": true },
+      "spider": { "enabled": true }
+    },
+    "site_defaults": {}
+  },
+  "project_options": {
+    "connections": {},
+    "http": {},
+    "misc": {},
+    "proxy": {
+      "proxy_listeners": {
+        "proxy_listener_0": {
+          "certificate_mode": "per_host",
+          "listening_host": "127.0.0.1",
+          "listening_port": 8080,
+          "options": {
+            "hide_error_message": false,
+            "hostname_resolution": "",
+            "http_connections": 6,
+            "local_system_proxy": false,
+            "response_buffering": false
+          }
+        }
+      }
+    },
+    "scanner": {},
+    "spider": {},
+    "target": {
+      "scope": {
+        "exclude": [],
+        "include": []
+      }
+    }
+  }
+}
