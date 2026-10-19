@@ -62,3 +62,10 @@ maestri list                           # squad presence
 ## Toolchain source of truth
 
 `~/.local/bin` (go + pipx) is prepended to PATH by the shell profile. If a tool exists but is not found, check that first.
+
+## Pipeline e índices
+
+- `bin/mitr3-scan.sh <case> <target> [label]` — semgrep + trivy fs + osv-scanner + secrets-audit, selo SHA256, resumo em `findings.md`.
+- `bin/mitr3-secrets-audit.py <paths...>` — auditoria de superfície de credencial; grava caminho/linha/regra/modo, nunca o valor.
+- `bin/mitr3-index.sh` — regenera `engagements/INDEX.md`.
+- `bin/mitr3-health.sh [--json]` — matriz de ferramentas; snapshot diário em `state/` por systemd user timer.

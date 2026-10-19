@@ -64,3 +64,13 @@ Confirmados no ambiente nesta data: `apktool` 3.0.3, `frida-tools` 14.11.0, `che
 2. **codeql:** CLI ausente. Falta o bundle oficial com consultas compatíveis para análise estática e criação de bancos CodeQL; obter `codeql-bundle-linux64.tar.zst` no release oficial e adicionar `codeql/` ao `PATH`.
 
 Referências de instalação: [ArchWiki Burp Suite](https://wiki.archlinux.org/title/Burp_Suite), [AUR android-apktool identificado no projeto](https://github.com/iBotPeaches/Apktool/issues/3334), [ProjectDiscovery](https://docs.projectdiscovery.io/tools/nuclei/install), [ffuf](https://github.com/ffuf/ffuf), [Amass](https://github.com/owasp-amass/docs/blob/master/docs/index.md), [Frida](https://frida.re/docs/installation/), [NetExec](https://www.netexec.wiki/getting-started/installation/installation-on-unix), [CodeQL CLI](https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/scan-from-the-command-line/set-up-codeql-cli).
+
+## osv-scanner - semantica de faixa (2026-10-19)
+
+Em `requirements` sem pin, o `osv-scanner` resolve a **versão mínima** da faixa: `pip>=X` pode virar `pip 9.0.3`. Os advisories resultantes são artefatos dessa resolução, não evidência da versão instalada no ambiente. Casos observados: `internal_baseline` F-02 e `internal_nexus_retest`.
+
+Para reportar vulnerabilidades de runtime, auditar o ambiente instalado (`pip freeze` registrado em lock) ou a imagem construída. Usar `trivy image` como fonte de verdade para a imagem em execução e confirmar as versões com `pip list` dentro do container antes de publicar o achado.
+
+## Pipeline unico
+
+`~/MITR3/bin/mitr3-scan.sh <case> <target> [label]` executa `semgrep` (`p/python`, `p/secrets`), `trivy fs` (`vuln`, `secret`, `misconfig`), `osv-scanner` e `secrets-audit`. O pipeline sela os resultados com SHA256 e escreve `findings.md`. Tempo observado: **19 s** em `mitr3-nexus-re`.
