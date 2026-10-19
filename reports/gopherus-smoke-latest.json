@@ -1,0 +1,208 @@
+{
+  "id": "GOPHERUS-PY3-20261019T185714Z",
+  "timestamp": "2026-10-19T18:57:14.821757+00:00",
+  "source": "/home/nielz/Tools/gopherus",
+  "upstream_commit": "90a2fd5799342bbd493966ed95ed2489068ea568",
+  "command_v": "/home/nielz/.local/bin/gopherus",
+  "python": "3.14.8 (main, Oct  2 2026, 10:23:31) [GCC 16.2.1 20260810]",
+  "compile_count": 12,
+  "compile": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/gopherus.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/DumpMemcached.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/FastCGI.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/MySQL.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/PHPMemcached.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/PostgreSQL.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/PyMemcached.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/RbMemcached.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/Redis.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/SMTP.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/Zabbix.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "py_compile",
+        "/home/nielz/Tools/gopherus/scripts/__init__.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "smokes": {
+    "banner_help": {
+      "command": [
+        "/usr/bin/python3",
+        "/home/nielz/Tools/gopherus/gopherus.py"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "\u001b[32m\n  ________              .__\n /  _____/  ____ ______ |  |__   ___________ __ __  ______\n/   \\  ___ /  _ \\\\\\\\____ \\|  |  \\_/ __ \\_  __ \\  |  \\/  ___/\n\\    \\_\\  (  <_> )  |_> >   Y  \\  ___/|  | \\/  |  /\\___ \\\\\n \\______  /\\____/|   __/|___|  /\\___  >__|  |____//____  >\n        \\/       |__|        \\/     \\/                 \\/\n\n\t\t\u001b[34mauthor: \u001b[33m$_SpyD3r_$\n\u001b[0m\nusage: gopherus.py [-h] [--exploit EXPLOIT]\n\noptions:\n  -h, --help         show this help message and exit\n  --exploit EXPLOIT  mysql, postgresql, fastcgi, redis, smtp, zabbix,\n                     pymemcache, rbmemcache, phpmemcache, dmpmemcache\nNone\n",
+      "stderr": ""
+    },
+    "help": {
+      "command": [
+        "/home/nielz/.local/bin/gopherus",
+        "--help"
+      ],
+      "stdin": "",
+      "exit_code": 0,
+      "stdout": "usage: gopherus.py [-h] [--exploit EXPLOIT]\n\noptions:\n  -h, --help         show this help message and exit\n  --exploit EXPLOIT  mysql, postgresql, fastcgi, redis, smtp, zabbix,\n                     pymemcache, rbmemcache, phpmemcache, dmpmemcache\n",
+      "stderr": ""
+    },
+    "redis_menu": {
+      "command": [
+        "/home/nielz/.local/bin/gopherus",
+        "--exploit",
+        "redis"
+      ],
+      "stdin": "smoke\n",
+      "exit_code": 0,
+      "stdout": "\u001b[32m\n  ________              .__\n /  _____/  ____ ______ |  |__   ___________ __ __  ______\n/   \\  ___ /  _ \\\\\\\\____ \\|  |  \\_/ __ \\_  __ \\  |  \\/  ___/\n\\    \\_\\  (  <_> )  |_> >   Y  \\  ___/|  | \\/  |  /\\___ \\\\\n \\______  /\\____/|   __/|___|  /\\___  >__|  |____//____  >\n        \\/       |__|        \\/     \\/                 \\/\n\n\t\t\u001b[34mauthor: \u001b[33m$_SpyD3r_$\n\u001b[0m\n\u001b[01m\nReady To get SHELL\n\u001b[0m\n\u001b[35mWhat do you want?? (ReverseShell/PHPShell): \u001b[0m\u001b[93mPlz choose between those two\u001b[0m\n",
+      "stderr": ""
+    }
+  },
+  "patch_reconstruction": "git apply --unidiff-zero --check + apply: PASS; all 12 source SHA256 match",
+  "sha256": {
+    "/home/nielz/Tools/gopherus/gopherus.py": "620039577b5e7a30181c7b44a96badf0321f8ea2385cd1a4e6200448592bd79e",
+    "/home/nielz/Tools/gopherus/scripts/DumpMemcached.py": "b48f65f671a9b56b7bd1f177396609ccc0f80acf9b13acd40f260999147acec4",
+    "/home/nielz/Tools/gopherus/scripts/FastCGI.py": "5a3a7add3c53942b539e2b49160db6639f959b9db0c45fcbbffb264be29f37ad",
+    "/home/nielz/Tools/gopherus/scripts/MySQL.py": "fd2bb71be5c760fa2062232052b16dc9483611089ef942a72d69658fa67d469f",
+    "/home/nielz/Tools/gopherus/scripts/PHPMemcached.py": "daa1f842d0ae68898450164b1b4ac949feaba0f3a829f04e26844c72167feb8f",
+    "/home/nielz/Tools/gopherus/scripts/PostgreSQL.py": "c0e5c054742bb82847addf25bc8345e3e0ce4deee9c0890e1296b1cb8be69472",
+    "/home/nielz/Tools/gopherus/scripts/PyMemcached.py": "549e37bcba4883934084791f95b5f8e86976efd2e01aa347c83949a61530403f",
+    "/home/nielz/Tools/gopherus/scripts/RbMemcached.py": "25555ba29b3e768a4636588879acbc0dec305a309877a58162a650e3c7a0d4cd",
+    "/home/nielz/Tools/gopherus/scripts/Redis.py": "c98e6040e8225954b78bdd5c127cf6cffb490fb607bfa2c4b6f6d7b666c372fd",
+    "/home/nielz/Tools/gopherus/scripts/SMTP.py": "37799e1b9ed1357851779fe7d55767c83b5fd51698eced51a73c62f55877a617",
+    "/home/nielz/Tools/gopherus/scripts/Zabbix.py": "ed2fc2b9b8439f14e82a32f779eee501e42bbe6f2e230f0f4e148e3ba84165cb",
+    "/home/nielz/Tools/gopherus/scripts/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "/home/nielz/.local/bin/gopherus": "f70661860353e9e17054910019ce482972f621d7f87b40f5f6a4e7e59c16a841",
+    "/home/nielz/MITR3/bin/mitr3-gopherus.sh": "f70661860353e9e17054910019ce482972f621d7f87b40f5f6a4e7e59c16a841",
+    "/home/nielz/MITR3/patches/gopherus-py3.patch": "84b2d8e603ef1842b916a2d49f475a8c8198b4482e81c7667232d8403f81ef3f"
+  },
+  "limits": "Redis menu input only (smoke); no payload generation, no network, no validation of other modes.",
+  "patch_format": "zero context; requires git apply --unidiff-zero on the recorded upstream commit"
+}
