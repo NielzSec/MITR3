@@ -1,0 +1,345 @@
+# DARKWEB-SOURCES-v1 — índice curado de fontes .onion (Robin / MITR3)
+
+> Data: 2026-10-19 16:57 UTC · Executor: Robin (lane deep/dark web) · Infra: Tor local (SOCKS 127.0.0.1:9050) + `bin/darkweb.sh`
+> Método: requisições GET passivas (sem login/posting/transação), User-Agent Firefox, timeouts 45–100 s;
+> 21 buscas de descoberta no Ahmia (~11 mil pares de resultado) e 47 hosts validados individualmente por GET (37 v3/v4 + 10 v2 históricos).
+> Bodies baixados ficam em `/tmp/opencode/darkquarantine/` com `sha256` registrado **antes** de qualquer análise.
+> Regras: `~/MITR3/docs/DEEPDARK-PLAYBOOK.md` (§2) — operação estritamente passiva, sem PII em claro, sem mercado.
+
+## 1. Resumo
+- Fontes indexadas: 22 · vivas: 21 · parciais: 1
+- Observadas e não indexadas: 14 (mortas/timeout, clones suspeitos ou fora de política — §8)
+- Endereços v2 herdados do `onionsearch` re-testados: 10 (ver §9 — mortos por protocolo Tor v3).
+- Baselines (Ahmia/DuckDuckGo) re-verificados com evidência (hashes em §10).
+
+## 2. Registro bruto de validação
+| fonte | veredito | evidência |
+|---|---|---|
+| `ahmia` | **VIVO** | HTTP 200 · 6.716595s · 4735 B · título: Ahmia — Search Tor Hidden Services |
+| `ddg` | **VIVO** | HTTP 200 · 7.024956s · 233501 B · título: DuckDuckGo - Protection. Privacy. Peace of mind. |
+| `torch` | **VIVO** | HTTP 200 · 12.815204s · 9227 B · título: The Original Dark Web Search Engine | Torch! |
+| `onionland` | **VIVO** | HTTP 200 · 19.846481s · 300982 B · título: OnionLand Search Engine - Deep Web and Tor .onion Search |
+| `tor66` | **VIVO** | HTTP 200 · 5.432564s · 17603 B · título: Tor66 - Search and Find .onion websites |
+| `oss` | parcial (captcha) | HTTP 200 · 9.158043s · 1298 B · título: OSS - Captcha |
+| `submarine` | **VIVO** | HTTP 200 · 15.801520s · 8194 B · título: Submarine - Search for Hidden Services |
+| `dnreport` | **VIVO** | HTTP 200 · 5.300313s · 16420 B · título: darknet.report — Search indexed Tor services by title, topic, and metadata |
+| `hiddenwiki` | **VIVO** | HTTP 200 · 4.296928s · 214337 B · título: The Hidden Wiki |
+| `daniel` | **VIVO** | HTTP 200 · 12.399145s · 122845 B · título: Daniel Winzen &#8211; Web- und Server-Experte |
+| `torsearch` | **VIVO** | HTTP 200 · 10.159211s · 151398 B · título: Hidden Wiki - Find latest DarkWeb Markets , Search Engines , Forums , Emails and much more |
+| `darkhackerzone` | **VIVO** | HTTP 200 · 9.976384s · 40437 B · título: Dark Hacker Zone &bull; Index page |
+| `notrace` | **VIVO** | HTTP 200 · 31.631707s · 1453 B · título: Index of / |
+| `libgen` | **VIVO** | HTTP 200 · 9.434293s · 1348 B · título: GenoType.INC |
+| `biblionex` | **VIVO** | HTTP 200 · 7.593818s · 9030 B · título: Bibliotheca Nex Alea |
+| `gnupg-ftp` | **VIVO** | HTTP 200 · 6.052180s · 4232 B · título: Index of / |
+| `glab` | **VIVO** | HTTP 200 · 6.510480s · 2999 B · título: 0xacab - code hosting for friendly people |
+| `moneroobs` | **VIVO** | HTTP 200 · 7.183527s · 9876 B · título: Monero Observer - Frontpage News |
+| `ssd-eff` | **VIVO** | HTTP 200 · 9.382272s · 30134 B · título: Surveillance Self-Defense |
+| `btcwiki` | **VIVO** | HTTP 200 · 5.782115s · 58814 B · título: Bitcoin Wiki |
+| `wdo-news` | **VIVO** | HTTP 200 · 8.614378s · 16369 B · título: WalletWatch |
+| `usb-news` | **VIVO** | HTTP 200 · 8.084485s · 18454 B · título: FlowFinance |
+| `haystak` | morto (timeout x2) | sem resposta útil (curl rc=28, 25.001592s) |
+| `phobos` | morto (socks x2) | sem resposta útil (curl rc=97, 13.104131s) |
+| `darksearchenginer` | morto (timeout x2) | sem resposta útil (curl rc=28, 25.001394s) |
+| `dread` | morto (timeout x2) | sem resposta útil (curl rc=28, 25.001729s) |
+| `xss` | morto (endereco-55-invalido) | sem resposta útil (curl rc=97, 0.000255s) |
+| `hiddenwiki-mirror` | morto (timeout) | sem resposta útil (curl rc=28, 35.001468s) |
+| `lantern` | morto (timeout) | sem resposta útil (curl rc=28, 35.001812s) |
+| `wgruul-news` | morto (timeout) | sem resposta útil (curl rc=28, 45.000401s) |
+| `archive-db` | morto (timeout) | sem resposta útil (curl rc=28, 40.001910s) |
+| `yellowlabs` | morto (timeout) | sem resposta útil (curl rc=28, 40.001396s) |
+| `torz-poc` | **VIVO** | HTTP 200 · 8.547388s · 164855 B · título: #1 Mobile Hacker For Hire - Fast Hacking Services For Hire |
+| `torport-news` | **VIVO** | HTTP 200 · 5.555767s · 13199 B · título: TorPortal, the Tor market and dark news portal for 2026 |
+| `h2-news` | **VIVO** | HTTP 200 · 5.343479s · 42254 B · título: Hacking Team | Elite Hackers on Deepweb |
+| `blackhat-blog` | **VIVO** | HTTP 200 · 6.168668s · 33454 B · título: Verified Domain Marketplace | Buy and Sell Trusted Domains |
+
+## 3. Engines / portais de busca
+
+### ahmia — **VIVO** (2026-10-19)
+- **URL**: `http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 6.716595s · 4735 B · título: Ahmia — Search Tor Hidden Services
+- **sha256 (frame baixado)**: `734ae9459c1aa207819020d5582ae8dda47e650776d81b1d2e9967b79e78acad` (4735 B)
+- **O que oferece**: Indexador do Tor Project (Ahmia/Hermes Center); busca exige token anti-scrape dinâmico (ver §Achados).
+
+### ddg — **VIVO** (2026-10-19)
+- **URL**: `https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 7.024956s · 233501 B · título: DuckDuckGo - Protection. Privacy. Peace of mind.
+- **sha256 (frame baixado)**: `310d00482c462c5fb769a7bbd6faabbcfebd4899f3fd5fcd63aa9d75011e40b6` (233501 B)
+- **O que oferece**: Versão .onion do DuckDuckGo: busca própria + baseline de conectividade Tor.
+
+### torch — **VIVO** (2026-10-19)
+- **URL**: `http://torchdeedp3i2jigzjdmfpn5ttjhthh5wbmda2rr3jvqjg5p77c54dqd.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 12.815204s · 9227 B · título: The Original Dark Web Search Engine | Torch!
+- **sha256 (frame baixado)**: `019e16aa3597bb46867abbb829eedabf267a565d175fd3d4dee2c923412f01d6` (9227 B)
+- **O que oferece**: Engine mais antiga em operação ("The Original Dark Web Search Engine"); índice grande, resultados mistos/spam.
+
+### onionland — **VIVO** (2026-10-19)
+- **URL**: `http://3bbad7fauom4d6sgppalyqddsqbf5u5p56b5k5uk2zxsy3d6ey2jobad.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 19.846481s · 300982 B · título: OnionLand Search Engine - Deep Web and Tor .onion Search
+- **sha256 (frame baixado)**: `2fb0fb9ad8760ca365296df2da6d731f773717a39f8a7b687f7097e7457459bd` (300982 B)
+- **O que oferece**: Engine moderna com API própria e boa cobertura; também usada como fonte pelo onionsearch.
+
+### tor66 — **VIVO** (2026-10-19)
+- **URL**: `http://tor66sewebgixwhcqfnp5inzp5x5uohhdy3kvtnyfxc2e5mxiuh34iid.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 5.432564s · 17603 B · título: Tor66 - Search and Find .onion websites
+- **sha256 (frame baixado)**: `6d4cf391734598527e2b67c56e2367d0fdbf4d8a670f70f61c0a7211feec87fe` (17603 B)
+- **O que oferece**: Portal de busca com categorias e lista de links; instável (falhou na 1ª tentativa, ok na 2ª em 5,4 s).
+
+### oss — parcial (captcha) (2026-10-19)
+- **URL**: `http://3fzh7yuupdfyjhwt3ugzqqof6ulbcl27ecev33knxe3u7goi3vfn2qqd.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 9.158043s · 1298 B · título: OSS - Captcha
+- **sha256 (frame baixado)**: `72f94a8f45d67cde322ccfb7e0d7fda9759288696137a6ce57ccbe7725001fd7` (1298 B)
+- **O que oferece**: OnionSearchServer — backend agregador do onionsearch; erige captcha (recuado sem contornar, registrar).
+
+### submarine — **VIVO** (2026-10-19)
+- **URL**: `http://no6m4wzdexe3auiupv2zwif7rm6qwxcyhslkcnzisxgeiw6pvjsgafad.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 15.801520s · 8194 B · título: Submarine - Search for Hidden Services
+- **sha256 (frame baixado)**: `e4b2f7bcac10878cd5128bfeb6a64f3fd147abd9b463efeecc21bb16ee50f0dd` (8194 B)
+- **O que oferece**: Engine "Submarine" (ex-Torgle); formulário simples de busca, saída HTML.
+
+### dnreport — **VIVO** (2026-10-19)
+- **URL**: `http://kgng6hv2o2gtv6rzukdis6s74vpubuvjtknewb3npk7axp442nppxuqd.onion/`
+- **Tipo**: engine
+- **Evidência**: HTTP 200 · 5.300313s · 16420 B · título: darknet.report — Search indexed Tor services by title, topic, and metadata
+- **sha256 (frame baixado)**: `831c326a7ff911f6aacbab0615131d4b0ca0a7e82a12c004f85cfcd7621611ee` (16420 B)
+- **O que oferece**: darknet.report — busca serviços Tor indexados por título, tópico e metadados.
+
+## 4. Diretórios e índices de .onion
+
+### hiddenwiki — **VIVO** (2026-10-19)
+- **URL**: `http://zqktlwiuavvvqqt4ybvgvi7tyo4hjl5xgfuvpdf6otjiycgwqbym2qad.onion/wiki/`
+- **Tipo**: dir
+- **Evidência**: HTTP 200 · 4.296928s · 214337 B · título: The Hidden Wiki
+- **sha256 (frame baixado)**: `7abc4257112c4689af6174eb547af908ce67958611f53b7b869fee39d2758539` (214337 B)
+- **O que oferece**: O Hidden Wiki (oficial): diretório clássico de links .onion por categoria; raiz redireciona para /wiki/; muitos links mortos/isca.
+
+### daniel — **VIVO** (2026-10-19)
+- **URL**: `http://danielas3rtn54uwmofdo3x2bsdifr47huasnmbgqzfrec5ubupvtpid.onion/`
+- **Tipo**: dir
+- **Evidência**: HTTP 200 · 12.399145s · 122845 B · título: Daniel Winzen &#8211; Web- und Server-Experte
+- **sha256 (frame baixado)**: `9c1a4a61a2bcb4a25c316c60d21c74b269c176ee7defdf2618b87853f1856030` (122845 B)
+- **O que oferece**: Índice curado de serviços onion (Daniel Winzen), com página pessoal e lista de mirrors.
+
+### torsearch — **VIVO** (2026-10-19)
+- **URL**: `http://torwikijwqskahohtn35pyfde2uqmgrxgr2fru4mn4rer5muj445dxyd.onion/`
+- **Tipo**: dir
+- **Evidência**: HTTP 200 · 10.159211s · 151398 B · título: Hidden Wiki - Find latest DarkWeb Markets , Search Engines , Forums , Emails and much more
+- **sha256 (frame baixado)**: `0d73e9c42579ae8df6ce9d115810878adaf245715067e3c4b50b3d6a927f1319` (151398 B)
+- **O que oferece**: "TorSearch — Hidden Wiki": diretório/portal com listas amplas (inclui mercados — usar só como mapa de descoberta).
+
+## 5. Fóruns de pesquisa e discussão
+
+### darkhackerzone — **VIVO** (2026-10-19)
+- **URL**: `http://wk54p5xel7uqhfl5uzpcqrk6npsx5td5jsa4iqrkmquimhynhks7ppyd.onion/`
+- **Tipo**: forum
+- **Evidência**: HTTP 200 · 9.976384s · 40437 B · título: Dark Hacker Zone &bull; Index page
+- **sha256 (frame baixado)**: `c072ce454c0716e18b93d24f589d85fc46dfde9f90170c4777eaa202411035e7` (40437 B)
+- **O que oferece**: Dark Hacker Zone — fórum de hackers com área de PoC/CVE (ex.: CVE-2026-1296); leitura p/ threat intel, zero interação.
+
+## 6. Acervos e bibliotecas
+
+### notrace — **VIVO** (2026-10-19)
+- **URL**: `http://libraryhmny4k3t424tznkzs3776hkn3tw5wijt2bqjvavpwh4544mqd.onion/`
+- **Tipo**: archive
+- **Evidência**: HTTP 200 · 31.631707s · 1453 B · título: Index of /
+- **sha256 (frame baixado)**: `85e52408d074236c0446ff607847701abd3ac158ff55ab7cf260bad3adacca5f` (1453 B)
+- **O que oferece**: Biblioteca/índice estático (Anarchy, Economics, Guides, Manipulation...) associado ao No Trace Project (opsec anti-vigilância).
+
+### libgen — **VIVO** (2026-10-19)
+- **URL**: `http://libgenfrialc7tguyjywa36vtrdcplwpxaw43h6o63dmmwhvavo5rqqd.onion/`
+- **Tipo**: archive
+- **Evidência**: HTTP 200 · 9.434293s · 1348 B · título: GenoType.INC
+- **sha256 (frame baixado)**: `191f4ff7c87816f8e472a7e9cb6e1ef2195bbb4882d036de03b038e5d6e86636` (1348 B)
+- **O que oferece**: Mirror oficial do Library Genesis em Tor ("GenoType.INC") — livros/artigos técnicos.
+
+### biblionex — **VIVO** (2026-10-19)
+- **URL**: `http://urzthcil4cjyfxqbs2jtjgebuyrr6du7oqsrvw2zgqepj5cqnndtkgad.onion/`
+- **Tipo**: archive
+- **Evidência**: HTTP 200 · 7.593818s · 9030 B · título: Bibliotheca Nex Alea
+- **sha256 (frame baixado)**: `f1080e97181642f3a89b2f72fd22284bdf2935761dd895dcfea61e0fa36f3a83` (9030 B)
+- **O que oferece**: Bibliotheca Nex Alea — biblioteca de designs de fabricação (impressão 3D e improvisos) + field guides; CONTEÚDO SENSÍVEL, referência apenas.
+
+### gnupg-ftp — **VIVO** (2026-10-19)
+- **URL**: `http://5gxsihf4vjdhimiotrhchihrfujoanondrplizofwparrtmgbwsafhid.onion/`
+- **Tipo**: archive
+- **Evidência**: HTTP 200 · 6.052180s · 4232 B · título: Index of /
+- **sha256 (frame baixado)**: `8be3ca28531875e34b7b2cfaeb179438cdfd2773b8fdee7102e86a019956adad` (4232 B)
+- **O que oferece**: Servidor de arquivos (estilo FTP) espelhando repositórios de distros: Arch, BlackArch, Gentoo, AlmaLinux, Endeavour e outros.
+
+### glab — **VIVO** (2026-10-19)
+- **URL**: `http://wmj5kiic7b6kjplpbvwadnht2nh2qnkbnqtcv3dyvpqtz7ssbssftxid.onion/`
+- **Tipo**: archive
+- **Evidência**: HTTP 200 · 6.510480s · 2999 B · título: 0xacab - code hosting for friendly people
+- **sha256 (frame baixado)**: `27a5cfee4897021f939a05f9183f40874c877abb02bf292e92c3bc42334837e5` (2999 B)
+- **O que oferece**: 0xacab — hospedagem de código (GitLab) de coletivos; espelho onion com código-fonte de ferramentas.
+
+## 7. Recursos de pesquisa, notícias e opsec
+
+### moneroobs — **VIVO** (2026-10-19)
+- **URL**: `http://ttq5m3lsdhjysspvof6m72lbygclzyeelvn3wgjj7m3fr4djvbgepwyd.onion/`
+- **Tipo**: res
+- **Evidência**: HTTP 200 · 7.183527s · 9876 B · título: Monero Observer - Frontpage News
+- **sha256 (frame baixado)**: `089ee28065f17d8d1616a87f6c64feb61019c4d9f579ceb27cb3e595240cc870` (9876 B)
+- **O que oferece**: Monero Observer — notícias e pesquisa sobre privacidade/Monero.
+
+### ssd-eff — **VIVO** (2026-10-19)
+- **URL**: `http://y7yea4pmqqtznb33qiugvysyn2bob5v62e4pvoadoibrwkq3tsddjeyd.onion/`
+- **Tipo**: res
+- **Evidência**: HTTP 200 · 9.382272s · 30134 B · título: Surveillance Self-Defense
+- **sha256 (frame baixado)**: `fb4dfa5ddcb0a7a3b8ca73caae9a5dbf9ec15d80189fa1282a8bde8e869b8bb7` (30134 B)
+- **O que oferece**: Surveillance Self-Defense (EFF) — guias de ameaças e opsec; espelho .onion.
+
+### btcwiki — **VIVO** (2026-10-19)
+- **URL**: `http://btcwikwfnbp7mn7qhpmnlgbhbe6fyj3lixgkb2kerulumioagu3xzcyd.onion/`
+- **Tipo**: res
+- **Evidência**: HTTP 200 · 5.782115s · 58814 B · título: Bitcoin Wiki
+- **sha256 (frame baixado)**: `b7e20d3a98f152e4006bc932a18bf2e532f3884ed2772e172558939e1a6b2c9e` (58814 B)
+- **O que oferece**: Bitcoin Wiki — referência técnica (protocolo, software, história).
+
+### wdo-news — **VIVO** (2026-10-19)
+- **URL**: `http://wdo4k4wrpnqcxft7xvkysjv5z3gykw2pppuq6zwgohr6hjqdhfpu4lqd.onion/`
+- **Tipo**: res
+- **Evidência**: HTTP 200 · 8.614378s · 16369 B · título: WalletWatch
+- **sha256 (frame baixado)**: `16224efa901a8ac419d05f9e24752415f1ddad3173f9c5c90c2d880af7972f94` (16369 B)
+- **O que oferece**: WalletWatch — notícias de breaches, ransomware e social engineering.
+
+### usb-news — **VIVO** (2026-10-19)
+- **URL**: `http://3rn3tgask2wfxjnn7rcvdd2npsyesv7oxxfjeyx7huvi4rtwvnk2vkyd.onion/`
+- **Tipo**: res
+- **Evidência**: HTTP 200 · 8.084485s · 18454 B · título: FlowFinance
+- **sha256 (frame baixado)**: `96ea5b13572bd91860937bbc9a73ff7383d1f84afd048a2e1b7e10502beb5b32` (18454 B)
+- **O que oferece**: FlowFinance — blog de notícias cyber (risco, contratos, trabalho).
+
+## 8. Observadas em teste e não indexadas (veredito e motivo de exclusão por entrada)
+
+### haystak — morto (timeout x2) (2026-10-19)
+- **URL**: `http://haystak5njsmn2hqkewecpaxetahtwhsbsa64jom2k22z5afxhnpxfid.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 25.001592s)
+- **O que oferece**: Indexador amplo; 3 tentativas (45/60/100 s) sem resposta — morto nesta data.
+
+### phobos — morto (socks x2) (2026-10-19)
+- **URL**: `http://phobosxilamwcg75xt22id7aywkzol6q6rfl2flipcqoc4e4ahima5id.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=97, 13.104131s)
+- **O que oferece**: Engine; SOCKS5 não conecta (2 tentativas).
+
+### darksearchenginer — morto (timeout x2) (2026-10-19)
+- **URL**: `http://l4rsciqnpzdndt2llgjx3luvnxip7vbyj6k6nmdy4xs77tx6gkd24ead.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 25.001394s)
+- **O que oferece**: Engine; timeout (2 tentativas).
+
+### dread — morto (timeout x2) (2026-10-19)
+- **URL**: `http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 25.001729s)
+- **O que oferece**: Fórum; endereço testado não responde (2 tentativas) — buscar endereço corrente em nova rodada.
+
+### xss — morto (endereco-55-invalido) (2026-10-19)
+- **URL**: `http://xssforumv3isucukbxhdhwz67hoa5e2voakcfkuiex4awjtcva5ood.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=97, 0.000255s)
+- **O que oferece**: Endereço recordado tinha 55 chars (v3 exige 56) — inválido; endereço atual não confirmado.
+
+### hiddenwiki-mirror — morto (timeout) (2026-10-19)
+- **URL**: `http://2222222cf2ta5bfavg45rfqbsy7m3viskwofek6sqkciptu5uvbtw5ad.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 35.001468s)
+- **O que oferece**: Espelho "2222222..." do Hidden Wiki; timeout — prefixos repetidos são típicos de clones/iscas, não priorizar.
+
+### lantern — morto (timeout) (2026-10-19)
+- **URL**: `http://2ucup5hbhurmtvxvhi52nre355ufcft5gd3lefklrq6jmjzon3ay2jad.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 35.001812s)
+- **O que oferece**: "Darknet Lantern"; timeout.
+
+### wgruul-news — morto (timeout) (2026-10-19)
+- **URL**: `http://wgruul6cmayc2k2i7gx4nucia2fxgm3kqq4wsapt3pnaqz2x7azcx3yd.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 45.000401s)
+- **O que oferece**: Portal de notícias (ransomware/IoT); timeout — candidato a re-teste.
+
+### archive-db — morto (timeout) (2026-10-19)
+- **URL**: `http://e3y5vky4v7snefqyhbn6kcmyl5fo4cnk3a2irh2ttvwua46ww5ubl6qd.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 40.001910s)
+- **O que oferece**: "Archive of delvingbitcoin.org"; timeout — candidato a re-teste (risco: clone).
+
+### yellowlabs — morto (timeout) (2026-10-19)
+- **URL**: `http://twd6bfktlkhwluhj2ghjthx55pnp2dcuuhf6qqjz7vm2krsmwpz6crad.onion/`
+- **Tipo**: dead
+- **Evidência**: sem resposta útil (curl rc=28, 40.001396s)
+- **O que oferece**: "#1 Y3llowl4bs"; timeout — candidato a re-teste.
+
+### torz-poc — **VIVO** (2026-10-19)
+- **URL**: `http://torzcd47rw4qh36g4yqxvv2tmifgmu6jjalkyqz4e4lzzwtfdfc7qaqd.onion/`
+- **Tipo**: dead
+- **Evidência**: HTTP 200 · 8.547388s · 164855 B · título: #1 Mobile Hacker For Hire - Fast Hacking Services For Hire
+- **sha256 (frame baixado)**: `e6f50432c5f16086e1e34561819eef5a44270c50dce35a1dadcfbdae179e8d57` (164855 B)
+- **O que oferece**: "Mobile Hacker For Hire" — serviço hacker-for-hire; fora de política (não indexado).
+
+### torport-news — **VIVO** (2026-10-19)
+- **URL**: `http://torportbymf56ref5lqztbbsz7vunmkrkxsn47l67yaayvghmjqz2xid.onion/`
+- **Tipo**: dead
+- **Evidência**: HTTP 200 · 5.555767s · 13199 B · título: TorPortal, the Tor market and dark news portal for 2026
+- **sha256 (frame baixado)**: `c1aabe80c47b1831959aed5d3b050f7285c0d54299c3b920227e4ddf10c6b6a9` (13199 B)
+- **O que oferece**: "TorPortal" — portal de mercado/notícias; fora de política.
+
+### h2-news — **VIVO** (2026-10-19)
+- **URL**: `http://hackerl2kbkh45lakwjwcpgly4ylfz5iiijqd5gudkaekq322cvgl3qd.onion/`
+- **Tipo**: dead
+- **Evidência**: HTTP 200 · 5.343479s · 42254 B · título: Hacking Team | Elite Hackers on Deepweb
+- **sha256 (frame baixado)**: `9eef09fa130f1d481edc68c959ca0dbce2c5eac3a95fdaf237a405708e2b29ed` (42254 B)
+- **O que oferece**: "Hacking Team" — hacker-for-hire; fora de política.
+
+### blackhat-blog — **VIVO** (2026-10-19)
+- **URL**: `http://wzdmtm4d7pymbx5u46o7ihmqn5hdksmiow2mu5hnjgd57xlomgqg4tid.onion/`
+- **Tipo**: dead
+- **Evidência**: HTTP 200 · 6.168668s · 33454 B · título: Verified Domain Marketplace | Buy and Sell Trusted Domains
+- **sha256 (frame baixado)**: `b578d6b3c9e933ab2096b3daff668148bf7be06b9f9b5eca80c1339a4a6b659c` (33454 B)
+- **O que oferece**: Virou marketplace de domínios; fora de política.
+
+## 9. Tabela histórica: engines embutidos no onionsearch (endereços v2, mortos)
+
+`onionsearch` embute endereços **v2** — protocolo aposentado em 2021; todos falham em ~0,0002 s com
+`curl rc=97` (SOCKS5 não consegue resolver). Re-testado 2026-10-19 para documentar a defasagem:
+
+| engine (onionsearch) | endereço | resultado |
+|---|---|---|
+| v2-tordex | `http://tordex7iie7z2wcg.onion/` | morto (socks/inacessivel) |
+| v2-tormax | `http://tormaxunodsbvtgo.onion/` | morto (socks/inacessivel) |
+| v2-multivac | `http://multivacigqzqqon.onion/` | morto (socks/inacessivel) |
+| v2-evosearch | `http://evo7no6twwwrm63c.onion/` | morto (socks/inacessivel) |
+| v2-notevil | `http://hss3uro2hsxfogfq.onion/` | morto (socks/inacessivel) |
+| v2-torgle1 | `http://torgle5fj664v7pf.onion/` | morto (socks/inacessivel) |
+| v2-ose | `http://onionf4j3fwqpeo5.onion/` | morto (socks/inacessivel) |
+| v2-deeplink | `http://deeplinkdeatbml7.onion/` | morto (socks/inacessivel) |
+| v2-ahmia-old | `http://msydqstlz2kzerdg.onion/` | morto (socks/inacessivel) |
+| v2-tor66-old | `http://5u56fjmxu63xcmbk.onion/` | morto (socks/inacessivel) |
+
+## Achados operacionais (anti-scrape e instabilidade)
+
+- **Ahmia exige token anti-scrape**: `GET /search/?q=<termo>` sem o campo dinâmico (`name="290b9f" value="e15aa0"`) responde **302 → home** (corpo vazio). Com o token, 200 e resultados completos. Isso explica o scraper do `onionsearch` retornar 0 resultados (ele não visita a home antes de buscar).
+- **Engines enferrujam e oscilam**: `tor66` falhou por timeout (25 s) na 1ª rodada e voltou **VIVO** na 2ª (5,4 s) — sempre re-testar antes de descartar.
+- **Haystak**: 3 tentativas (25–60 s de timeout cada) sem resposta — tratado como morto nesta data.
+- **Transientes**: circuitos Tor variam; timeouts não devem ser lidos como morte definitiva sem 2ª tentativa.
+
+## 10. Integridade
+
+- Vereditos brutos: `/tmp/opencode/darkweb-m1/m1-validation.tsv` (com `http_code`, `curl_rc`, `time_total`, `size`, `content_type`, `sha256`).
+- Bodies em quarentena: `/tmp/opencode/darkquarantine/` — sha256 por fonte listado acima; **nada executado**.
+- Selo de integridade deste documento: `~/MITR3/docs/SHA256SUMS` (entrada `DARKWEB-SOURCES-v1.md`).
+
+## 11. Próximos passos sugeridos
+
+- Expandir acervos/foruns com novas rodadas de busca (token Ahmia a cada sessão) e validar por lote.
+- Re-testar intermitentes (haystak, dse, dread) em outra janela; buscar endereços correntes de fóruns que rotacionam.
+- Enviar este doc para indexação no MegaBrain (Gemma4) com o selo.
+

@@ -33,6 +33,7 @@ RULES = [
     ("github_fine_pat",   re.compile(r"\bgithub_pat_[A-Za-z0-9_]{40,}\b")),
     ("aws_access_key",    re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("google_api_key",    re.compile(r"\bAIza[0-9A-Za-z_\-]{35}\b")),
+    ("google_oauth_like", re.compile(r"(?<![A-Za-z0-9_])AQ\.[A-Za-z0-9_\-]{25,}")),
     ("slack_token",       re.compile(r"\bxox[baprs]-[A-Za-z0-9\-]{10,}\b")),
     ("private_key_block", re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----")),
     ("bearer_literal",    re.compile(r"Bearer\s+[A-Za-z0-9_\-\.]{24,}")),

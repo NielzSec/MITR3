@@ -9,3 +9,6 @@ engagements/codeql_*/runs/
 /codeql-findings.md
 __pycache__/
 *.pyc
+
+# Diagnósticos locais de exposição: nunca incluir metadados privados em commits.
+state/shared-secret-check-latest.json

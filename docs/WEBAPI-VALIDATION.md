@@ -48,6 +48,39 @@ Observação: sem alteração de resultado do nuclei — novo run entregou os me
 ## Conclusão
 Pilha WEB/API validada ponta a ponta em ambiente localhost: descoberta (nmap/ffuf), detecção de tecnologia (nuclei), teste de injeção (sqlmap) e varredura de dependências (trivy). Infra pronta.
 
+## Burp Lane (2026-10-19)
+Burp Suite Professional 2026.3.3-47134 licenciado (loader v1.18 + JDK21) — operação em `engagements/burp_lane/config.json` + README.
+
+### Lançamento
+```
+cd ~/MITR3/engagements/burp_lane
+DISPLAY=:1 ~/MITR3/bin/burp.sh --config-file=$PWD/config.json --disable-auto-update
+```
+- Forma `--config-file=<abs>` é obrigatória; com espaço o loader re-injeta args e o Burp falha "Expected a value for option config-file".
+- Encerrar: `kill <pid>` obtido via `ss -ltnp | grep :8080` (não usar pkill por pattern).
+
+### Proxy
+- Listener `127.0.0.1:8080` (cert per_host). Roteie scanners: `-x http://127.0.0.1:8080`.
+- Spider/Scanner habilitados (user_options.misc). Scope por caso em project_options.target.scope.
+- Update off via config (`etc.update_interval=0`) + flag `--disable-auto-update`.
+
+### Export de issues e correlação com nuclei/ffuf/codeql
+- Export de issues: GUI → Dashboard/Issue Activity → "Export" (ou REST API em User options → Misc → REST API).
+- Correlação: tráfego de nuclei/ffuf pelo proxy → conjuntos de hosts/paths vistos no sitemap vs. findings das ferramentas; codeql dá o achado de código; Burp confirma exploitability no runtime; dedupe por host+path+issue class.
+- Evidência: `curl -x http://127.0.0.1:8080 http://127.0.0.1:8090/` = 200 (proxy egress confirmado; alvo local).
+
+### Validação (13:35–13:41)
+| item | resultado |
+|---|---|
+| --config-file (estrutura user/project options) | parse OK; listener 8080 aplicado |
+| proxy listener 127.0.0.1:8080 | `ss -ltn` → LISTEN [::ffff:127.0.0.1]:8080 |
+| proxy egress | `curl -x` → HTTP 200 contra servidor local 8090 |
+| GUI no display :1 | janela "Burp Suite Professional v2026.3.3 - Temporary Project - licensed to h3110w0r1d" (xdotool) |
+| screenshot | `burp_gui_proof.png` (11 KB) |
+
+Limitação: verificação visual dos toggles (Spider/Scanner na UI) não feita — vision API indisponível neste modelo (`image_url` não suportado). Estado dos toggles via config (não confirmado visualmente).
+
+
 ## Re-run 11:15
 - Comando (contagem de templates): `nuclei -tl | wc -l` -> 13.619 templates carregados em ~/nuclei-templates.
 - Comando (scan): `nuclei -u http://127.0.0.1:8089 -tags tech -silent` -> 2 achados, ambos info: [tech-detect:simplehttp] [http] e [tech-detect:python] [http] contra 127.0.0.1:8089 (servidor python3 -m http.server 8089, timeout 180, em background; alvo restrito a 127.0.0.1).
