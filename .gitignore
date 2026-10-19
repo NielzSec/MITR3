@@ -2,3 +2,10 @@ engagements/*/evidence/
 engagements/*/logs/
 engagements/*/artifacts/
 *.log
+
+# Resultados locais do CodeQL: podem conter trechos e caminhos sensíveis.
+engagements/codeql_*/runs/
+/codeql-results.sarif
+/codeql-findings.md
+__pycache__/
+*.pyc

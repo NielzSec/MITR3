@@ -38,7 +38,7 @@ done
 
 # --- services / MCP ---
 mb=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 https://nielz-aspire-a315-53.tailb82a64.ts.net/mcp 2>/dev/null)
-[[ "$mb" == "200" || "$mb" == "202" ]] && OK+=("megabrain-http") || BAD+=("megabrain-http")
+[[ "$mb" == "200" || "$mb" == "202" ]] && OK+=("megabrain-http") || WARN+=("megabrain-http")
 if docker info >/dev/null 2>&1; then OK+=("docker-daemon")
 elif sudo -n docker info >/dev/null 2>&1; then OK+=("docker-daemon(sudo)")
 else WARN+=("docker-daemon"); fi

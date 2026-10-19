@@ -52,6 +52,16 @@ kill $(cat /tmp/srv.pid)
 ```
 19 s num repo pequeno; evidência selada e `findings.md` no case.
 
+## CodeQL security-extended
+
+```
+~/MITR3/bin/mitr3-codeql.sh <repo_dir> [python|javascript|go]
+```
+
+Python é o padrão. Para Python e JavaScript, o wrapper cria banco com `--build-mode=none` (sem build) em `/tmp/opencode/codeql-db-<nome>-<lang>-<timestamp>`. Cada resultado fica em **`~/MITR3/engagements/codeql_<repo>_<hash>/runs/<timestamp>_<lang>/`**: `codeql-findings.md`, `evidence/codeql-<lang>.sarif`, `evidence/SHA256SUMS` e `logs/database-{create,analyze}.log`. Confirme cobertura no log (`CodeQL scanned X out of Y`) e integridade com `cd <pasta_da_execução> && sha256sum -c evidence/SHA256SUMS`. Não copie SARIF sem saneamento para RAG.
+
+Go **não suporta `--build-mode=none`** na CLI 2.27.2; o script bloqueia Go por padrão. Para repositório de confiança em que compilação local seja permitida: `MITR3_CODEQL_ALLOW_GO_BUILD=1 ~/MITR3/bin/mitr3-codeql.sh <repo_dir> go`; esse modo usa `autobuild` e pode executar código do projeto. Resultados prévios deixados na raiz dos repositórios por outras ferramentas não são editados pelo wrapper atual. Recomenda-se nunca sobrescrever evidências existentes.
+
 ## Dossiers de função no Ghidra (PyGhidra)
 
 O `analyzeHeadless -postScript foo.py` do host recusa `.py` (`Ghidra was not started with
