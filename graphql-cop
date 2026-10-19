@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+cd "$HOME/Tools/graphql-cop" && exec python3 graphql-cop.py "$@"

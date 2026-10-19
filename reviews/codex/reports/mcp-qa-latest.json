@@ -1,0 +1,75 @@
+{
+  "source_time": "2026-10-19T18:23:53.471245+00:00",
+  "age_minutes": 3.8,
+  "configured": 7,
+  "client_status_available": false,
+  "client_confirmed": 0,
+  "counts": {
+    "unverified_http_reachable": 2,
+    "launch_failure_review": 3,
+    "unverified_process_stable": 2
+  },
+  "warnings": [
+    "OpenCode status unavailable; zero connections confirmed via its CLI",
+    "Separate smoke launch failures do not prove that live client MCP sessions are down",
+    "HTTP GET 405 or 406 is not an MCP initialize/tools/list success"
+  ],
+  "servers": [
+    {
+      "name": "megabrain",
+      "transport": "remote",
+      "assessment": "unverified_http_reachable",
+      "transport_signal": "HTTP 406",
+      "reason": "HTTP response only; no MCP protocol handshake",
+      "configuration_issues": 0
+    },
+    {
+      "name": "rea",
+      "transport": "local",
+      "assessment": "launch_failure_review",
+      "transport_signal": "local launch failure",
+      "reason": "Separate launch failed; actual active MCP connection not confirmed",
+      "configuration_issues": 0
+    },
+    {
+      "name": "chrome-devtools",
+      "transport": "local",
+      "assessment": "launch_failure_review",
+      "transport_signal": "local launch failure",
+      "reason": "Separate launch failed; actual active MCP connection not confirmed",
+      "configuration_issues": 0
+    },
+    {
+      "name": "apisec-ng",
+      "transport": "local",
+      "assessment": "unverified_process_stable",
+      "transport_signal": "local process survived smoke window",
+      "reason": "Separate process survived 5 seconds; MCP handshake not verified",
+      "configuration_issues": 0
+    },
+    {
+      "name": "playwright",
+      "transport": "local",
+      "assessment": "launch_failure_review",
+      "transport_signal": "local launch failure",
+      "reason": "Separate launch failed; actual active MCP connection not confirmed",
+      "configuration_issues": 0
+    },
+    {
+      "name": "context7",
+      "transport": "remote",
+      "assessment": "unverified_http_reachable",
+      "transport_signal": "HTTP 405",
+      "reason": "HTTP response only; no MCP protocol handshake",
+      "configuration_issues": 0
+    },
+    {
+      "name": "mitr3-nexus",
+      "transport": "local",
+      "assessment": "unverified_process_stable",
+      "transport_signal": "local process survived smoke window",
+      "reason": "Separate process survived 5 seconds; MCP handshake not verified",
+      "configuration_issues": 0
+    }
+  ]
+}
