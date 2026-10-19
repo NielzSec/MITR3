@@ -1,0 +1,4 @@
+engagements/*/evidence/
+engagements/*/logs/
+engagements/*/artifacts/
+*.log

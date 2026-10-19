@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# MITR3 environment health — fast, read-only.
+# usage: mitr3-health.sh [--json]
+set -uo pipefail
+
+JSON=0
+[[ "${1:-}" == "--json" ]] && JSON=1
+
+PATH="$HOME/.local/bin:$PATH"
+declare -a OK=() BAD=() WARN=()
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# --- host ---
+mem_avail=$(free -m | awk '/^Mem/{print $NF}')
+disk_free=$(df -Pm / | awk 'NR==2{print $4}')
+load=$(cut -d' ' -f1 /proc/loadavg)
+sudo_ok=N
+sudo -n true 2>/dev/null && sudo_ok=Y
+
+# --- core toolchain (name:command) ---
+tools=(
+  "ghidra:/usr/bin/ghidra" "ghidra-headless:$HOME/Tools/ghidra/support/analyzeHeadless"
+  "r2:r2" "rizin:rizin" "gdb:gdb" "jadx:jadx" "apktool:apktool" "java:java"
+  "python3:python3" "go:go" "rustc:rustc" "node:node" "docker:docker"
+  "nmap:nmap" "masscan:masscan" "sqlmap:sqlmap" "ffuf:ffuf" "nuclei:nuclei"
+  "httpx:httpx" "subfinder:subfinder" "katana:katana" "dnsx:dnsx" "gau:gau"
+  "amass:amass" "trivy:trivy" "semgrep:semgrep" "osv-scanner:osv-scanner"
+  "checksec:checksec" "ropper:ropper" "pwntools:pwn" "frida:frida"
+  "impacket:smbclient.py" "netexec:nxc" "chisel:chisel" "mitmproxy:mitmproxy"
+  "upx:upx" "afl-fuzz:afl-fuzz" "gh:gh" "msfconsole:msfconsole" "hashcat:hashcat"
+  "hydra:hydra" "burpsuite:burpsuite" "codeql:codeql"
+)
+for entry in "${tools[@]}"; do
+  name=${entry%%:*}; cmd=${entry#*:}
+  if [[ "$cmd" == /* ]]; then [[ -x "$cmd" ]] && OK+=("$name") || BAD+=("$name")
+  else have "$cmd" && OK+=("$name") || BAD+=("$name"); fi
+done
+
+# --- services / MCP ---
+mb=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 https://nielz-aspire-a315-53.tailb82a64.ts.net/mcp 2>/dev/null)
+[[ "$mb" == "200" || "$mb" == "202" ]] && OK+=("megabrain-http") || BAD+=("megabrain-http")
+docker info >/dev/null 2>&1 && OK+=("docker-daemon") || WARN+=("docker-daemon (needs docker group re-login)")
+have ollama >/dev/null 2>&1 && OK+=("ollama") || true
+
+# --- thresholds ---
+(( mem_avail < 2000 )) && WARN+=("low-mem:${mem_avail}MB")
+(( disk_free < 20480 )) && WARN+=("low-disk:${disk_free}MB")
+
+if (( JSON )); then
+  printf '{"ok":['
+  printf '"%s",' "${OK[@]}" | sed 's/,$//'
+  printf '],"missing":['
+  printf '"%s",' "${BAD[@]}" | sed 's/,$//'
+  printf '],"warn":['
+  printf '"%s",' "${WARN[@]}" | sed 's/,$//'
+  printf '],"mem_avail_mb":%d,"disk_free_mb":%d,"load":%s,"sudo_cached":%s}\n' \
+    "$mem_avail" "$disk_free" "$load" "$([[ $sudo_ok == Y ]] && echo true || echo false)"
+  exit 0
+fi
+
+printf '\nMITR3 — environment health\n'
+printf 'load %-6s mem free %-6sMB disk free %-7sMB\n\n' "$load" "$mem_avail" "$disk_free"
+printf '  ok      %2d  %s\n' "${#OK[@]}"  "$(printf '%s ' "${OK[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
+printf '  missing %2d  %s\n' "${#BAD[@]}" "$(printf '%s ' "${BAD[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
+if ((${#WARN[@]})); then
+  printf '  warn    %2d  %s\n' "${#WARN[@]}" "$(printf '%s ' "${WARN[@]}" | fold -s -w 100 | sed '2,$s/^/              /')"
+fi
+echo
