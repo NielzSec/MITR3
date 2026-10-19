@@ -28,7 +28,7 @@ tools=(
   "checksec:checksec" "ropper:ropper" "pwntools:pwn" "frida:frida"
   "impacket:smbclient.py" "netexec:nxc" "chisel:chisel" "mitmproxy:mitmproxy"
   "upx:upx" "afl-fuzz:afl-fuzz" "gh:gh" "msfconsole:msfconsole" "hashcat:hashcat"
-  "hydra:hydra" "burpsuite:$HOME/MITR3/bin/burp.sh" "codeql:codeql"
+  "hydra:hydra" "burpsuite:$HOME/MITR3/bin/burp.sh" "codeql:codeql" "tor:tor" "onionsearch:$HOME/.local/bin/onionsearch" "darkweb:$HOME/MITR3/bin/darkweb.sh"
 )
 for entry in "${tools[@]}"; do
   name=${entry%%:*}; cmd=${entry#*:}

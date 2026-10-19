@@ -1,0 +1,75 @@
+# DEEPDARK-PLAYBOOK — Robin (pesquisa deep/dark web)
+
+> Operado por: Robin (seat de pesquisa profunda) · Supervisão: OpenCode (maestro)
+> Criado: 2026-10-19 · Infra: Tor local neste host
+
+## 1. Infraestrutura
+
+| peça | estado | detalhe |
+|---|---|---|
+| `tor` (systemd) | ativo, autostart | SOCKS5 em `127.0.0.1:9050`; bootstrap confirmado 100% |
+| `torsocks` | instalado | `torsocks curl ...` |
+| `onionsearch` | instalado (`~/.local/bin`) | busca multi-engine; usar `--proxy 127.0.0.1:9050` (default) |
+| `bin/darkweb.sh` | helper do time | `fetch` / `head` / `search` / `status` |
+
+Exemplos:
+
+```bash
+curl -s --socks5-hostname 127.0.0.1:9050 --max-time 90 https://<algo>.onion/
+~/MITR3/bin/darkweb.sh fetch https://<algo>.onion/
+~/MITR3/bin/darkweb.sh search "termo" --engines ahmia --limit 5
+journalctl -u tor --since "5 min ago" --no-pager | tail -3   # ou darkweb.sh status
+```
+
+Baselines verificados em 2026-10-19 (referência de que o circuito funciona):
+- Ahmia onion → HTTP 200 (~5 s)
+- DuckDuckGo onion → HTTP 200 (~11 s, primeiro circuito)
+
+**Engines enferrujam.** O smoke `onionsearch --engines ahmia` devolveu 0 resultados em 0,2 s
+(scraper quebrado no layout atual, não rede). Regra: todo engine usado precisa de validação
+individual — abrir por `darkweb.sh head`, procurar um termo de controle e registrar o veredito
+em `DARKWEB-SOURCES` (vivo/morto/parcial + data).
+
+## 2. Regras de operação (não negociáveis)
+
+1. **Passivo por padrão.** Ler e coletar. Sem login, sem postagem, sem cadastro, sem
+   transação, sem mensagem a terceiros. Interação só com ordem explícita do maestro.
+2. **Anonimato do time.** Nunca usar identidade, e-mail, handle ou credencial real em
+   qualquer serviço da rede. Nada de dados do host em requests.
+3. **Quarentena.** Qualquer artefato baixado (binário, arquivo, dump) vai para
+   `/tmp/opencode/darkquarantine/`, com `sha256sum` ANTES de qualquer análise, e **nunca
+   executa** sem autorização explícita do maestro + sandbox. Verificar tipo com `file`
+   antes de tudo.
+4. **Nada de PII de terceiros em claro** nos relatórios. Vazamentos são citados por
+   referência (fonte, data, tamanho, hash), nunca com dados pessoais copiados.
+5. **Sem mercado.** Marketplace, cartão, "compras" — fora. O trabalho é conhecimento
+   (exploits, PoCs, writeups, fóruns de pesquisa), não aquisição.
+6. **Google seats fora da rede.** Conteúdo dark vai para o maestro/Robin/Gemma4 — nunca
+   para seats com backend Google (política).
+
+## 3. Objetivo da lane
+
+Encontrar e curar **conhecimento útil para trabalho autorizado MITR3**: exploits e PoCs
+(aplicáveis a alvos de engajamento), writeups de 0day/pesquisa, fontes de referência
+(agregadores, pastes, fóruns), espelhos de projetos de segurança caídos no clearnet.
+
+## 4. Evidência (padrão do time)
+
+- Toda fonte citada com: URL (onion completo), data/hora UTC de acesso, HTTP status,
+  e — para artefatos — `sha256` + tamanho.
+- Saídas viram doc `~/MITR3/docs/DARKWEB-SOURCES-vN.md` com selo `SHA256SUMS`.
+- Resumo de conhecimento vai para o MegaBrain (via Gemma4 quando em formato de documento).
+- Relatório ao maestro: comandos exatos, o que funcionou, o que morreu, próximos passos.
+
+## 5. Segurança do próprio Robin
+
+- Não manter sessões longas contra um mesmo serviço; intervalos entre requisições.
+- Se um serviço pedir JS/captcha/login — recuar e registrar, sem tentar contornar.
+- Suspeita de armadilha (honeypot/canary): parar, registrar URL, reportar ao maestro.
+
+## 6. Fila inicial (missão 1 do Robin)
+
+1. Validar individualmente ≥8 engines/gateways (vivo/morto/parcial + como validou).
+2. Índice `DARKWEB-SOURCES-v1.md`: ≥15 fontes entre engines, agregadores de exploit/PoC,
+   fóruns de pesquisa e acervos; cada uma com veredito de alcance e descrição.
+3. Reportar ao maestro em ≤8 linhas.
