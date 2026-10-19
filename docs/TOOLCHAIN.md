@@ -74,3 +74,8 @@ Para reportar vulnerabilidades de runtime, auditar o ambiente instalado (`pip fr
 ## Pipeline unico
 
 `~/MITR3/bin/mitr3-scan.sh <case> <target> [label]` executa `semgrep` (`p/python`, `p/secrets`), `trivy fs` (`vuln`, `secret`, `misconfig`), `osv-scanner` e `secrets-audit`. O pipeline sela os resultados com SHA256 e escreve `findings.md`. Tempo observado: **19 s** em `mitr3-nexus-re`.
+
+## Lacunas Ghidra no case `nexus_vault` (2026-10-19)
+
+1. **Post-script Python no headless — aberto.** `scripts/ghidra_headless_dumper.py` falha no headless atual com `Ghidra was not started with PyGhidra. Python is not available`. A instalação Ghidra 12.1.2 do host precisa iniciar com PyGhidra para aceitar post-script `.py`. Até essa integração ser validada, o dossier Ghidra deve vir pelo provider REA; a mera presença do executável `analyzeHeadless` não comprova suporte a Python.
+2. **Binários nativos sem bit de execução — corrigido, sujeito a regressão.** Arquivos como `~/Tools/ghidra/Ghidra/Features/Decompiler/os/linux_x86_64/decompile` estavam em modo `0600`, causando `EACCES` na decompilação. Foi aplicado `chmod +x` em `~/Tools/ghidra/**/os/linux_x86_64/*`; na conferência atual, `decompile` está em modo `0711`. Após cada atualização do Ghidra, conferir novamente o bit executável dos binários nativos antes de confiar no resultado da decompilação.
