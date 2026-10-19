@@ -51,3 +51,18 @@ kill $(cat /tmp/srv.pid)
 ~/MITR3/bin/mitr3-scan.sh <case> <target> [label]
 ```
 19 s num repo pequeno; evidência selada e `findings.md` no case.
+
+## Dossiers de função no Ghidra (PyGhidra)
+
+O `analyzeHeadless -postScript foo.py` do host recusa `.py` (`Ghidra was not started with
+PyGhidra. Python is not available`). Caminho que funciona — CLI `pyghidra` em venv própria:
+
+```
+~/MITR3/bin/ghidra-dump.sh <binario> <saida.json> [fast_mode]
+```
+
+Por dentro: `~/.local/share/pyghidra-venv/bin/pyghidra --install-dir ~/Tools/ghidra
+<bin> <dumper.py> <out.json>`, com `GHIDRA_INSTALL_DIR` exportado. O dumper é
+`mitr3-nexus-re/scripts/ghidra_headless_dumper.py` (saída no formato Evidence v2).
+Receita de instalação: `python3 -m venv ~/.local/share/pyghidra-venv &&
+~/.local/share/pyghidra-venv/bin/pip install pyghidra`.
