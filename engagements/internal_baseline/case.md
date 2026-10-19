@@ -1,8 +1,11 @@
-# Case: internal_baseline
+# Case — internal_baseline
 
-- purpose: internal_audit
-- opened: 2026-10-19
+- id: internal_baseline
+- type: internal_audit
+- scope: `mitr3-nexus-re` e `apisec-ng-mcp-server`
+- authorization: interna — host do squad, autorizada por Kai em 2026-10-19
 - operator: nielz / squad MITR3
+- opened: 2026-10-19
 - state: remediated (F-01..F-03), F-04 FP, F-05 accepted
 
 ## Objective
