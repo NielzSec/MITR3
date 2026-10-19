@@ -80,6 +80,29 @@ local, sem valor no repositório.
 - pacu — framework de exploração AWS (autorizado)
 - trufflehog — vazamento de segredos em repos/CI/cloud
 
+<!-- MITR3_PHASE23_STATUS_START -->
+### Validação automatizada das Fases 2/3
+
+Atualizado: 2026-10-19T18:48:36.641880+00:00. Comandos de versão/ajuda apenas; sem login ou coleta.
+
+| Ferramenta | Fase | Status | Versão | Evidência |
+|---|---|---|---|---|
+| [impacket](https://github.com/fortra/impacket) | 2 | instalado/validado | 0.13.1 | `/home/nielz/.local/bin/smbclient.py`; /home/nielz/.local/bin/smbclient.py -h |
+| [bloodhound-python](https://github.com/dirkjanm/BloodHound.py) | 2 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/bloodhound-python.log` |
+| [kerbrute](https://github.com/ropnop/kerbrute) | 2 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/kerbrute.log` |
+| [responder](https://github.com/lgandx/Responder) | 2 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/responder.log` |
+| [aws](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/aws.log` |
+| [gcloud](https://docs.cloud.google.com/sdk/docs/install-sdk) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/gcloud.log` |
+| [az](https://learn.microsoft.com/cli/azure/install-azure-cli-linux) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/az.log` |
+| [prowler](https://github.com/prowler-cloud/prowler) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/prowler.log` |
+| [scoutsuite](https://github.com/nccgroup/ScoutSuite) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/scoutsuite.log` |
+| [cloudfox](https://github.com/BishopFox/cloudfox) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/cloudfox.log` |
+| [pacu](https://github.com/RhinoSecurityLabs/pacu) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/pacu.log` |
+| [trufflehog](https://github.com/trufflesecurity/trufflehog) | 3 | ausente; instalação bloqueada/falhou | — | command -v: ausente; log: `/home/nielz/MITR3/reports/arsenal-install-20261019T184821172062Z/trufflehog.log` |
+
+Relatório detalhado: `reports/arsenal-phase23-latest.json`.
+<!-- MITR3_PHASE23_STATUS_END -->
+
 ## Fase 4 — Mobile (apoio a app testing)
 - mobsf (docker) — análise estática Android/iOS central
 - objection — runtime mobile (SSL pinning bypass, frida auto)

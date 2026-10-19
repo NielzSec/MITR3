@@ -47,6 +47,47 @@ hermes mcp test <nome>
 ```
 Config alterada exige sessão nova: `hermes --resume <session-id> --provider dahl -m <modelo>`.
 
+## Arsenal — Fases 2 e 3
+
+```bash
+~/MITR3/bin/mitr3-arsenal.sh install all --update-docs
+~/MITR3/bin/mitr3-arsenal.sh check all --json
+~/MITR3/bin/mitr3-arsenal.sh check all --update-docs
+~/MITR3/bin/mitr3-ad.sh --check
+~/MITR3/bin/mitr3-cloud.sh --check
+~/MITR3/bin/mitr3-ad.sh impacket -h
+~/MITR3/bin/mitr3-cloud.sh aws --version
+```
+
+`install phase2`, `install phase3` e `install <nome>` permitem retomar parcialmente.
+Os nomes Cloud são `aws`, `gcloud`, `az`, `prowler`, `scoutsuite`, `cloudfox`,
+`pacu`, `trufflehog`; AD: `impacket`, `bloodhound-python`, `kerbrute`, `responder`.
+`run <nome> -- <argumentos>` repassa argumentos diretamente ao programa, inclusive
+`--help`/`--json`. `check` executa apenas versão/ajuda, sem login nem coleta.
+
+O instalador consulta o pacote oficial Arch com `pacman -Si` e usa
+`sudo -n pacman -S --needed` quando disponível. Falha de sudo é registrada; não
+troca silenciosamente um pacote Arch por pip. Fora dos repositórios Arch, Python
+usa `~/Tools/<nome>/.venv` com pip do próprio venv e PyPI oficial, Go usa
+`~/Tools/<nome>/bin`; o Responder usa clone upstream e venv, e o gcloud usa o
+arquivo oficial do Google. `MITR3_PYTHON` pode indicar outro interpretador para
+criar novos venvs. O venv do Hermes não é usado.
+
+Wrappers em `~/.local/bin` só são criados quando o backend existe; comandos
+existentes são preservados. O Impacket expõe aliases `impacket-smbclient`,
+`impacket-secretsdump`, `impacket-wmiexec`, `impacket-psexec`,
+`impacket-GetNPUsers` e `impacket-ntlmrelayx` quando os scripts correspondentes
+estão presentes. BloodHound.py é o coletor Legacy (`bloodhound-python`);
+o serviço BloodHound CE/Docker não é provisionado por este instalador.
+
+Evidências: `reports/arsenal-phase23-latest.json`, snapshots separados para
+seleções parciais e logs em `reports/arsenal-install-<UTC>/` (permissões privadas).
+O processo retorna 1 se houver ferramenta ausente, smoke falho ou instalação
+falha. `--update-docs` atualiza somente o bloco marcado das Fases 2/3 no ARSENAL
+e exige a seleção `all`. Health checa presença dos novos comandos; a validação
+de versões fica em `mitr3-arsenal.sh check`. Nenhuma credencial Cloud é criada
+ou copiada pelo instalador; os programas usam os perfis locais do operador.
+
 ## Docker
 
 - Operacional: `sudo docker ...` (regra NOPASSWD em `/etc/sudoers.d/50-mitr3-docker`).

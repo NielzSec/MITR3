@@ -29,6 +29,9 @@ tools=(
   "impacket:smbclient.py" "netexec:nxc" "chisel:chisel" "mitmproxy:mitmproxy"
   "upx:upx" "afl-fuzz:afl-fuzz" "gh:gh" "msfconsole:msfconsole" "hashcat:hashcat"
   "hydra:hydra" "burpsuite:$HOME/MITR3/bin/burp.sh" "codeql:codeql" "tor:tor" "onionsearch:$HOME/.local/bin/onionsearch" "darkweb:$HOME/MITR3/bin/darkweb.sh"
+  "bloodhound-python:bloodhound-python" "kerbrute:kerbrute" "responder:responder"
+  "aws:aws" "gcloud:gcloud" "az:az" "prowler:prowler" "scoutsuite:scout"
+  "cloudfox:cloudfox" "pacu:pacu" "trufflehog:trufflehog"
 )
 for entry in "${tools[@]}"; do
   name=${entry%%:*}; cmd=${entry#*:}
