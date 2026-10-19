@@ -38,3 +38,6 @@ Saída esperada (72x 'A' + win little-endian), ex.:
     4141414141414141 ... 4141 7611400000000000
 
 Requires: pwntools (`pip install pwntools`).
+
+## Confirmação dinâmica (contrato v2 allow_dynamic)
+- Harness: dynamic/validate_ret2win.py atingiu win@0x401176 e capturou a flag MITR3{v4ult_r0p_4nd_ev1d3nce}; variante direta (offset 72) confirmada — ret-sled 0x40101a também funciona.

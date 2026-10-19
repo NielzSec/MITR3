@@ -86,6 +86,7 @@ Correção aplicada por evidência nova (EV-0004), sem reescrever histórico. QA
 - 11:59 EV-0005/0006 via REA; dossiers Ghidra falham por PyGhidra
 - 12:00 conhecimento capturado no MegaBrain
 - 12:05 rizin cobre VANTA (3º provider); EV-0002/0003 confirmados
-- 15:05 autorizador estendido (`--allow-dynamic`); contrato v2 assinado (EV-0008)
-- 15:07 `dynamic/validate_ret2win.py`: variantes direta e ret-sled atingem `win()`;
+- 12:09 contrato v2 assinado (`--allow-dynamic`; UTC 15:09Z) — EV-0008
+- 12:11 `dynamic/validate_ret2win.py`: variantes direta e ret-sled atingem `win()`;
   flag capturada (EV-0007); UNK-0001 fechado
+- 12:13 dumper Ghidra rodando via PyGhidra (`bin/ghidra-dump.sh`); dossier nativo (EV-0009)
