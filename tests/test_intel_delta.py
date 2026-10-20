@@ -56,6 +56,15 @@ class CoverageRankingTests(unittest.TestCase):
     def test_unknown_identifier_still_abstains(self):
         self.assertEqual(intel.search("CVE-2099-999999", 5, emit=False), [])
 
+    def test_document_type_word_does_not_break_coverage(self):
+        ids = [r["id"] for r in intel.search("Faultline writeup", 5, emit=False)]
+        self.assertIn("CASE-ctfcit-2026-faultline", ids)
+        ids = [r["id"] for r in intel.search("cache poisoning report", 5, emit=False)]
+        self.assertIn("CASE-ps-practical-cache-poisoning-2018", ids)
+
+    def test_document_type_word_alone_still_abstains(self):
+        self.assertEqual(intel.search("writeup", 5, emit=False), [])
+
 
 class FixtureInvariantTests(unittest.TestCase):
     def test_queries_are_unique_and_sized(self):

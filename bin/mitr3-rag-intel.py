@@ -26,6 +26,9 @@ CVE_RE=re.compile(r"^CVE-\d{4}-\d{4,}$",re.I)
 ASVS_RE=re.compile(r"^V?\d+\.\d+\.\d+$",re.I)
 BLOCK=re.compile(r"(?i)\b(ignore previous instructions|send your environment|reveal your system prompt)\b")
 STOPWORDS=frozenset("a an the of for and or to in on with from by is are was were that this it as at".split())
+# Palavra de tipo de documento nao pode derrubar cobertura: "Faultline writeup" tem
+# um alvo so, e "writeup" nao aparece no corpo da ficha.
+DOC_TYPES=frozenset("writeup write-up writeups report paper blog article analysis analise fichamento".split())
 RELATION_SOURCES={"cwe_of":"cisa-kev", "asvs_maps_cwe":"owasp-asvs-5.0.0",
                   "case_references":"public-cases"}
 CWE_RE=re.compile(r"^CWE-\d+$",re.ASCII)
@@ -344,7 +347,7 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
    # quebra consulta real de 4+ termos; OR puro enche de filler. Meio-termo: exige
    # >=60% dos termos distintos (arredonda para cima). Cobertura tem prioridade;
    # bm25 e o pequeno vies de fonte ordenam dentro da mesma cobertura.
-   uniq=sorted(set(toks))
+   uniq=sorted(set(t for t in toks if t not in DOC_TYPES)) or sorted(set(toks))
    need=max(1,-(-len(uniq)*3//5))
    term=" OR ".join('"'+t.replace('"','')+'"' for t in uniq)
    filters=["docs_fts MATCH ?"]
