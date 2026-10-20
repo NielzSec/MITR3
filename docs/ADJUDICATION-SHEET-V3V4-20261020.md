@@ -32,3 +32,22 @@ Para cada linha D1–D4: **manter nota do QA**, **manter classificação do JEV*
 Assinatura do operador: ______________________ Data: __________
 
 Consequência da adjudicação: fecha a revisão semântica dos v3/v4 (item 1 da ordem do QA) e libera o caminho para congelamento do candidato e a rodada pareada no v5 — com protocolo métrico definido ANTES da primeira execução.
+
+## 5. Apêndice — isolamento experimental D3/D4 (Perplexity, 2026-10-20)
+
+Evidência obtida por pesquisa assistida (portal Perplexity, sessão corrigida pelo operador). Citações verbatim conferidas contra os artigos originais.
+
+**D4 — PortSwigger 2018, `practical-web-cache-poisoning`:**
+- "Please note that web caches also enable a different type of attack called Web Cache Deception which should not be confused with cache poisoning." — a distinção existe literalmente no paper.
+- "any difference in the response triggered by an unkeyed input may be stored and served to other users." — vínculo unkeyed→resposta compartilhada.
+- URL: https://portswigger.net/research/practical-web-cache-poisoning
+
+**D3 — PortSwigger 2024, `gotta-cache-em-all` (M. Doyhenard):**
+- "Many HTTP servers and proxies including Nginx, Node, CloudFlare, CloudFront and Google Cloud decode certain delimiter characters before interpreting the pathname. To make things worse, this process is inconsistent."
+- "This means that the same URL will have a different meaning in the most popular CDNs and origin servers even without any custom configuration."
+- "It's possible to exploit dot-segment normalization by leveraging the discrepancies between parsers to modify the behavior of the cache rules and obtain crafted keys."
+- URL: https://portswigger.net/research/gotta-cache-em-all
+
+**Conclusão do isolamento:** D3 e D4 têm sustentação literal nas fontes originais → nota 2 factual do QA confirmada. Os flags do JEV permanecem válidos como sinal de empacotamento da evidência entregue ao juiz (âncoras-resumo no v4), não como erro factual.
+
+Arquivo de conferência desta consulta: portal Perplexity, threads `71323410-db19-4d92-b9e4-6c3a45eda1b5` e follow-up, 2026-10-20 15:25-15:26.
