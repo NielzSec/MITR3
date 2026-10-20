@@ -25,3 +25,11 @@ Kai autoriza que a revisão dos conjuntos cegos v3/v4 seja executada por **QA (G
 - Trilha JEV: relatório a ser gerado por `jev_evidence` (megabrain MCP, provider typesafe, `jev-latest`), congelado com sha256.
 - Trilha GPT-6: parecer entregue via Arch por GPT-6, congelado com sha256 na chegada.
 - Comparação somente após ambos os shas registrados.
+
+## Adendo — instrução do operador (2026-10-20)
+
+Kai confirmou que a base de revisão dos conjuntos é **GPT (QA) + pesquisa externa (verificação de fontes) + JEV**, em substituição a revisor humano designado. Aplicação:
+
+- Toda revisão de conjunto cego segue esse tripé; a pesquisa externa existe para conferir a fonte original (ex.: Perplexity nos casos D3/D4).
+- A assinatura formal da folha de adjudicação fica dispensada; a disposição do QA registrada em `GPT6-QA-D1-D4-DISPOSITION` (sha d914c441) vale como decisão, com os flags do JEV preservados.
+- Divergência entre GPT e JEV que a pesquisa não resolver segue para o operador como último recurso — não como etapa obrigatória de cada claim.

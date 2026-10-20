@@ -51,3 +51,7 @@ Evidência obtida por pesquisa assistida (portal Perplexity, sessão corrigida p
 **Conclusão do isolamento:** D3 e D4 têm sustentação literal nas fontes originais → nota 2 factual do QA confirmada. Os flags do JEV permanecem válidos como sinal de empacotamento da evidência entregue ao juiz (âncoras-resumo no v4), não como erro factual.
 
 Arquivo de conferência desta consulta: portal Perplexity, threads `71323410-db19-4d92-b9e4-6c3a45eda1b5` e follow-up, 2026-10-20 15:25-15:26.
+
+## 6. Fecho da folha
+
+Disposição final registrada: D1 = 2 · D2 = 2 · D3 = 2 · D4 = 2 (factual), com flags do JEV preservados como sinal de empacotamento de evidência. Base de revisão confirmada pelo operador: **GPT + pesquisa + JEV** (adendo da emenda, 2026-10-20). Assinatura formal dispensada por instrução do operador.
