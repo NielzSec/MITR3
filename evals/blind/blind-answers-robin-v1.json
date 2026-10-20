@@ -1,0 +1,136 @@
+[
+  {
+    "id": "blind-robin-01",
+    "question": "O Cobalt Strike aparece crackeado em oferta na oferta do meu monitor. Antes de citar isso num relatório, quero saber: qual falha catalogada como explorada afeta o Teamserver do Cobalt Strike e permite roubar dados do beacon?",
+    "expected_answer": "CVE-2022-39197 — XSS no Fortra Cobalt Strike Teamserver, catalogada no KEV. A resposta deve indicar componente Teamserver, tipo XSS, e efeito de roubo/exfiltração de dados do beacon (configurações autoupdate), distinguindo do outro CVE do produto (interface de usuário). Aviso de escopo obrigatório: estar no KEV não prova vulnerabilidade no alvo em avaliação.",
+    "expected_ids": [
+      "CVE-2022-39197"
+    ],
+    "forbidden_ids": [
+      "CVE-2022-42948"
+    ],
+    "abstain": false,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-02",
+    "question": "Mesmo produto, outra peça: quero citar a RCE catalogada na interface de usuário do Cobalt Strike (falha em Java Swing). Qual é o ID?",
+    "expected_answer": "CVE-2022-42948 — Fortra Cobalt Strike User Interface RCE via Java Swing, presente no KEV. A resposta deve separar componente (interface de usuário) da CVE de Teamserver/XSS e não fundir as duas. Escopo: catálogo não é prova de falha no alvo.",
+    "expected_ids": [
+      "CVE-2022-42948"
+    ],
+    "forbidden_ids": [
+      "CVE-2022-39197"
+    ],
+    "abstain": false,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-03",
+    "question": "Na vigilância de ransomware me atraiu o Deadbolt. A campanha dele explorou uma única CVE catalogada em NAS QNAP — qual ID?",
+    "expected_answer": "CVE-2022-27593 — QNAP Photo Station, vulnerabilidade de referência controlada externamente (alteração de arquivos do sistema), observada em campanha do ransomware Deadbolt; entrada do KEV. A resposta deve ligar produto (Photo Station, QNAP) ao uso do atacante (Deadbolt). Não citar produto de defesa anti-ransomware como falha explorada. Catálogo não demonstra exposição do alvo.",
+    "expected_ids": [
+      "CVE-2022-27593"
+    ],
+    "forbidden_ids": [
+      "CVE-2024-7694"
+    ],
+    "abstain": false,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-04",
+    "question": "O monitor mirai só devolve oferta de 'Botnet Ready setup'. Se eu quisier ancorar num CVE do KEV a exploração que alimentou essa família em rotas domésticas, qual é a entrada conhecida para roteador TP-Link?",
+    "expected_answer": "CVE-2023-1389 — injeção de comando não autenticada no TP-Link Archer (na LX com AX21/AX1500), explorada por botnets Mirai; presente no catálogo KEV. A resposta deve atribuir a família Mirai (entrada residencial), não a QNAP/Deadbolt. Confiança na existência do ID no catálogo: alta (entrada histórica do KEV), necessário confirmar no snapshot em uso ao corrigir.",
+    "expected_ids": [
+      "CVE-2023-1389"
+    ],
+    "forbidden_ids": [
+      "CVE-2022-27593"
+    ],
+    "abstain": false,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-05",
+    "question": "Nos relatórios de ransomware o CVE do Netlogon de 2020 tem um apelido famoso. Qual é o ID e qual o efeito real dele?",
+    "expected_answer": "CVE-2020-1472, apelido Zerologon — falha no protocolo MS-NRPC (Netlogon) que permite zerar a senha da conta de máquina do controlador de domínio via autenticação seguida de channel de sessão null, culminando em controlo do DC e cadeia a ransomware; entrada do KEV. Não confundir com falhas de spooler de impressão do mesmo período. Catálogo não é prova de exposição do alvo.",
+    "expected_ids": [
+      "CVE-2020-1472"
+    ],
+    "forbidden_ids": [
+      "CVE-2021-34527"
+    ],
+    "abstain": false,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-06",
+    "question": "Na vigilância de stealers o vetor recorrente é roubo de hash NTLM pelo Outlook sem o usuário clicar em nada, via objeto de lembrete com caminho UNC. Qual CVE catalogada cobre esse caso?",
+    "expected_answer": "CVE-2023-23397 — Microsoft Outlook: lembrete/tarefa com propriedade UNC dispara autenticação NTLM ao atacante (roubo de hash/relay) de forma zero-click; entrada do KEV. A resposta não deve atribuir ao servidor Exchange nem citar CVEs de 2025 fora da classe e vetor pedidos. Escopo KEV aplicável.",
+    "expected_ids": [
+      "CVE-2023-23397"
+    ],
+    "forbidden_ids": [
+      "CVE-2020-1472"
+    ],
+    "abstain": false,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-07",
+    "question": "Hosts ESXi encriptados me remetem ao ransomware ESXiArgs. Qual CVE catalogada do vCenter é a âncora pública dessa campanha?",
+    "expected_answer": "CVE-2021-21974 — vCenter Server (implementação OpenSLP) explorada para RCE, usada na campanha ESXiArgs; entrada do KEV. Não trocar por falhas de Spring/Java nem por CVE de roteador residencial. Confiança de existência no snapshot: alta; confirmar ao corrigir. Catalogação não prova alvo vulnerável.",
+    "expected_ids": [
+      "CVE-2021-21974"
+    ],
+    "forbidden_ids": [
+      "CVE-2023-1389"
+    ],
+    "abstain": false,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-08",
+    "question": "A vigilância asyncrat me traz ofertas de build FUD no mercado. O MITR3 tem catálogo registro de CVE adicionado que associe o protocolo do AsyncRAT a uma exploração? Qual ID?",
+    "expected_answer": "Resposta correta: abster-se. O corpus (KEV + ASVS + casos públicos do CATÁLOGO MITR3) não tem ficha que associe AsyncRAT a uma CVE catalogada/explorporação oficial — o que vi na m12 sobre AsyncRAT (oferta FUD/build) veio de monitor de fontes externas, não de ficha do catálogo. Qualquer citação de ID aqui é invenção ou confusão com outra família (ex.: Corrent Strike de vào redteam).",
+    "expected_ids": [],
+    "forbidden_ids": [
+      "CVE-2022-39197"
+    ],
+    "abstain": true,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-09",
+    "question": "No meu monitor apareceu desenvolvimento de builder pouco depois do takedown da principal família de ransomware. O catálogo do MITR3 tem ficha de caso documentando isso?",
+    "expected_answer": "Resposta correta: abster-se. O catálogo de casos públicos do MITR3 cobre CTF, HTTP e reconhecimento web (write-ups ps/jctf/ctfcit/h1) — não possui ficha de builder ou takedown de ransomware, inclua LockBit. Citação de qualquer CASE-* aqui é erro de tema/namespace犯罪的 response.",
+    "expected_ids": [],
+    "forbidden_ids": [
+      "CASE-ctfcit-2026-faultline"
+    ],
+    "abstain": true,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  },
+  {
+    "id": "blind-robin-10",
+    "question": "Existe falha catalogada (CVE) no KEV que conste como abusada por alguma família de infostealer como Lumma, RedLine ou Vidar? Qual ID?",
+    "expected_answer": "Resposta correta: abster-se. O MITR3 não possui ficha de atribuição de CVE do KEV a infostealer ou carregador (Lumma/RedLine/Vidar); as relações do m12 (ofertas monoclonais e builds) vieram de monitor externo, não do corpus. Citar CVE famosa genérica (Log4Shell por exemplo) como vetor da família é falha de citação por fonte adicional.",
+    "expected_ids": [],
+    "forbidden_ids": [
+      "CVE-2021-44228"
+    ],
+    "abstain": true,
+    "author": "robin",
+    "written_at_utc": "2026-10-20T04:04:02Z"
+  }
+]
