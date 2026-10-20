@@ -5,7 +5,7 @@ Initial run establishes baseline, never mislabels existing items as new.
 A successful refresh updates the previous snapshot only after index and QA succeed.
 """
 from __future__ import annotations
-import datetime,json,os,pathlib,subprocess,sys,tempfile,hashlib
+import datetime,json,os,pathlib,subprocess,sys,tempfile,hashlib,re
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 CLI=ROOT/"bin/mitr3-rag-intel.py"
 REPORT=ROOT/"state/mitr3-intel-refresh-latest.json"
@@ -24,17 +24,60 @@ def write_atomic(path:pathlib.Path,blob:bytes):
  finally:
   if os.path.exists(tmp):os.unlink(tmp)
 
+SNAPSHOT_SCHEMA_VERSION=2
+DIGEST_FIELDS=("shortDescription","notes","forensicTriage")
+
+def canonical_digest(value):
+ """Track a public feed field's changes without storing arbitrary prose in snapshots."""
+ if value is None:
+  return None
+ norm=json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(",",":"))
+ return hashlib.sha256(norm.encode("utf8")).hexdigest()
+
 def record_snapshot(feed:dict)->dict:
- assert isinstance(feed,dict) and isinstance(feed.get("vulnerabilities"),list)
- return {v["cveID"].upper():{
-  "dateAdded":v.get("dateAdded",""),
-  "vendorProject":v.get("vendorProject",""),
-  "product":v.get("product",""),
-  "vulnerabilityName":v.get("vulnerabilityName",""),
-  "knownRansomwareCampaignUse":v.get("knownRansomwareCampaignUse",""),
-  "requiredAction":v.get("requiredAction",""),
-  "dueDate":v.get("dueDate",""),
- } for v in feed["vulnerabilities"]}
+ if not isinstance(feed,dict) or not isinstance(feed.get("vulnerabilities"),list):
+  raise ValueError("Invalid KEV JSON")
+ result={}
+ for item in feed["vulnerabilities"]:
+  if not isinstance(item,dict):
+   raise ValueError("Non-object KEV record")
+  key=item.get("cveID","")
+  if not isinstance(key,str) or not re.fullmatch(r"CVE-\d{4}-\d{4,}",key,re.I):
+   raise ValueError("Invalid CVE identifier")
+  ident=key.upper()
+  if ident in result:
+   raise ValueError("Duplicate CVE ID in source feed: "+ident)
+  cwes=item.get("cwes")
+  if not isinstance(cwes,list):
+   cwes=[]
+  clean_cwes=sorted({cwe.upper() for cwe in cwes
+     if isinstance(cwe,str) and re.fullmatch(r"CWE-\d+",cwe,re.I)})
+  body={k:item.get(k,"") for k in ("dateAdded","vendorProject","product",
+     "vulnerabilityName","knownRansomwareCampaignUse","requiredAction","dueDate")}
+  body["cwes"]=clean_cwes
+  for field in DIGEST_FIELDS:
+   body[field+"_sha256"]=canonical_digest(item.get(field))
+  result[ident]=body
+ return result
+
+def read_previous_snapshot(path):
+ """Snapshot v1 lacks change-tracked fields: rebaseline instead of false bulk UPDATE."""
+ if not path.exists():
+  return None, "new_catalog"
+ raw=json.loads(path.read_text(encoding="utf8"))
+ if not isinstance(raw,dict):
+  raise ValueError("Invalid KEV snapshot envelope")
+ version=raw.get("schema_version",1)
+ if version==1:
+  if not isinstance(raw.get("records"),dict):
+   raise ValueError("Invalid previous KEV snapshot")
+  return None,"schema_migration_v1_to_v2"
+ if version!=SNAPSHOT_SCHEMA_VERSION:
+  raise ValueError("Unknown KEV snapshot schema: "+repr(version))
+ records=raw.get("records")
+ if not isinstance(records,dict):
+  raise ValueError("Invalid v2 KEV snapshot records")
+ return records,"current_v2"
 
 def compare(previous:dict|None,current:dict)->dict:
  if previous is None:
@@ -67,7 +110,7 @@ def run(action):
  return r.stdout
 
 def main():
- previous=json.loads(SNAPSHOT.read_text())["records"] if SNAPSHOT.exists() else None
+ previous, baseline_reason=read_previous_snapshot(SNAPSHOT)
  run("sync")
  run("build")
  bench=json.loads(run("bench"))
@@ -76,6 +119,8 @@ def main():
  current=record_snapshot(feed)
  if len(current)!=stats["sources"]["cisa-kev"]:raise ValueError("KEV duplicate entries or feed count mismatch")
  delta=compare(previous,current)
+ if baseline_reason=="schema_migration_v1_to_v2":
+  delta["note"]="schema migration: v1 lacked description, notes, forensic triage and CWE hashes; rebaselined to avoid false updates"
  new_recent=recent_by_added(current)
  timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
  digest=hashlib.sha256(FEED.read_bytes()).hexdigest()
@@ -85,7 +130,8 @@ def main():
         "kev_delta":delta,"kev_recent_by_date_added_last_7_days":new_recent,
         "kev_snapshot_sha256":digest}
  write_atomic(REPORT,(json.dumps(state,ensure_ascii=False,indent=2)+"\n").encode())
- write_atomic(SNAPSHOT,(json.dumps({"taken_at":timestamp,"sha256":digest,"records":current},ensure_ascii=False)+"\n").encode())
+ write_atomic(SNAPSHOT,(json.dumps({"schema_version":SNAPSHOT_SCHEMA_VERSION,
+     "taken_at":timestamp,"sha256":digest,"records":current},ensure_ascii=False)+"\n").encode())
  # Append compact per-refresh delta, not entire list.
  H= {"at":timestamp,"snapshot_sha256":digest,"status":delta["status"],
      "counts":delta.get("counts"),"recent_count":len(new_recent)}
