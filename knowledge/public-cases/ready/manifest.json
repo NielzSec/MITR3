@@ -126,5 +126,85 @@
     "sha256": "481c3ed4a98e64d80c5b63fe249827161b4145cc815fa9da105a1cb20e72cec9",
     "origin": "mitr3:public-rag:v1:owasp-cheatsheets",
     "validation": "source_catalog_only"
+  },
+  {
+    "id": "ps-ai-http-terminator-2026",
+    "title": "Can AI do novel security research? Meet the HTTP Terminator",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-ai-http-terminator-2026.md",
+    "sha256": "7160e0a22f1505d397caad198836dd4b9fbb537ba7ff22431da74c7953d9e2c7",
+    "origin": "mitr3:public-rag:v1:ps-ai-http-terminator-2026",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-practical-cache-poisoning-2018",
+    "title": "Practical Web Cache Poisoning",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-practical-cache-poisoning-2018.md",
+    "sha256": "4b806598aed2693c7d641b4329dfee3cef11c0176b9aa6101b478ccb7dfc4f8c",
+    "origin": "mitr3:public-rag:v1:ps-practical-cache-poisoning-2018",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-top-web-2025",
+    "title": "Top 10 Web Hacking Techniques of 2025",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-top-web-2025.md",
+    "sha256": "7862db0100acf5f2f9065dd8567258c9971a77832319e6dbdba39c1fbc5cbced",
+    "origin": "mitr3:public-rag:v1:ps-top-web-2025",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ctfcit-2026-click",
+    "title": "CTF@CIT 2026: The click that may have fixed",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ctfcit-2026-click.md",
+    "sha256": "6156789d698c97dbdcb82fde0ed1de7d55a1e21095b6147b9fae5e2031f224b9",
+    "origin": "mitr3:public-rag:v1:ctfcit-2026-click",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ctfcit-2026-faultline",
+    "title": "CTF@CIT 2026: Faultline",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ctfcit-2026-faultline.md",
+    "sha256": "0f28fe3cd06f91edd9a4834cefe0e6b702c5a131b8d76ba047d8251ad1d77ae8",
+    "origin": "mitr3:public-rag:v1:ctfcit-2026-faultline",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ctfcit-2026-saymyname",
+    "title": "CTF@CIT 2026: Say My Name",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ctfcit-2026-saymyname.md",
+    "sha256": "4360c414ce85a91644d0b3478eedc168de9404f2ca76f6bdac04240eac55f7b8",
+    "origin": "mitr3:public-rag:v1:ctfcit-2026-saymyname",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "owasp-asvs-5-stable",
+    "title": "OWASP Application Security Verification Standard 5.0.0",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/owasp-asvs-5-stable.md",
+    "sha256": "2c5b1865027be8f5ff03b21399bcaa332042b819c16481f9d4fb6faf1561560c",
+    "origin": "mitr3:public-rag:v1:owasp-asvs-5-stable",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "h1-disclosure-2026",
+    "title": "HackerOne: Requesting Disclosure",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/h1-disclosure-2026.md",
+    "sha256": "018af82e1a6a00eceddc9d8af518c65639c292e78ee07144b095ef9b725a7856",
+    "origin": "mitr3:public-rag:v1:h1-disclosure-2026",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "projectdiscovery-templates",
+    "title": "ProjectDiscovery Nuclei Templates — Catalogo Comunitario",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/projectdiscovery-templates.md",
+    "sha256": "c44edeeff1bb32af8edbcbcaa4885a9b8417fdeaf743cb0d79099cec7ef8d8ff",
+    "origin": "mitr3:public-rag:v1:projectdiscovery-templates",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "ps-request-smuggling-research",
+    "title": "PortSwigger: HTTP Request Smuggling Research",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-request-smuggling-research.md",
+    "sha256": "70a96ab02d8d106f67862dfdad6c6f51be4472e8e9a8e53f34caf45697a2ef75",
+    "origin": "mitr3:public-rag:v1:ps-request-smuggling-research",
+    "validation": "source_catalog_only"
   }
 ]

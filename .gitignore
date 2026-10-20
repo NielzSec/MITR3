@@ -17,3 +17,9 @@ state/shared-secret-check-latest.json
 state/public-rag.sqlite3
 state/public-rag-mcp-receipts.json
 state/public-rag-mcp-qa.json
+
+# Public official feeds cached locally, FTS index and QA status
+knowledge/reference-datasets/cache/
+state/mitr3-intel.sqlite3
+state/mitr3-intel-refresh-latest.json
+knowledge/public-cases/queue/

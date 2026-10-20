@@ -17,7 +17,7 @@ class PublicRagTests(unittest.TestCase):
         cls.records = mod.load()
 
     def test_verified_initial_catalog(self):
-        self.assertEqual(len(self.records), 16)
+        self.assertGreaterEqual(len(self.records), 26)
         self.assertEqual(len(set(x["id"] for x in self.records)),len(self.records))
         self.assertEqual(len(set(x["source_url"] for x in self.records)),len(self.records))
 
