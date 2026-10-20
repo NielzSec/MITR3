@@ -104,3 +104,17 @@ a camada de respostas proposta.
 O artefato desta branch é apenas a especificação técnica. Nenhum
 script executável ou chamada a modelo foi implantado nesta rodada.
 
+
+## Implementação posterior desta especificação
+
+`bin/mitr3-answer.py` e `tests/test_answer_pipeline.py` implementam o pipeline e
+seu gate de integridade. Uso, schemas, códigos, política de dados e limites em
+[MITR3-ANSWER-PIPELINE.md](MITR3-ANSWER-PIPELINE.md). A primeira chamada recebe
+literalmente só a pergunta; saída narrativa do provedor causa abstenção, não
+conversão heurística para plano. A eficácia desse protocolo com o provedor real
+não foi medida nesta entrega.
+
+Suite 139/139, sem ResourceWarning; candidate idêntico, recall 0.975 e abstenção
+1.000. Testes de modelo usam somente script mock local. Avaliação cega e revisão
+humana independente não executadas; os respectivos critérios de aceitação acima
+continuam pendentes. A presença de uma citação continua sem comprovar entailment.
