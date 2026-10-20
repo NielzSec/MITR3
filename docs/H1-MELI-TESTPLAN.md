@@ -10,12 +10,14 @@
 | P0 | `api.mercadolibre.com` | 1 | superfície de marketplace, autenticação e objetos de usuário |
 | P0 | `api.mercadopago.com` | 1 | pagamentos, OAuth2, merchant management |
 | P1 | `*.adminml.com` | 1 | separação administrativa; risco de BFLA/BOLA |
-| P1 | `*.mercadolivre.com.br` | 2 | maior mercado; sessão e fluxo de checkout |
-| P1 | `*.mercadolibre.com.ar` / `*.mercadolibre.com.mx` | 2 | variação regional de sessão/erros |
-| P2 | `*.mercadolibre.com` / `*.mercadolibre.cl` / `*.mercadolibre.com.co` / `*.mercadolibre.com.pe` / `*.mercadolibre.com.uy` | 2 | XSS/CSP e redirects |
-| P2 | `*.mercadopago.com` / `*.mercadopago.cl` / `*.mercadopago.com.ar` | 2 | fluxo de pagamento regional |
+| P1 | `*.mercadolivre.com.br` | 1 | maior mercado; sessão e fluxo de checkout |
+| P1 | `*.mercadolibre.com.ar` / `*.mercadolibre.com.mx` | 1 | variação regional de sessão/erros |
+| P2 | `*.mercadolibre.com` / `*.mercadolibre.cl` / `*.mercadolibre.com.co` / `*.mercadolibre.com.pe` / `*.mercadolibre.com.uy` | 1 | XSS/CSP e redirects |
+| P2 | `*.mercadopago.com` / `*.mercadopago.cl` / `*.mercadopago.com.ar` | 1 | fluxo de pagamento regional |
 | — | `Crypto` | sem tier | somente `/crypto/*` em `www.mercadopago.com.mx`, `www.mercadopago.cl`, `www.mercadopago.com.br` |
 | — | Point Smart | 1 | **adiado** — fora deste plano |
+
+Tier confirmado no campo `instruction` do extrato: **todos os 14 ativos web/API citados são Tier 1**.
 
 ## 2. Hipóteses (OWASP WSTG / API Top 10)
 
@@ -24,17 +26,17 @@
 | H1 | BOLA/IDOR em objetos de usuário/transação | api.mercadolibre.com | dois test users, resposta do objeto do outro com campo não público, sem ação destrutiva |
 | H2 | BFLA em endpoint administrativo exposto | *.adminml.com | função de admin acessível com test user comum, prova read-only |
 | H3 | Falha de validação de redirect/OAuth | api.mercadopago.com | `redirect_uri` aceito fora do allowlist, sem capturar token de terceiro |
-| H4 | Exposição de dados em resposta de erro/verbose | APIs | stack trace, path interno ou PII de outro usuário na resposta |
+| H4 | Exposição de dados em resposta de erro/verbose | APIs | stack trace ou path interno em **conta própria de laboratório**; qualquer dado de terceiro = parada imediata |
 | H5 | CSRF em ação sensível sem token/Origin | web | ação de estado replicada com test user, sem vítima real |
 | H6 | XSS refletido/armazenado com bypass de CSP | web | execução em contexto do ativo, CSP violada documentada |
 | H7 | SSRF em parâmetro de URL/imagem | APIs/web | callback para domínio nosso, sem varrer rede interna |
-| H8 | Race condition em estado de pagamento | mercadopago | duas requisições espaçadas reproduzindo inconsistência, sem saldo real |
+| H8 | **ADIADO** — race condition exige concorrência, proibida nesta fase | mercadopago | não testar sem método autorizado que demonstre corrida |
 | H9 | Exposição de chave/token em app ou JS público | web/mobile | chave de baixo privilégio confirmada com **uma** chamada read-only |
 | H10 | Subdomain takeover | wildcards | conteúdo de verificação + DNS/HTTP, sem cookies/phishing |
 
 ## 3. Técnicas
 
-**Permitidas:** navegação manual, Burp Repeater/Intruder em modo **não** massivo (uma hipótese por vez), test users oficiais, cartões de teste, comparação de respostas entre dois test users, análise de JS público.
+**Permitidas:** navegação manual, Burp Repeater com requisições **individuais e manuais**; sem Intruder, sem automação de lotes, test users oficiais, cartões de teste, comparação de respostas entre dois test users, análise de JS público.
 
 **Proibidas:** scanner/crawler/fuzzer automatizado, brute force, enumeração em massa, DoS, GraphQL DoS, engenharia social, malware, criação massiva de contas, acesso a dados de terceiros, persistência, pivot, exploração além da prova mínima.
 
