@@ -7,6 +7,7 @@ import argparse, collections, datetime as dt, hashlib, json, os, re, sqlite3, sy
 import urllib.request, urllib.parse
 import unicodedata
 from pathlib import Path
+from contextlib import closing
 
 ROOT=Path(__file__).resolve().parents[1]
 CACHE=ROOT/"knowledge/reference-datasets/cache"
@@ -212,8 +213,7 @@ def create():
  fd,tmp=tempfile.mkstemp(dir=DB.parent,prefix=".mitr3-intel-",suffix=".sqlite3")
  os.close(fd)
  try:
-  con=sqlite3.connect(tmp)
-  try:
+  with closing(sqlite3.connect(tmp)) as con:
    con.execute("PRAGMA journal_mode=DELETE")
    con.execute("PRAGMA foreign_keys=ON")
    con.execute("CREATE TABLE documents (id TEXT PRIMARY KEY, kind TEXT NOT NULL, source TEXT NOT NULL, title TEXT NOT NULL, summary TEXT NOT NULL, lesson TEXT NOT NULL, tags TEXT NOT NULL, source_url TEXT NOT NULL, published_at TEXT, validation TEXT NOT NULL, digest TEXT NOT NULL)")
@@ -262,7 +262,6 @@ def create():
    con.execute("INSERT INTO metadata VALUES('schema_version','2')")
    con.execute("INSERT INTO metadata VALUES('source_sha256',?)",(hashlib.sha256(MANIFEST.read_bytes()+SOURCE.read_bytes()).hexdigest(),))
    con.commit()
-  finally: con.close()
   os.chmod(tmp,0o600)
   os.replace(tmp,DB)
  finally:
@@ -277,8 +276,7 @@ def relations(identifier,as_json=False,emit=True):
  """Return direct declarations in both directions, including external CWE nodes."""
  identifier=identifier.strip()
  identifier=("CASE-"+identifier[5:]) if identifier.upper().startswith("CASE-") else identifier.upper()
- con=open_db()
- try:
+ with closing(open_db()) as con:
   if "evidence" not in {r[1] for r in con.execute("PRAGMA table_info(related)")}:
    raise ValueError("Relation evidence unavailable in legacy index: run build")
   def edges(column):
@@ -287,7 +285,6 @@ def relations(identifier,as_json=False,emit=True):
             "SELECT doc_id,target_id,relation,evidence FROM related WHERE "+column+"=? "
             "ORDER BY doc_id,target_id,relation",(identifier,))]
   result={"id":identifier,"outbound":edges("doc_id"),"inbound":edges("target_id")}
- finally:con.close()
  if emit:
   if as_json:print(json.dumps(result,ensure_ascii=False,indent=2))
   else:
@@ -329,8 +326,7 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  # ranking preference; a product/CVE/standard in another corpus must survive it.
  preferred_source=routed_source(query,"") if not source else ""
  skip=is_unsupported_intent(query) if not (CVE_RE.fullmatch(qid) or qid.startswith("ASVS-")) else None
- con=open_db()
- try:
+ with closing(open_db()) as con:
   rows=[]
   if skip:
    rows=[]
@@ -378,7 +374,6 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
   for item in matches:
    item["related"]=[e[0] for e in con.execute(
     "SELECT target_id FROM related WHERE doc_id=?",(item["id"],)).fetchall()]
- finally:con.close()
  if emit:
   if as_json:print(json.dumps(matches,ensure_ascii=False,indent=2))
   else:
@@ -392,15 +387,13 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  return matches
 
 def stats():
- con=open_db()
- try:
+ with closing(open_db()) as con:
   all_count=con.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
   sources=con.execute("SELECT source,COUNT(*) FROM documents GROUP BY source ORDER BY source").fetchall()
   related=con.execute("SELECT count(*) FROM related").fetchone()[0]
   relation_types={relation:0 for relation in RELATION_SOURCES}
   relation_types.update(con.execute("SELECT relation,count(*) FROM related GROUP BY relation ORDER BY relation"))
   updated=con.execute("SELECT value FROM metadata WHERE key='indexed_at'").fetchone()[0]
- finally:con.close()
  print(json.dumps({"total":all_count,"sources":dict(sources),"relations":related,"relations_by_type":relation_types,"indexed_at":updated},indent=2))
 
 def benchmark():
@@ -413,8 +406,7 @@ def benchmark():
   ("ASVS V1.1.1","ASVS-V1.1.1"),
   ("ASVS V1.2.5","ASVS-V1.2.5")
  ]
- con=open_db()
- try:
+ with closing(open_db()) as con:
   # Pure identifier queries for exact terms, or FTS queries for case recall.
   results=[]
   for query,target in fixture:
@@ -426,7 +418,6 @@ def benchmark():
     found=con.execute("SELECT d.id FROM docs_fts JOIN documents d ON d.id=docs_fts.id WHERE docs_fts MATCH ? ORDER BY bm25(docs_fts,0,3,1.2,1.2,1.5) LIMIT 5",(match,)).fetchall()
    ids=[x[0] for x in found]
    results.append({"query":query,"expected":target,"hit_at_5":target in ids,"top5":ids})
- finally:con.close()
  hits=sum(int(x["hit_at_5"]) for x in results)
  print(json.dumps({"benchmark":"static_lexical_recall_at_5","hits":hits,"total":len(results),"recall_at_5":hits/len(results),"details":results},ensure_ascii=False,indent=2))
  return hits==len(results)

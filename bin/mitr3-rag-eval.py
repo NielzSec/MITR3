@@ -11,6 +11,7 @@ import json
 import re
 import sqlite3
 from pathlib import Path
+from contextlib import closing
 
 ROOT=Path(__file__).resolve().parents[1]
 TESTS=ROOT/"tests/fixtures/intel-relevance-v1.json"
@@ -76,13 +77,11 @@ def main():
  queries=json.loads(TESTS.read_text())
  assert len(queries)==30
  index_path=a.reference_index if a.mode=="baseline" else DB
- db=sqlite3.connect("file:"+str(index_path)+"?mode=ro",uri=True)
- try:
+ with closing(sqlite3.connect("file:"+str(index_path)+"?mode=ro",uri=True)) as db:
   if a.mode=="baseline":
    result=evaluate(queries,lambda q:baseline(db,q))
   else:
    result=evaluate(queries,candidate)
- finally:db.close()
  result["mode"]=a.mode
  result["fixture"]=str(TESTS)
  result[ "notes"]="Human-curated corpus examples, not blinded. P@5 uses fixed denominator 5. Precision-of-returned is conditional on how many results the system chooses to return, so it can rise by abstaining; NOT an independent semantic correctness measure."

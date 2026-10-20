@@ -59,7 +59,7 @@ class RelationTests(unittest.TestCase):
             intel.create()
 
     def edges(self):
-        with sqlite3.connect(self.db) as con:
+        with contextlib.closing(sqlite3.connect(self.db)) as con, con:
             return con.execute("SELECT doc_id,target_id,relation,evidence FROM related").fetchall()
 
     def test_missing_or_invalid_evidence_never_enters(self):
@@ -68,7 +68,7 @@ class RelationTests(unittest.TestCase):
                          {"source_id": "public-cases", "sha256": "a" * 64}):
             with self.subTest(evidence=evidence):
                 self.assertEqual(intel.declared_relations(["CWE-79"], "cwe_of", evidence), [])
-                with sqlite3.connect(self.db) as con:
+                with contextlib.closing(sqlite3.connect(self.db)) as con, con:
                     with self.assertRaises(sqlite3.IntegrityError):
                         con.execute("INSERT INTO related VALUES(?,?,?,?)",
                                     ("CVE-2026-10000", "CWE-80", "cwe_of",
@@ -120,7 +120,7 @@ class RelationTests(unittest.TestCase):
                     *(('CASE-case-a', target, 'case_references') for target in
                       ('CVE-2026-10000', 'ASVS-V1.1.1', 'CASE-case-b', 'CWE-89'))}
         self.assertEqual({row[:3] for row in self.edges()}, expected)
-        with sqlite3.connect(self.db) as con:
+        with contextlib.closing(sqlite3.connect(self.db)) as con, con:
             documents = {r[0] for r in con.execute("SELECT id FROM documents")}
         for doc, target, relation, _ in self.edges():
             self.assertIn(doc, documents)
@@ -151,7 +151,7 @@ class RelationTests(unittest.TestCase):
                 intel.main()
         result = json.loads(output.getvalue())
         self.assertEqual(result, intel.relations("CVE-2026-10000", emit=False))
-        with sqlite3.connect(self.db) as con:
+        with contextlib.closing(sqlite3.connect(self.db)) as con, con:
             con.execute("DROP TABLE related")
             con.execute("CREATE TABLE related(doc_id,target_id,relation)")
         with self.assertRaisesRegex(ValueError, "run build"):
@@ -178,7 +178,7 @@ class CachedRelationTests(unittest.TestCase):
             with mock.patch.object(intel, "DB", Path(td) / "index.sqlite3"):
                 with contextlib.redirect_stdout(io.StringIO()):
                     intel.create()
-                with sqlite3.connect(intel.DB) as con:
+                with contextlib.closing(sqlite3.connect(intel.DB)) as con, con:
                     docs = {r[0] for r in con.execute("SELECT id FROM documents")}
                     rows = con.execute("SELECT doc_id,target_id,relation,evidence FROM related").fetchall()
         expected = set()
