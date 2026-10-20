@@ -1,0 +1,159 @@
+{
+ "at_utc": "2026-10-20T11:52:47.625618Z",
+ "set": "blind-answers-gemma4-v4",
+ "sha256": "7b99a31bbf49dbd908353b8f91b3ed446234b685179151b0089ec71c7667a652",
+ "model": "dahl/deepseek-ai/DeepSeek-V4-Flash-0731",
+ "pass": 1,
+ "rows": [
+  {
+   "id": "blind-hermes-01",
+   "abstain_expected": false,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "MODEL_ABSTAIN",
+    "status": "abstained"
+   }
+  },
+  {
+   "id": "blind-hermes-02",
+   "abstain_expected": false,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "MODEL_ABSTAIN",
+    "status": "abstained"
+   }
+  },
+  {
+   "id": "blind-hermes-03",
+   "abstain_expected": false,
+   "answer": {
+    "abstain": false,
+    "claims": [
+     {
+      "text": "Em CASE-ps-cache-2024, a normalizacao de URLs e um ponto critico de falha porque diferencas de interpretacao de caminhos entre CDN e servidor de origem geram divergencias nas regras de cache aplicadas a um mesmo recurso.",
+      "citations": [
+       {
+        "id": "CASE-ps-cache-2024",
+        "quote": "diferencas de interpretacao de caminhos e regras de cache entre CDN e servidor de origem",
+        "source_url": "https://portswigger.net/research/gotta-cache-em-all",
+        "sha256": "b8db5b004862075866609cc22bb7d593b765aacb61c2c12abb4445241a0508c3",
+        "namespace": "local"
+       }
+      ]
+     },
+     {
+      "text": "Essas divergencias de normalizacao podem expor conteudos dinamicos ou fazer o cache armazenar respostas inadequadas, condicao central da tecnica de cache poisoning.",
+      "citations": [
+       {
+        "id": "CASE-ps-cache-2024",
+        "quote": "Essas divergencias podem expor conteudos dinamicos ou armazenar respostas inadequadas",
+        "source_url": "https://portswigger.net/research/gotta-cache-em-all",
+        "sha256": "b8db5b004862075866609cc22bb7d593b765aacb61c2c12abb4445241a0508c3",
+        "namespace": "local"
+       }
+      ]
+     }
+    ],
+    "error_code": null,
+    "status": "evidence_attached_proposal"
+   }
+  },
+  {
+   "id": "blind-hermes-04",
+   "abstain_expected": false,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "MODEL_TIMEOUT",
+    "status": "abstained"
+   }
+  },
+  {
+   "id": "blind-hermes-05",
+   "abstain_expected": false,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "MODEL_ABSTAIN",
+    "status": "abstained"
+   }
+  },
+  {
+   "id": "blind-hermes-06",
+   "abstain_expected": false,
+   "answer": {
+    "abstain": false,
+    "claims": [
+     {
+      "text": "A pesquisa descreve o mecanismo central dos headers 'unkeyed': entradas que afetam a resposta sem compor a chave de cache, permitindo que a resposta influenciada seja armazenada e servida a outros visitantes, o que facilita a exploração de cache poisoning.",
+      "citations": [
+       {
+        "id": "CASE-ps-practical-cache-poisoning-2018",
+        "quote": "Pesquisa publica sobre influencia de entradas que afetam uma resposta sem compor a chave de cache.",
+        "source_url": "https://portswigger.net/research/practical-web-cache-poisoning",
+        "sha256": "4bf5dab173e6250e6db067f1882843323b4d17fbeae5da75a8b19905122fed22",
+        "namespace": "local"
+       }
+      ]
+     },
+     {
+      "text": "A exploração decorre da distinção entre entradas que compõem a chave de cache e aquelas que influenciam a resposta sem compor essa chave, sendo estas últimas a base do vetor de cache poisoning.",
+      "citations": [
+       {
+        "id": "CASE-ps-practical-cache-poisoning-2018",
+        "quote": "influencia de entradas que afetam uma resposta sem compor a chave de cache",
+        "source_url": "https://portswigger.net/research/practical-web-cache-poisoning",
+        "sha256": "4bf5dab173e6250e6db067f1882843323b4d17fbeae5da75a8b19905122fed22",
+        "namespace": "local"
+       }
+      ]
+     }
+    ],
+    "error_code": null,
+    "status": "evidence_attached_proposal"
+   }
+  },
+  {
+   "id": "blind-hermes-07",
+   "abstain_expected": false,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "MODEL_ABSTAIN",
+    "status": "abstained"
+   }
+  },
+  {
+   "id": "blind-hermes-08",
+   "abstain_expected": true,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "NO_EVIDENCE",
+    "status": "abstained"
+   }
+  },
+  {
+   "id": "blind-hermes-09",
+   "abstain_expected": true,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "NO_EVIDENCE",
+    "status": "abstained"
+   }
+  },
+  {
+   "id": "blind-hermes-10",
+   "abstain_expected": true,
+   "answer": {
+    "abstain": true,
+    "claims": [],
+    "error_code": "MODEL_ABSTAIN",
+    "status": "abstained"
+   }
+  }
+ ]
+}
