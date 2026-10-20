@@ -1,0 +1,210 @@
+{
+  "_header": {
+    "dataset": "blind-answers-robin-v5",
+    "version": "v5",
+    "author": "robin",
+    "written_at_utc": "2026-10-20T13:00:00Z",
+    "item_count": 10,
+    "positive_controls": 7,
+    "negative_controls": 3,
+    "corpus": [
+      "CISA-KEV",
+      "OWASP-ASVS-5.0.0",
+      "MITR3-PUBLIC-CASES"
+    ],
+    "scoring_scale": {
+      "2": "correta: resposta precisa, IDs esperados presentes, nenhum ID proibido, aviso de escopo adequado",
+      "1": "parcial: conceito central correto mas com omiss\u00e3o de detalhe relevante ou formula\u00e7\u00e3o incompleta",
+      "0": "errada: erro conceitual, alucina\u00e7\u00e3o de fontes/IDs, cita\u00e7\u00e3o de forbidden_ids, ou resposta com confian\u00e7a em item de absten\u00e7\u00e3o"
+    },
+    "sha256_canonical_items": "7f9d7d3ea32b7b515c711b378306ad26859bc9844db8ad0f54d0deb1caad3d56"
+  },
+  "rows": [
+    {
+      "id": "blind-robin-41",
+      "question": "Um cliente pede que eu declare 'explora\u00e7\u00e3o ativa' no relat\u00f3rio com base em uma CVE estar no cat\u00e1logo CISA KEV. Essa afirma\u00e7\u00e3o est\u00e1 correta? O que o KEV atesta e o que ele n\u00e3o atesta?",
+      "expected_answer": "O KEV atesta que uma explora\u00e7\u00e3o ativa para aquela CVE foi observada e reportada ao CISA \u2014 significa que existe hist\u00f3rico p\u00fablico de uso. N\u00e3o atesta que o alvo em avalia\u00e7\u00e3o est\u00e1 exposto, vulner\u00e1vel ou foi comprometido. A resposta deve distinguir 'consta no KEV' (prioridade de resposta) de 'falha presente no alvo' (diagn\u00f3stico local).",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2023-23397"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Afirma corretamente: KEV = cat\u00e1logo de explora\u00e7\u00e3o ativa reportada, n\u00e3o prova de exposi\u00e7\u00e3o do alvo; separa prioridade de resposta de diagn\u00f3stico; ambos os limites presentes.",
+        "1": "Capta que KEV n\u00e3o \u00e9 prova do alvo, mas \u0444\u043e\u0440\u043c\u0443\u043b\u0438\u0440\u043e\u0432\u043a\u0430 vagueia ou omite um dos dois limites.",
+        "0": "Afirma que a CVE no KEV \u00e9 prova de explora\u00e7\u00e3o ativa no alvo, ou usa o KEV como diagn\u00f3stico."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-42",
+      "question": "Num teste de aplica\u00e7\u00e3o web, posso usar o ASVS para definir o que \u00e9 obrigat\u00f3rio e depois usar uma CVE do KEV como evid\u00eancia de que aquele controle foi furado? Essa cadeia funciona?",
+      "expected_answer": "N\u00e3o. ASVS define requisitos de seguran\u00e7a no n\u00edvel de aplica\u00e7\u00e3o (o que verificar em design/c\u00f3digo/testes); uma CVE do KEV cataloga explora\u00e7\u00e3o ativa de produto/vers\u00e3o. A cadeia 'ASVS requer X \u2192 CVE Y quebrou X no produto Z' exige media\u00e7\u00e3o: mostrar que o controle ASVS corresponde exatamente ao vetor da CVE no contexto do alvo \u2014 n\u00e3o basta a exist\u00eancia da CVE.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2021-44228"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Identifica a descontinuidade: ASVS \u00e9 framework de requisitos, CVE atesta explora\u00e7\u00e3o de produto/vers\u00e3o; a cadeia precisa de media\u00e7\u00e3o expl\u00edcita (produto+vers\u00e3o+vetor) para ser v\u00e1lida.",
+        "1": "Reconhece que ASVS e CVE s\u00e3o coisas diferentes mas n\u00e3o explicita a media\u00e7\u00e3o necess\u00e1ria.",
+        "0": "Afirma que a CVE do KEV evidencia automaticamente a falha do controle ASVS no alvo."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-43",
+      "question": "A minha ferramenta de varredura reportou CWE-79 (XSS) no alvo. Posso usar a entrada CWE-79 da base MITR3 para vincular isso a uma CVE do KEV que tamb\u00e9m trata de XSS?",
+      "expected_answer": "N\u00e3o diretamente. CWE-79 descreve uma classe de weakness (como falhas XSS se manifestam em c\u00f3digo); uma CVE do KEV cataloga uma inst\u00e2ncia espec\u00edfica de explora\u00e7\u00e3o ativa num produto/vers\u00e3o. O v\u00ednculo entre a classe (CWE) e a inst\u00e2ncia (CVE) precisa de evid\u00eancia local \u2014 a mera coexist\u00eancia n\u00e3o prova que o vetor da CVE \u00e9 o XSS encontrado.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2022-39197"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Distingue CWE (classe) de CVE (inst\u00e2ncia de explora\u00e7\u00e3o ativa); afirma que o v\u00ednculo requer media\u00e7\u00e3o local, n\u00e3o basta coincid\u00eancia de classe.",
+        "1": "Capta que CWE e CVE s\u00e3o namespaces diferentes mas \u0444\u043e\u0440\u043c\u0443\u043b\u0438\u0440\u0443\u0435\u0442 o risco de forma vaga.",
+        "0": "Afirma que a presen\u00e7a de CWE-79 justifica vincular a qualquer CVE do KEV que mencione XSS."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-44",
+      "question": "O fornecedor do sistema publicou um patch para a CVE que o KEV cataloga. Posso marcar o risco como 'mitigado' com base no release notes do patch?",
+      "expected_answer": "Release notes do fornecedor indicam que o patch existe, mas n\u00e3o garantem que foi aplicado no ambiente, que a vers\u00e3o antiga foi completamente removida, nem que n\u00e3o h\u00e1Workarounds ativos. Mitiga\u00e7\u00e3o confirmada requer verifica\u00e7\u00e3o no ativo (vers\u00e3o aplicada,artefatos remanescentes, testes de regresso).",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2020-1472"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Distingue 'patch existe' de 'patch aplicado e eficaz no ativo'; exige verifica\u00e7\u00e3o local, n\u00e3o apenas release notes.",
+        "1": "Capta que release notes n\u00e3o bastam mas \u0444\u043e\u0440\u043c\u0443\u043b\u0438\u0440\u043e\u0432\u043a\u0430 incompleta sobre o que verificar.",
+        "0": "Afirma que a exist\u00eancia do patch mitiga o risco no alvo sem verifica\u00e7\u00e3o local."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-45",
+      "question": "A cadeia Follina (2022) usava o MSDT do Microsoft Office para executar c\u00f3digo arbitr\u00e1rio a partir de um documento malicioso. Qual a CVE do KEV que nomeia esse vetor e qual o efeito documentado?",
+      "expected_answer": "CVE-2022-30190 \u2014 execu\u00e7\u00e3o de c\u00f3digo arbitr\u00e1rio atrav\u00e9s do URL Scheme do MSDT (ms-msdt) quando o Office abre um documento especialmente crafted. Catalogada no KEV como explora\u00e7\u00e3o ativa. A resposta deve identificar o vetor (documento \u2192 MSDT \u2192 code execution), n\u00e3o confundir com outras cadeias do Office.",
+      "expected_ids": [
+        "CVE-2022-30190"
+      ],
+      "forbidden_ids": [
+        "CVE-2021-44228"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2022-30190, descreve MSDT/ms-msdt como vetor e code execution como efeito; distin\u00e7\u00e3o de outras cadeias Office e aviso de escopo.",
+        "1": "Cita CVE-2022-30190 mas omite o mecanismo MSDT ou confunde com outra cadeia; nenhum forbidden citado.",
+        "0": "Cita CVE incorreta ou forbidden_ids; confunde com Log4Shell ou outra cadeia."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-46",
+      "question": "No cen\u00e1rio ProxyLogon do Microsoft Exchange (2021), qual classe de vulnerabilidade permitiu o acesso inicial e qual o impacto documentado no KEV?",
+      "expected_answer": "A classe inicial foi SSRF (Server-Side Request Forgery) no proxy do Exchange \u2014 a CVE espec\u00edfica (CVE-2021-26855) permitia ao atacante enviar requisi\u00e7\u00f5es HTTP autenticadas como o servidor e acessar caixas postais. O impacto documentado no KEV \u00e9 acesso n\u00e3o autorizado a e-mail. A resposta deve distinguir a classe SSRF do effetoda cadeia (EoP + RCE).",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2021-34527"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Identifica SSRF como classe inicial e acesso a mailboxes como impacto; distingue da cadeia completa EoP/RCE; aviso de escopo.",
+        "1": "Menciona ProxyLogon mas omite a classe SSRF ou confunde com simplesmente 'vulnerabilidade Exchange'; nenhum forbidden.",
+        "0": "Cita CVE incorreta, identifica classe errada, ou confunde com PrintNightmare (forbidden_ids)."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-47",
+      "question": "O Zerologon (CVE-2020-1472) tem um efeito documentado preciso no controle de dom\u00ednio. O que o KEV cataloga como impacto dessa CVE e qual o aviso de contexto para quem avalia um servidor DC?",
+      "expected_answer": "O KEV cataloga a CVE-2020-1472 como a falha de autentica\u00e7\u00e3o NetLogon que permite a um atacante estabelecer sess\u00e3o privilegiada em qualquer controlador de dom\u00ednio. O impacto documentado vai da nega\u00e7\u00e3o de servi\u00e7o ao takeover completo do dom\u00ednio (escala\u00e7\u00e3o de privil\u00e9gio total). O aviso de contexto: a CVE \u00e9 de produto de controle de dom\u00ednio e seu impacto \u00e9 sist\u00eamico; estar no KEV confirma que foi explorada ativamente contra DCs.",
+      "expected_ids": [
+        "CVE-2020-1472"
+      ],
+      "forbidden_ids": [
+        "CVE-2021-44228"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2020-1472, descreve efeito em DC (autentica\u00e7\u00e3o NetLogon \u2192 privil\u00e9gio de dom\u00ednio) e d\u00e1 aviso de contexto sist\u00eamico; nenhum forbidden.",
+        "1": "Cita a CVE mas omite o efeito espec\u00edfico em DC ou o aviso de contexto; nenhum forbidden.",
+        "0": "Cita wrong CVE, cita forbidden_ids, ou afirma que o impacto \u00e9 apenas nega\u00e7\u00e3o de servi\u00e7o sem contexto de dom\u00ednio."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-48",
+      "question": "Para o ransomware LockBit 3.0, existe alguma CVE espec\u00edfica no KEV que corresponda ao builder usado por afiliados para gerar cargas?",
+      "expected_answer": "Absten\u00e7\u00e3o correta: o corpus n\u00e3o cont\u00e9m ficha que associe uma CVE ao builder do LockBit 3.0 ou que mapeie CVE de ferramenta de ransomware builder. Qualquer cita\u00e7\u00e3o nesse contexto \u00e9 alucina\u00e7\u00e3o.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2021-44228",
+        "CVE-2020-1472"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Responde que o corpus n\u00e3o sustenta a pergunta e abespta-se, sem citar ID.",
+        "1": "Menciona aus\u00eancia de fonte mas sugere uma CVE 'prov\u00e1vel'.",
+        "0": "Cita qualquer CVE com confian\u00e7a neste item abstain."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-49",
+      "question": "O AsyncRAT \u00e9 um RAT conhecido. Qual CVE do KEV corresponde ao seu vetor de instala\u00e7\u00e3o ou ao seu protocolo de C2?",
+      "expected_answer": "Absten\u00e7\u00e3o correta: o corpus n\u00e3o cont\u00e9m ficha sobre AsyncRAT nem qualquer CVE que mapeie vetor de instala\u00e7\u00e3o ou protocolo C2 dessa fam\u00edlia.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2022-39197",
+        "CVE-2022-42948"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abst\u00e9m-se, responde que o corpus n\u00e3o sustenta, sem citar ID.",
+        "1": "Menciona lacuna mas prop\u00f5e uma CVE 'prov\u00e1vel'.",
+        "0": "Cita qualquer CVE com confian\u00e7a neste item abstain."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    },
+    {
+      "id": "blind-robin-50",
+      "question": "Para as variantes do Mirai que visam arquiteturas ARM/x86, existe alguma CVE espec\u00edfica no KEV al\u00e9m da CVE-2023-1389 (TP-Link) que seja atribu\u00edda a essas variantes?",
+      "expected_answer": "Absten\u00e7\u00e3o correta: o corpus cont\u00e9m apenas a CVE-2023-1389 (TP-Link/LX) como entrada associada ao Mirai; n\u00e3o h\u00e1 fichas que mapeiem CVEs espec\u00edficas para as variantes ARM/x86 do Mirai al\u00e9m dessa.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2021-44228"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abst\u00e9m-se corretamente; n\u00e3o cita ID; menciona que apenas a CVE-2023-1389 \u00e9 catalogada.",
+        "1": "Reconhece a lacuna mas sugere outra CVE 'prov\u00e1vel' para as variantes.",
+        "0": "Cita qualquer CVE adicional com confian\u00e7a neste item."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T13:00:00Z"
+    }
+  ]
+}
