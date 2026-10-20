@@ -9,11 +9,11 @@
 | Conjunto v5 | `550793412774fb1daadba220290c1ba5f56797b5748797c4ba135526a4c67c84` (manifesto `43589b6`) |
 | Spec de congelamento | `ef5ec791003abc6f927ca7389fd19f83ccd1efe1269b3bc76af0ceec555fd402` |
 | Baseline `bin/mitr3-answer.py` | `4ba78d9a0b57e6bfaad6524e95cd81d266f2ba071eeaba61ad8551ed114c29ab` |
-| Runner pareado `bin/mitr3-candidate-run.py` | `cf2578791e2a11e3d4bc0165b72cd29d60dc841da32fc73e89a9ab8f61d4fac3` |
+| Runner pareado `bin/mitr3-candidate-run.py` | `a49e0c64040107350a009a6babad1004db38882359b2aafff2cc8a43fbba1b40` |
 | Escrow `bin/mitr3-review-artifacts.py` | `f62ce0208151869b96355324484811f55a6e942a9dcf70d045d1c33881e18d54` |
 | Commit do merge (árvore de execução) | `25be178` (escrow incluído) |
 | Modelo | `dahl/deepseek-ai/DeepSeek-V4-Flash-0731` |
-| Suite | 218/218 OK (`ResourceWarning` como erro) |
+| Suite | 220/220 OK (`ResourceWarning` como erro) |
 
 ## Comandos exatos (uma execução por braço, sem retry seletivo)
 
@@ -53,3 +53,7 @@ Bloqueio do QA (`GPT6-V5-PRE-RUN-NOGO`, sha 28675085) corrigido antes de qualque
 - Prova DEV item 1 do QA: fixture sintética, dois braços; **GPT QA** classificou A=SUSTENTADA / B=NÃO SUSTENTADA; **JEV** 0.59 / 0.07. Ambos leram claim, citação e snippet do escrow.
 - Suite 218/218; o runner continua exigindo `--operator-approved` + sha do conjunto.
 - v5 permanece `55079341…`; nenhum relatório de execução foi criado.
+
+## Envelope do conjunto (2026-10-20, pós-escrow)
+
+O v5 é `{_header, rows:[...10]}`; o projetor cego agora aceita array puro ou envelope com `rows`, mantendo `_header` e campos de gabarito pulados **sem decodificação**. Testes: `test_envelope_rows_projection_stays_blind`, `test_envelope_malformed_or_duplicate_rejected`. Carga real do v5: 10 linhas, ids únicos, sha `55079341…` confere. Suite 220/220.

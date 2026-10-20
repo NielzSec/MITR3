@@ -114,6 +114,23 @@ class CandidateRunTests(unittest.TestCase):
         rows[1]['id']=rows[0]['id']
         with self.assertRaises(R.RunError):R.QuestionProjection(json.dumps(rows)).rows()
 
+    def test_envelope_rows_projection_stays_blind(self):
+        rows=[{'id':f'env-{i}','question':'Pergunta pública?','expected_answer':'GOLD_TRIPWIRE',
+               'expected_ids':['GOLD_IDS_TRIPWIRE'],'forbidden_ids':['GOLD_FORBIDDEN_TRIPWIRE'],
+               'rubric':'GOLD_RUBRIC_TRIPWIRE'} for i in range(10)]
+        raw=json.dumps({'_header':{'note':'GOLD_HEADER_TRIPWIRE'},'rows':rows,'extra':{'x':[1,2]}})
+        out=R.QuestionProjection(raw).rows()
+        self.assertEqual(out,[{'id':r['id'],'question':r['question']} for r in rows])
+        dumped=json.dumps(out)
+        for marker in ['GOLD_','_header','rubric','expected_','forbidden']:
+            self.assertNotIn(marker,dumped)
+
+    def test_envelope_malformed_or_duplicate_rejected(self):
+        for raw in ['{}','{"rows":[]}','{"rows":[],"rows":[]}','{"other":[]}',
+                    json.dumps({'rows':[{'id':'x','question':'q'}]})]:
+            with self.subTest(raw=raw),self.assertRaises(R.RunError):
+                R.QuestionProjection(raw).rows()
+
     def test_all_rejected_extracts_stop_before_synthesis(self):
         extraction={'extracts':[{'id':self.doc['id'],'quote':'NON_LITERAL_CANARY'}]}
         out,stage,calls,_=self.pipeline('candidate',[self.plan,extraction])

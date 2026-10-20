@@ -102,6 +102,35 @@ class QuestionProjection:
             self.pos = match.end()
 
     def rows(self):
+        self.whitespace()
+        if self.text[self.pos:self.pos+1] == '{':
+            self.require('{')
+            rows, found, keys = None, False, set()
+            if not self.take('}'):
+                while True:
+                    key = self.string(True)
+                    if key in keys:
+                        raise RunError('DUPLICATE_KEY')
+                    keys.add(key)
+                    self.require(':')
+                    if key == 'rows':
+                        found = True
+                        rows = self.array_rows()
+                    else:
+                        self.skip()
+                    if self.take('}'):
+                        break
+                    self.require(',')
+            if not found or rows is None:
+                raise RunError('INPUT_SCHEMA')
+        else:
+            rows = self.array_rows()
+        self.whitespace()
+        if self.pos != len(self.text) or len(rows) != 10:
+            raise RunError('TEN_ITEMS_REQUIRED')
+        return rows
+
+    def array_rows(self):
         self.require('[')
         rows, seen = [], set()
         if not self.take(']'):
@@ -134,9 +163,6 @@ class QuestionProjection:
                 if self.take(']'):
                     break
                 self.require(',')
-        self.whitespace()
-        if self.pos != len(self.text) or len(rows) != 10:
-            raise RunError('TEN_ITEMS_REQUIRED')
         return rows
 
 
