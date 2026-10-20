@@ -17,8 +17,21 @@ das até três consultas passa pelo bridge com `--json --limit 5`. A consulta re
 
 ## Interpretação e adapter
 
-A primeira chamada recebe **literalmente apenas a pergunta crua**, sem corpus,
-evidência, gabarito, exemplos, instruções acrescentadas ou consultas anteriores.
+A primeira chamada recebe **`plan_prompt(question)`**, não a pergunta isolada.
+O prompt acrescenta instruções fixas de formato JSON, intents permitidos,
+limite de uma a três consultas curtas (2–5 palavras), vocabulário técnico em
+**inglês**, tradução dos termos quando necessário e preservação dos nomes de
+produto/feature. Inclui exemplos genéricos de estilo de query, atualmente
+`MOVEit SQL injection` e `Ivanti Connect Secure auth bypass`. Eles são exemplos
+de forma, não respostas esperadas nem evidência.
+
+A pergunta do usuário permanece literal, serializada como string JSON ao final
+das instruções, e é o único dado específico da solicitação na etapa A. Não há
+corpus, snippets, respostas anteriores ou gabaritos nesse prompt. A regra de não
+introduzir identificadores ausentes da pergunta é explícita e também aplicada
+pelo gate. Essas orientações são o comportamento intencional; a descrição antiga
+“somente a pergunta, sem instruções ou exemplos” estava incorreta.
+
 O adapter precisa devolver exatamente:
 
 ```json
@@ -30,17 +43,24 @@ O adapter precisa devolver exatamente:
 Um identificador CVE/CWE/ASVS/ATT&CK introduzido pelo plano, ausente literalmente da
 pergunta, causa `PLAN_NEW_IDENTIFIER`. O plano não é evidência nem autorização.
 
-O requisito de enviar só a pergunta tem uma limitação operacional: um provedor
-que devolva prosa, em vez do plano JSON, resulta em abstenção `MODEL_JSON` ou
-`PLAN_SCHEMA`. Este CLI não acrescenta silenciosamente instruções de formato na
-etapa A, nem transforma uma resposta narrativa em plano. A obediência do provedor
-a esse protocolo não foi medida com um modelo real nesta implementação.
+Se o provedor devolver prosa em vez do plano estruturado, o resultado pode ser
+`MODEL_JSON` ou `PLAN_SCHEMA`, apesar das instruções de formato. O parser admite
+uma tentativa de extrair o primeiro objeto balanceado de uma saída envolta em
+texto; isso não é interpretação heurística da prosa nem uma chamada de reparo ao
+modelo. A validade do plano não comprova que suas queries recuperarão evidência.
+O wrapper/agente do provedor também pode influenciar a forma da resposta.
 
 Comando padrão, em argv sem shell:
 
 ```text
-opencode run --model google/gemini-3.5-flash-lite -- <prompt>
+opencode run --agent plan --model <M> -- <prompt>
 ```
+
+O modelo padrão atual em `DEFAULT_MODEL` é
+`opencode/nemotron-3.5-lightning-free`; `--model` escolhe outro explicitamente.
+Não há troca automática de provedor em falha. A seleção de `plan` é a configuração
+do adapter atual; o nome do agente não substitui verificar suas permissões no
+ambiente. stdin é fechado e stderr do provedor não é publicado.
 
 `MITR3_MODEL_CMD` configura um comando confiável, separado por `shlex.split`.
 Os placeholders `{model}` e `{prompt}` são substituídos dentro de argumentos,
@@ -112,7 +132,7 @@ relações implícitas. O resultado é uma **proposta com evidência anexada**,
 pendente de revisão independente, nunca uma resposta semanticamente validada
 pelo próprio gerador.
 
-## Verificação desta entrega
+## Verificação histórica da implementação inicial (`f8c74e3`)
 
 - 118 testes anteriores e 21 testes novos: **139/139**, também com
   `python3 -W error::ResourceWarning -m unittest discover -s tests`.
@@ -126,3 +146,12 @@ pelo próprio gerador.
 
 A medição cega com o provedor real, a correção semântica por revisores
 independentes e a aceitação operacional ficam para a rodada separada do time.
+
+## Correção documental de 2026-10-20
+
+Esta atualização alinha a descrição ao `plan_prompt()` já existente, incluindo
+formato, vocabulário inglês e exemplos fixos. Não altera código, prompts,
+parâmetros de busca, conjuntos cegos ou relatórios congelados. As verificações
+históricas acima não são uma nova medição do cego. O diagnóstico independente
+A–D em [MITR3-STAGE-DIAG-20261020.md](MITR3-STAGE-DIAG-20261020.md) usa somente
+fixture DEV pública e distingue seu transporte do adapter de produção.
