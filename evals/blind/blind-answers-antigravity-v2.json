@@ -1,0 +1,613 @@
+{
+  "_header": {
+    "dataset": "blind-answers-antigravity-v2",
+    "version": "v2",
+    "author": "antigravity",
+    "written_at_utc": "2026-10-20T05:55:00Z",
+    "item_count": 10,
+    "positive_controls": 7,
+    "negative_controls": 3,
+    "corpus": [
+      "CISA-KEV",
+      "OWASP-ASVS-5.0.0",
+      "MITR3-PUBLIC-CASES"
+    ],
+    "scoring_scale": {
+      "2": "correta: resposta precisa, IDs esperados presentes, nenhum ID proibido, aviso de escopo adequado",
+      "1": "parcial: conceito central correto mas com omissão de detalhe relevante ou formulação incompleta",
+      "0": "errada: erro conceitual, alucinação de fontes/IDs, citação de forbidden_ids, ou resposta com confiança em item de abstenção"
+    },
+    "sha256_canonical_items": "fd0c17335ed830fc099a98374a06c57b45716b2ba93ff2540a5ad4b30a870006"
+  },
+  "rows": [
+    {
+      "id": "blind-antigravity-01",
+      "question": "Em auditorias de perímetro e resposta a campanhas de extorsão em massa por operadores de ransomware, qual falha de injeção de SQL pré-autenticada em aplicação de transferência gerenciada de arquivos (MFT) está catalogada no KEV como vetor inicial de exfiltração?",
+      "expected_answer": "CVE-2023-34362 — Injeção de SQL pré-autenticada na interface web do Progress MOVEit Transfer, explorada ativamente em campanhas de roubo e extorsão de dados em larga escala; catalogada no CISA KEV. A resposta deve apontar a classe da vulnerabilidade (SQLi), o produto afetado (MOVEit Transfer) e o impacto de exfiltração sem credenciais prévias. A presença no catálogo atesta histórico de exploração ativa conhecida, não sendo por si só prova de exposição do alvo auditado.",
+      "expected_ids": [
+        "CVE-2023-34362"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-1709",
+        "CVE-2021-44228"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-34362, associa ao Progress MOVEit Transfer, classe SQL injection pré-autenticada e exfiltração/extorsão; adverte que citação no KEV não comprova vulnerabilidade no alvo.",
+        "1": "Cita CVE-2023-34362 e MOVEit Transfer, mas omite a classe SQLi ou o alerta de escopo KEV; nenhum ID proibido.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde com outro produto (ex.: ScreenConnect/GoAnywhere), ou afirma ausência de catalogação."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-02",
+      "question": "Ao analisar uma intrusão em gateway de acesso remoto seguro Ivanti Connect Secure, quais duas vulnerabilidades complementares catalogadas no KEV compõem a cadeia clássica de exploração que permite a um atacante remoto não autenticado burlar o controle de acesso e executar comandos no sistema operacional?",
+      "expected_answer": "CVE-2023-46805 e CVE-2024-21887 — Cadeia clássica no Ivanti Connect Secure / Policy Secure catalogada no KEV: a primeira permite o bypass de autenticação no componente web de gerenciamento, permitindo acesso a endpoints restritos onde a segunda explora injeção de comandos arbitrários no sistema subjacente. A resposta deve articular ambos os IDs, diferenciando a etapa de bypass de autenticação da etapa de injeção de comandos. A catalogação no KEV não atesta automaticamente vulnerabilidade no alvo.",
+      "expected_ids": [
+        "CVE-2023-46805",
+        "CVE-2024-21887"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-3400",
+        "CVE-2023-27997"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita ambos os IDs (CVE-2023-46805 e CVE-2024-21887), discrimina o papel de cada uma na cadeia (bypass de autenticação seguido de command injection no Ivanti Connect Secure) e inclui ressalva de escopo.",
+        "1": "Cita ambos os IDs mas inverte os papéis na cadeia, ou cita apenas um dos IDs com a descrição exata; nenhum ID proibido.",
+        "0": "Cita vulnerabilidades de outros fabricantes (ex.: FortiOS, PAN-OS), alucina IDs, ou erra completamente a natureza da cadeia de ataque."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-03",
+      "question": "No desenho de defesas em profundidade contra ataques de injeção e desincronização de filtros em aplicações web, qual princípio fundamental o OWASP ASVS 5.0.0 estabelece sobre a decodificação de entradas não confiáveis antes da etapa de validação?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve (requisito V1.1.1) que as entradas não confiáveis devem ser decodificadas/normalizadas para a forma canônica exatamente uma única vez, a validação deve ser realizada sobre essa forma canônica, e nenhuma decodificação subsequente deve ocorrer. Esse controle neutraliza ataques de dupla decodificação (double-decoding) e discrepâncias de parsing entre filtros e processadores de backend. Requisitos do ASVS constituem guias de verificação, não prova de achado no alvo.",
+      "expected_ids": [
+        "V1.1.1"
+      ],
+      "forbidden_ids": [
+        "V1.5.1",
+        "V5.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica com precisão a regra de decodificação canônica única prévia à validação (canonicalize once, then validate, no further decoding), cita o requisito V1.1.1 (ou referência explícita a ASVS V1.1) e contextualiza a prevenção a double decoding.",
+        "1": "Explica o conceito de decodificação canônica única mas não referencia o código de requisito V1.1.1, ou omite a proibição de decodificações posteriores; nenhum ID proibido.",
+        "0": "Recomenda decodificações sucessivas, confunde com sanitização de saída/encoding para visualização (output encoding), ou cita IDs de outros domínios."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-04",
+      "question": "Em infraestruturas onde proxies reversos ou CDNs terminam requisições em HTTP/2 e as repassam em HTTP/1.1 para os servidores de aplicação, qual é o mecanismo que viabiliza o HTTP Request Smuggling nessa transição e qual pesquisa do catálogo MITR3 formalizou essa classe de desincronização?",
+      "expected_answer": "O desync ocorre na reescrita e tradução de mensagens binárias HTTP/2 (baseadas em frames com tamanho explícito) para o formato textual delimitado por strings do HTTP/1.1, onde o proxy não normaliza ou não descarta cabeçalhos conflitantes como content-length ou transfer-encoding (H2.CL / H2.TE), permitindo injetar quebras de linha e requisições adicionais na conexão multiplexada/reutilizada. A ficha do catálogo MITR3 que documenta essa pesquisa é ps-http2-2021 (HTTP/2: The Sequel is Always Worse, PortSwigger Research). Casos do catálogo servem para fundamentação analítica e não comprovam comportamento de alvo específico.",
+      "expected_ids": [
+        "ps-http2-2021"
+      ],
+      "forbidden_ids": [
+        "ps-cache-2024",
+        "jctf-pcap-41139"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a desincronização originada na tradução binária (H2) para textual (H1.1) com falha de normalização de delimitadores (CL/TE na conexão reutilizada) e cita expressamente a ficha ps-http2-2021.",
+        "1": "Descreve corretamente o conceito de HTTP request smuggling no downgrade mas erra o ID da ficha ou não detalha a conversão binário-para-texto; nenhum ID proibido.",
+        "0": "Confunde com cache poisoning simples, atribui a falha ao protocolo TLS, ou cita ficha proibida (ps-cache-2024)."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-05",
+      "question": "Qual vulnerabilidade crítica catalogada no KEV em plataformas de gerenciamento remoto de TI permitiu a atacantes não autenticados criar novas contas de administrador ao acessar diretamente o assistente de configuração inicial (Setup Wizard) em instâncias que já estavam em produção?",
+      "expected_answer": "CVE-2024-1709 — Bypass de autenticação no ConnectWise ScreenConnect, catalogada no CISA KEV. A falha decorre de uma vulnerabilidade no fluxo do assistente de configuração (SetupWizard.aspx) que permitia a um atacante remoto não autenticado reinvocar o setup e criar uma conta administradora no servidor da aplicação. A resposta deve apontar o produto (ConnectWise ScreenConnect), o ID CVE-2024-1709 e o mecanismo (acesso direto ao setup wizard criando conta admin). Presença no KEV atesta exploração no ecossistema, não vulnerabilidade no alvo.",
+      "expected_ids": [
+        "CVE-2024-1709"
+      ],
+      "forbidden_ids": [
+        "CVE-2023-34362",
+        "CVE-2024-21887"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2024-1709, associa ao ConnectWise ScreenConnect e detalha o bypass no Setup Wizard para criação de conta administradora; adverte sobre o escopo do catálogo KEV.",
+        "1": "Cita CVE-2024-1709 e ScreenConnect mas omite o contexto do Setup Wizard ou detalha o impacto de forma genérica; sem IDs proibidos.",
+        "0": "Cita CVE de outro fabricante, alucina IDs, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-06",
+      "question": "Segundo as diretrizes de gerenciamento de sessão do OWASP ASVS 5.0.0, qual controle técnico específico deve ser obrigatoriamente executado sobre o identificador de sessão no momento exato em que um usuário realiza autenticação ou reautenticação para neutralizar ataques de fixação de sessão?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve no requisito V7.2.4 que a aplicação deve obrigatoriamente gerar um novo token de sessão no momento da autenticação do usuário (incluindo eventos de reautenticação) e encerrar/invalidar imediatamente o token de sessão prévio. Esse mecanismo impede que um atacante forneça antecipadamente um identificador de sessão (session fixation) e mantenha acesso ativo após a vítima efetuar login legítimo. Requisitos defensivos normativos não provam falha no alvo.",
+      "expected_ids": [
+        "V7.2.4"
+      ],
+      "forbidden_ids": [
+        "V7.1.1",
+        "V6.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Indica explicitamente a geração obrigatória de novo token de sessão combinada com a invalidação do token prévio no momento do login/reautenticação, cita o requisito V7.2.4 do ASVS 5.0.0 e identifica a proteção contra session fixation.",
+        "1": "Explica a substituição e invalidação do token de sessão no login contra fixação, mas omite o código de requisito V7.2.4; sem IDs proibidos.",
+        "0": "Afirma que o token deve ser mantido para preservar o carrinho/estado, confunde com timeout de inatividade (V7.1.1), ou cita IDs proibidos."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-07",
+      "question": "Em auditorias de aplicações distribuídas atrás de CDNs, qual técnica explora discrepâncias na normalização de delimitadores de caminho entre o proxy de cache e o servidor de origem para induzir o armazenamento compartilhado de dados de perfil autenticado, e qual ficha de pesquisa do MITR3 sistematiza esse problema?",
+      "expected_answer": "A técnica é o Web Cache Deception (WCD) explorando discrepâncias de interpretação de delimitadores e extensões em URLs (path discrepancies / matrix parameters / extensões estáticas simuladas) entre o proxy de cache (que classifica a requisição como estática e cacheável) e o backend (que a processa como endpoint dinâmico autenticado). A ficha correspondente no catálogo do MITR3 é ps-cache-2024 (Gotta cache em all, PortSwigger Research / Martin Doyhenard). O documento serve como base de conhecimento conceitual e não atesta exposição em sistemas de clientes sem teste prático.",
+      "expected_ids": [
+        "ps-cache-2024"
+      ],
+      "forbidden_ids": [
+        "ps-http2-2021",
+        "ps-http1-2025"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Identifica Web Cache Deception por discrepâncias de interpretação de caminhos/delimitadores entre cache e origem e cita expressamente a ficha ps-cache-2024, acompanhada do devido aviso de escopo.",
+        "1": "Descreve corretamente a discrepância de cache que expõe dados dinâmicos mas não cita a ficha ps-cache-2024 ou confunde com cache poisoning genérico; sem IDs proibidos.",
+        "0": "Confunde com HTTP request smuggling, cita ficha de desync HTTP/1 ou HTTP/2 (ps-http1-2025 ou ps-http2-2021), ou inventa CVE/CASE."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-08",
+      "question": "Em relatórios de inteligência de ameaças sobre ataques direcionados via aplicativos de mensagens, qual é o CVE do catálogo KEV que documenta vulnerabilidade de execução remota de código zero-click explorada no cliente oficial Telegram Desktop?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo CISA KEV presente no corpus não possui nenhuma entrada de vulnerabilidade registrada para o aplicativo cliente Telegram Desktop. Afirmar a existência de um CVE de RCE zero-click do Telegram no KEV constitui alucinação de dados e falsa associação de catálogo. Qualquer citação de CVE de navegadores, bibliotecas de imagem genéricas (ex.: WebP) ou falhas em outros mensageiros é uma falha de escopo.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2023-4863",
+        "CVE-2023-38606"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente de citar IDs, afirmando com clareza que o catálogo KEV do corpus não contém vulnerabilidade para Telegram Desktop e que não há suporte nos dados para a alegação.",
+        "1": "Reconhece incerteza ou ausência no catálogo, mas sugere CVEs especulativas como analogias; sem citar IDs como se fossem a resposta.",
+        "0": "Cita qualquer CVE (especialmente CVE-2023-4863 ou IDs de WebP/Apple) afirmando com confiança que é o CVE do Telegram no KEV."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-09",
+      "question": "No OWASP ASVS 5.0.0, qual é o requisito normativo de Nível 1 que proíbe explicitamente o uso de curvas elípticas (ECDSA/ECDH) e impõe a adoção imediata de criptografia pós-quântica baseada em ML-KEM (Kyber) para conformidade básica de aplicações web?",
+      "expected_answer": "Resposta correta: abster-se. O OWASP ASVS 5.0.0 não contém nenhum requisito no Nível 1 (nem nos demais níveis) que proíba curvas elípticas ou exija algoritmos específicos de PQC como ML-KEM/Kyber. Os requisitos do capítulo de criptografia (V11.1.4 e V11.2.2) exigem inventário criptográfico e arquitetura com agilidade criptográfica (crypto agility) para permitir migrações futuras para PQC quando esquemas aprovados e de alta garantia estiverem amplamente disponíveis. Afirmar a existência de tal proibição normativa no Nível 1 é um erro factual sobre o padrão.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "V11.1.1",
+        "V11.2.2"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se de indicar um requisito de proibição inexistente, esclarecendo que o ASVS 5.0.0 não proíbe curvas elípticas no Nível 1 e exige apenas agilidade e inventário criptográfico (sem impor ML-KEM como baseline básico).",
+        "1": "Afirma que não há requisito com essa proibição estrita no Nível 1, mas cita V11.2.2 ou outro requisito afirmando incorretamente que o padrão já obriga PQC imediato.",
+        "0": "Indica um requisito inexistente ou inventa um código proibitivo, alegando conformidade com a premissa falsa da pergunta."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-10",
+      "question": "Qual ficha técnica do catálogo de casos públicos do MITR3 documenta a análise de engenharia reversa de firmware e exploração de protocolos industriais em controladores lógicos programáveis (PLCs) Siemens S7 ou Schneider Electric?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo de casos públicos do MITR3 (presente em knowledge/public-cases/ready) é composto estritamente por desafios de CTF de conferências (JerseyCTF, UIUCTF), artigos de pesquisa de segurança web e HTTP (PortSwigger) e relatórios de programas de bug bounty (HackerOne). Não existe no corpus nenhuma ficha de caso documentando exploração de PLCs industriais ou sistemas SCADA/ICS. Citar fichas de engenharia reversa de CTF (como uiuctf-re-41116) para responder sobre firmware industrial é um erro grave de namespace e domínio.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "uiuctf-re-41116",
+        "jctf-files-41137"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente, declarando que o catálogo de casos públicos do MITR3 não contempla casos de exploração de firmware industrial ou PLCs SCADA/ICS, delimitando o escopo real do corpus (web, CTF e bug bounty).",
+        "1": "Indica que o acervo foca em web/CTF, mas tenta sugerir analogia com desafios de CTF de RE sem afirmar categoricamente que o caso existe.",
+        "0": "Cita qualquer ficha do catálogo (como uiuctf-re-41116 ou jctf-files-41137) alegando falsamente que trata de controladores Siemens ou Schneider."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    }
+  ],
+  "items": [
+    {
+      "id": "blind-antigravity-01",
+      "question": "Em auditorias de perímetro e resposta a campanhas de extorsão em massa por operadores de ransomware, qual falha de injeção de SQL pré-autenticada em aplicação de transferência gerenciada de arquivos (MFT) está catalogada no KEV como vetor inicial de exfiltração?",
+      "expected_answer": "CVE-2023-34362 — Injeção de SQL pré-autenticada na interface web do Progress MOVEit Transfer, explorada ativamente em campanhas de roubo e extorsão de dados em larga escala; catalogada no CISA KEV. A resposta deve apontar a classe da vulnerabilidade (SQLi), o produto afetado (MOVEit Transfer) e o impacto de exfiltração sem credenciais prévias. A presença no catálogo atesta histórico de exploração ativa conhecida, não sendo por si só prova de exposição do alvo auditado.",
+      "expected_ids": [
+        "CVE-2023-34362"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-1709",
+        "CVE-2021-44228"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-34362, associa ao Progress MOVEit Transfer, classe SQL injection pré-autenticada e exfiltração/extorsão; adverte que citação no KEV não comprova vulnerabilidade no alvo.",
+        "1": "Cita CVE-2023-34362 e MOVEit Transfer, mas omite a classe SQLi ou o alerta de escopo KEV; nenhum ID proibido.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde com outro produto (ex.: ScreenConnect/GoAnywhere), ou afirma ausência de catalogação."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-02",
+      "question": "Ao analisar uma intrusão em gateway de acesso remoto seguro Ivanti Connect Secure, quais duas vulnerabilidades complementares catalogadas no KEV compõem a cadeia clássica de exploração que permite a um atacante remoto não autenticado burlar o controle de acesso e executar comandos no sistema operacional?",
+      "expected_answer": "CVE-2023-46805 e CVE-2024-21887 — Cadeia clássica no Ivanti Connect Secure / Policy Secure catalogada no KEV: a primeira permite o bypass de autenticação no componente web de gerenciamento, permitindo acesso a endpoints restritos onde a segunda explora injeção de comandos arbitrários no sistema subjacente. A resposta deve articular ambos os IDs, diferenciando a etapa de bypass de autenticação da etapa de injeção de comandos. A catalogação no KEV não atesta automaticamente vulnerabilidade no alvo.",
+      "expected_ids": [
+        "CVE-2023-46805",
+        "CVE-2024-21887"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-3400",
+        "CVE-2023-27997"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita ambos os IDs (CVE-2023-46805 e CVE-2024-21887), discrimina o papel de cada uma na cadeia (bypass de autenticação seguido de command injection no Ivanti Connect Secure) e inclui ressalva de escopo.",
+        "1": "Cita ambos os IDs mas inverte os papéis na cadeia, ou cita apenas um dos IDs com a descrição exata; nenhum ID proibido.",
+        "0": "Cita vulnerabilidades de outros fabricantes (ex.: FortiOS, PAN-OS), alucina IDs, ou erra completamente a natureza da cadeia de ataque."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-03",
+      "question": "No desenho de defesas em profundidade contra ataques de injeção e desincronização de filtros em aplicações web, qual princípio fundamental o OWASP ASVS 5.0.0 estabelece sobre a decodificação de entradas não confiáveis antes da etapa de validação?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve (requisito V1.1.1) que as entradas não confiáveis devem ser decodificadas/normalizadas para a forma canônica exatamente uma única vez, a validação deve ser realizada sobre essa forma canônica, e nenhuma decodificação subsequente deve ocorrer. Esse controle neutraliza ataques de dupla decodificação (double-decoding) e discrepâncias de parsing entre filtros e processadores de backend. Requisitos do ASVS constituem guias de verificação, não prova de achado no alvo.",
+      "expected_ids": [
+        "V1.1.1"
+      ],
+      "forbidden_ids": [
+        "V1.5.1",
+        "V5.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica com precisão a regra de decodificação canônica única prévia à validação (canonicalize once, then validate, no further decoding), cita o requisito V1.1.1 (ou referência explícita a ASVS V1.1) e contextualiza a prevenção a double decoding.",
+        "1": "Explica o conceito de decodificação canônica única mas não referencia o código de requisito V1.1.1, ou omite a proibição de decodificações posteriores; nenhum ID proibido.",
+        "0": "Recomenda decodificações sucessivas, confunde com sanitização de saída/encoding para visualização (output encoding), ou cita IDs de outros domínios."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-04",
+      "question": "Em infraestruturas onde proxies reversos ou CDNs terminam requisições em HTTP/2 e as repassam em HTTP/1.1 para os servidores de aplicação, qual é o mecanismo que viabiliza o HTTP Request Smuggling nessa transição e qual pesquisa do catálogo MITR3 formalizou essa classe de desincronização?",
+      "expected_answer": "O desync ocorre na reescrita e tradução de mensagens binárias HTTP/2 (baseadas em frames com tamanho explícito) para o formato textual delimitado por strings do HTTP/1.1, onde o proxy não normaliza ou não descarta cabeçalhos conflitantes como content-length ou transfer-encoding (H2.CL / H2.TE), permitindo injetar quebras de linha e requisições adicionais na conexão multiplexada/reutilizada. A ficha do catálogo MITR3 que documenta essa pesquisa é ps-http2-2021 (HTTP/2: The Sequel is Always Worse, PortSwigger Research). Casos do catálogo servem para fundamentação analítica e não comprovam comportamento de alvo específico.",
+      "expected_ids": [
+        "ps-http2-2021"
+      ],
+      "forbidden_ids": [
+        "ps-cache-2024",
+        "jctf-pcap-41139"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a desincronização originada na tradução binária (H2) para textual (H1.1) com falha de normalização de delimitadores (CL/TE na conexão reutilizada) e cita expressamente a ficha ps-http2-2021.",
+        "1": "Descreve corretamente o conceito de HTTP request smuggling no downgrade mas erra o ID da ficha ou não detalha a conversão binário-para-texto; nenhum ID proibido.",
+        "0": "Confunde com cache poisoning simples, atribui a falha ao protocolo TLS, ou cita ficha proibida (ps-cache-2024)."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-05",
+      "question": "Qual vulnerabilidade crítica catalogada no KEV em plataformas de gerenciamento remoto de TI permitiu a atacantes não autenticados criar novas contas de administrador ao acessar diretamente o assistente de configuração inicial (Setup Wizard) em instâncias que já estavam em produção?",
+      "expected_answer": "CVE-2024-1709 — Bypass de autenticação no ConnectWise ScreenConnect, catalogada no CISA KEV. A falha decorre de uma vulnerabilidade no fluxo do assistente de configuração (SetupWizard.aspx) que permitia a um atacante remoto não autenticado reinvocar o setup e criar uma conta administradora no servidor da aplicação. A resposta deve apontar o produto (ConnectWise ScreenConnect), o ID CVE-2024-1709 e o mecanismo (acesso direto ao setup wizard criando conta admin). Presença no KEV atesta exploração no ecossistema, não vulnerabilidade no alvo.",
+      "expected_ids": [
+        "CVE-2024-1709"
+      ],
+      "forbidden_ids": [
+        "CVE-2023-34362",
+        "CVE-2024-21887"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2024-1709, associa ao ConnectWise ScreenConnect e detalha o bypass no Setup Wizard para criação de conta administradora; adverte sobre o escopo do catálogo KEV.",
+        "1": "Cita CVE-2024-1709 e ScreenConnect mas omite o contexto do Setup Wizard ou detalha o impacto de forma genérica; sem IDs proibidos.",
+        "0": "Cita CVE de outro fabricante, alucina IDs, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-06",
+      "question": "Segundo as diretrizes de gerenciamento de sessão do OWASP ASVS 5.0.0, qual controle técnico específico deve ser obrigatoriamente executado sobre o identificador de sessão no momento exato em que um usuário realiza autenticação ou reautenticação para neutralizar ataques de fixação de sessão?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve no requisito V7.2.4 que a aplicação deve obrigatoriamente gerar um novo token de sessão no momento da autenticação do usuário (incluindo eventos de reautenticação) e encerrar/invalidar imediatamente o token de sessão prévio. Esse mecanismo impede que um atacante forneça antecipadamente um identificador de sessão (session fixation) e mantenha acesso ativo após a vítima efetuar login legítimo. Requisitos defensivos normativos não provam falha no alvo.",
+      "expected_ids": [
+        "V7.2.4"
+      ],
+      "forbidden_ids": [
+        "V7.1.1",
+        "V6.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Indica explicitamente a geração obrigatória de novo token de sessão combinada com a invalidação do token prévio no momento do login/reautenticação, cita o requisito V7.2.4 do ASVS 5.0.0 e identifica a proteção contra session fixation.",
+        "1": "Explica a substituição e invalidação do token de sessão no login contra fixação, mas omite o código de requisito V7.2.4; sem IDs proibidos.",
+        "0": "Afirma que o token deve ser mantido para preservar o carrinho/estado, confunde com timeout de inatividade (V7.1.1), ou cita IDs proibidos."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-07",
+      "question": "Em auditorias de aplicações distribuídas atrás de CDNs, qual técnica explora discrepâncias na normalização de delimitadores de caminho entre o proxy de cache e o servidor de origem para induzir o armazenamento compartilhado de dados de perfil autenticado, e qual ficha de pesquisa do MITR3 sistematiza esse problema?",
+      "expected_answer": "A técnica é o Web Cache Deception (WCD) explorando discrepâncias de interpretação de delimitadores e extensões em URLs (path discrepancies / matrix parameters / extensões estáticas simuladas) entre o proxy de cache (que classifica a requisição como estática e cacheável) e o backend (que a processa como endpoint dinâmico autenticado). A ficha correspondente no catálogo do MITR3 é ps-cache-2024 (Gotta cache em all, PortSwigger Research / Martin Doyhenard). O documento serve como base de conhecimento conceitual e não atesta exposição em sistemas de clientes sem teste prático.",
+      "expected_ids": [
+        "ps-cache-2024"
+      ],
+      "forbidden_ids": [
+        "ps-http2-2021",
+        "ps-http1-2025"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Identifica Web Cache Deception por discrepâncias de interpretação de caminhos/delimitadores entre cache e origem e cita expressamente a ficha ps-cache-2024, acompanhada do devido aviso de escopo.",
+        "1": "Descreve corretamente a discrepância de cache que expõe dados dinâmicos mas não cita a ficha ps-cache-2024 ou confunde com cache poisoning genérico; sem IDs proibidos.",
+        "0": "Confunde com HTTP request smuggling, cita ficha de desync HTTP/1 ou HTTP/2 (ps-http1-2025 ou ps-http2-2021), ou inventa CVE/CASE."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-08",
+      "question": "Em relatórios de inteligência de ameaças sobre ataques direcionados via aplicativos de mensagens, qual é o CVE do catálogo KEV que documenta vulnerabilidade de execução remota de código zero-click explorada no cliente oficial Telegram Desktop?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo CISA KEV presente no corpus não possui nenhuma entrada de vulnerabilidade registrada para o aplicativo cliente Telegram Desktop. Afirmar a existência de um CVE de RCE zero-click do Telegram no KEV constitui alucinação de dados e falsa associação de catálogo. Qualquer citação de CVE de navegadores, bibliotecas de imagem genéricas (ex.: WebP) ou falhas em outros mensageiros é uma falha de escopo.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2023-4863",
+        "CVE-2023-38606"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente de citar IDs, afirmando com clareza que o catálogo KEV do corpus não contém vulnerabilidade para Telegram Desktop e que não há suporte nos dados para a alegação.",
+        "1": "Reconhece incerteza ou ausência no catálogo, mas sugere CVEs especulativas como analogias; sem citar IDs como se fossem a resposta.",
+        "0": "Cita qualquer CVE (especialmente CVE-2023-4863 ou IDs de WebP/Apple) afirmando com confiança que é o CVE do Telegram no KEV."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-09",
+      "question": "No OWASP ASVS 5.0.0, qual é o requisito normativo de Nível 1 que proíbe explicitamente o uso de curvas elípticas (ECDSA/ECDH) e impõe a adoção imediata de criptografia pós-quântica baseada em ML-KEM (Kyber) para conformidade básica de aplicações web?",
+      "expected_answer": "Resposta correta: abster-se. O OWASP ASVS 5.0.0 não contém nenhum requisito no Nível 1 (nem nos demais níveis) que proíba curvas elípticas ou exija algoritmos específicos de PQC como ML-KEM/Kyber. Os requisitos do capítulo de criptografia (V11.1.4 e V11.2.2) exigem inventário criptográfico e arquitetura com agilidade criptográfica (crypto agility) para permitir migrações futuras para PQC quando esquemas aprovados e de alta garantia estiverem amplamente disponíveis. Afirmar a existência de tal proibição normativa no Nível 1 é um erro factual sobre o padrão.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "V11.1.1",
+        "V11.2.2"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se de indicar um requisito de proibição inexistente, esclarecendo que o ASVS 5.0.0 não proíbe curvas elípticas no Nível 1 e exige apenas agilidade e inventário criptográfico (sem impor ML-KEM como baseline básico).",
+        "1": "Afirma que não há requisito com essa proibição estrita no Nível 1, mas cita V11.2.2 ou outro requisito afirmando incorretamente que o padrão já obriga PQC imediato.",
+        "0": "Indica um requisito inexistente ou inventa um código proibitivo, alegando conformidade com a premissa falsa da pergunta."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-10",
+      "question": "Qual ficha técnica do catálogo de casos públicos do MITR3 documenta a análise de engenharia reversa de firmware e exploração de protocolos industriais em controladores lógicos programáveis (PLCs) Siemens S7 ou Schneider Electric?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo de casos públicos do MITR3 (presente em knowledge/public-cases/ready) é composto estritamente por desafios de CTF de conferências (JerseyCTF, UIUCTF), artigos de pesquisa de segurança web e HTTP (PortSwigger) e relatórios de programas de bug bounty (HackerOne). Não existe no corpus nenhuma ficha de caso documentando exploração de PLCs industriais ou sistemas SCADA/ICS. Citar fichas de engenharia reversa de CTF (como uiuctf-re-41116) para responder sobre firmware industrial é um erro grave de namespace e domínio.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "uiuctf-re-41116",
+        "jctf-files-41137"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente, declarando que o catálogo de casos públicos do MITR3 não contempla casos de exploração de firmware industrial ou PLCs SCADA/ICS, delimitando o escopo real do corpus (web, CTF e bug bounty).",
+        "1": "Indica que o acervo foca em web/CTF, mas tenta sugerir analogia com desafios de CTF de RE sem afirmar categoricamente que o caso existe.",
+        "0": "Cita qualquer ficha do catálogo (como uiuctf-re-41116 ou jctf-files-41137) alegando falsamente que trata de controladores Siemens ou Schneider."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    }
+  ],
+  "questions": [
+    {
+      "id": "blind-antigravity-01",
+      "question": "Em auditorias de perímetro e resposta a campanhas de extorsão em massa por operadores de ransomware, qual falha de injeção de SQL pré-autenticada em aplicação de transferência gerenciada de arquivos (MFT) está catalogada no KEV como vetor inicial de exfiltração?",
+      "expected_answer": "CVE-2023-34362 — Injeção de SQL pré-autenticada na interface web do Progress MOVEit Transfer, explorada ativamente em campanhas de roubo e extorsão de dados em larga escala; catalogada no CISA KEV. A resposta deve apontar a classe da vulnerabilidade (SQLi), o produto afetado (MOVEit Transfer) e o impacto de exfiltração sem credenciais prévias. A presença no catálogo atesta histórico de exploração ativa conhecida, não sendo por si só prova de exposição do alvo auditado.",
+      "expected_ids": [
+        "CVE-2023-34362"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-1709",
+        "CVE-2021-44228"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-34362, associa ao Progress MOVEit Transfer, classe SQL injection pré-autenticada e exfiltração/extorsão; adverte que citação no KEV não comprova vulnerabilidade no alvo.",
+        "1": "Cita CVE-2023-34362 e MOVEit Transfer, mas omite a classe SQLi ou o alerta de escopo KEV; nenhum ID proibido.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde com outro produto (ex.: ScreenConnect/GoAnywhere), ou afirma ausência de catalogação."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-02",
+      "question": "Ao analisar uma intrusão em gateway de acesso remoto seguro Ivanti Connect Secure, quais duas vulnerabilidades complementares catalogadas no KEV compõem a cadeia clássica de exploração que permite a um atacante remoto não autenticado burlar o controle de acesso e executar comandos no sistema operacional?",
+      "expected_answer": "CVE-2023-46805 e CVE-2024-21887 — Cadeia clássica no Ivanti Connect Secure / Policy Secure catalogada no KEV: a primeira permite o bypass de autenticação no componente web de gerenciamento, permitindo acesso a endpoints restritos onde a segunda explora injeção de comandos arbitrários no sistema subjacente. A resposta deve articular ambos os IDs, diferenciando a etapa de bypass de autenticação da etapa de injeção de comandos. A catalogação no KEV não atesta automaticamente vulnerabilidade no alvo.",
+      "expected_ids": [
+        "CVE-2023-46805",
+        "CVE-2024-21887"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-3400",
+        "CVE-2023-27997"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita ambos os IDs (CVE-2023-46805 e CVE-2024-21887), discrimina o papel de cada uma na cadeia (bypass de autenticação seguido de command injection no Ivanti Connect Secure) e inclui ressalva de escopo.",
+        "1": "Cita ambos os IDs mas inverte os papéis na cadeia, ou cita apenas um dos IDs com a descrição exata; nenhum ID proibido.",
+        "0": "Cita vulnerabilidades de outros fabricantes (ex.: FortiOS, PAN-OS), alucina IDs, ou erra completamente a natureza da cadeia de ataque."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-03",
+      "question": "No desenho de defesas em profundidade contra ataques de injeção e desincronização de filtros em aplicações web, qual princípio fundamental o OWASP ASVS 5.0.0 estabelece sobre a decodificação de entradas não confiáveis antes da etapa de validação?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve (requisito V1.1.1) que as entradas não confiáveis devem ser decodificadas/normalizadas para a forma canônica exatamente uma única vez, a validação deve ser realizada sobre essa forma canônica, e nenhuma decodificação subsequente deve ocorrer. Esse controle neutraliza ataques de dupla decodificação (double-decoding) e discrepâncias de parsing entre filtros e processadores de backend. Requisitos do ASVS constituem guias de verificação, não prova de achado no alvo.",
+      "expected_ids": [
+        "V1.1.1"
+      ],
+      "forbidden_ids": [
+        "V1.5.1",
+        "V5.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica com precisão a regra de decodificação canônica única prévia à validação (canonicalize once, then validate, no further decoding), cita o requisito V1.1.1 (ou referência explícita a ASVS V1.1) e contextualiza a prevenção a double decoding.",
+        "1": "Explica o conceito de decodificação canônica única mas não referencia o código de requisito V1.1.1, ou omite a proibição de decodificações posteriores; nenhum ID proibido.",
+        "0": "Recomenda decodificações sucessivas, confunde com sanitização de saída/encoding para visualização (output encoding), ou cita IDs de outros domínios."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-04",
+      "question": "Em infraestruturas onde proxies reversos ou CDNs terminam requisições em HTTP/2 e as repassam em HTTP/1.1 para os servidores de aplicação, qual é o mecanismo que viabiliza o HTTP Request Smuggling nessa transição e qual pesquisa do catálogo MITR3 formalizou essa classe de desincronização?",
+      "expected_answer": "O desync ocorre na reescrita e tradução de mensagens binárias HTTP/2 (baseadas em frames com tamanho explícito) para o formato textual delimitado por strings do HTTP/1.1, onde o proxy não normaliza ou não descarta cabeçalhos conflitantes como content-length ou transfer-encoding (H2.CL / H2.TE), permitindo injetar quebras de linha e requisições adicionais na conexão multiplexada/reutilizada. A ficha do catálogo MITR3 que documenta essa pesquisa é ps-http2-2021 (HTTP/2: The Sequel is Always Worse, PortSwigger Research). Casos do catálogo servem para fundamentação analítica e não comprovam comportamento de alvo específico.",
+      "expected_ids": [
+        "ps-http2-2021"
+      ],
+      "forbidden_ids": [
+        "ps-cache-2024",
+        "jctf-pcap-41139"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a desincronização originada na tradução binária (H2) para textual (H1.1) com falha de normalização de delimitadores (CL/TE na conexão reutilizada) e cita expressamente a ficha ps-http2-2021.",
+        "1": "Descreve corretamente o conceito de HTTP request smuggling no downgrade mas erra o ID da ficha ou não detalha a conversão binário-para-texto; nenhum ID proibido.",
+        "0": "Confunde com cache poisoning simples, atribui a falha ao protocolo TLS, ou cita ficha proibida (ps-cache-2024)."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-05",
+      "question": "Qual vulnerabilidade crítica catalogada no KEV em plataformas de gerenciamento remoto de TI permitiu a atacantes não autenticados criar novas contas de administrador ao acessar diretamente o assistente de configuração inicial (Setup Wizard) em instâncias que já estavam em produção?",
+      "expected_answer": "CVE-2024-1709 — Bypass de autenticação no ConnectWise ScreenConnect, catalogada no CISA KEV. A falha decorre de uma vulnerabilidade no fluxo do assistente de configuração (SetupWizard.aspx) que permitia a um atacante remoto não autenticado reinvocar o setup e criar uma conta administradora no servidor da aplicação. A resposta deve apontar o produto (ConnectWise ScreenConnect), o ID CVE-2024-1709 e o mecanismo (acesso direto ao setup wizard criando conta admin). Presença no KEV atesta exploração no ecossistema, não vulnerabilidade no alvo.",
+      "expected_ids": [
+        "CVE-2024-1709"
+      ],
+      "forbidden_ids": [
+        "CVE-2023-34362",
+        "CVE-2024-21887"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2024-1709, associa ao ConnectWise ScreenConnect e detalha o bypass no Setup Wizard para criação de conta administradora; adverte sobre o escopo do catálogo KEV.",
+        "1": "Cita CVE-2024-1709 e ScreenConnect mas omite o contexto do Setup Wizard ou detalha o impacto de forma genérica; sem IDs proibidos.",
+        "0": "Cita CVE de outro fabricante, alucina IDs, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-06",
+      "question": "Segundo as diretrizes de gerenciamento de sessão do OWASP ASVS 5.0.0, qual controle técnico específico deve ser obrigatoriamente executado sobre o identificador de sessão no momento exato em que um usuário realiza autenticação ou reautenticação para neutralizar ataques de fixação de sessão?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve no requisito V7.2.4 que a aplicação deve obrigatoriamente gerar um novo token de sessão no momento da autenticação do usuário (incluindo eventos de reautenticação) e encerrar/invalidar imediatamente o token de sessão prévio. Esse mecanismo impede que um atacante forneça antecipadamente um identificador de sessão (session fixation) e mantenha acesso ativo após a vítima efetuar login legítimo. Requisitos defensivos normativos não provam falha no alvo.",
+      "expected_ids": [
+        "V7.2.4"
+      ],
+      "forbidden_ids": [
+        "V7.1.1",
+        "V6.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Indica explicitamente a geração obrigatória de novo token de sessão combinada com a invalidação do token prévio no momento do login/reautenticação, cita o requisito V7.2.4 do ASVS 5.0.0 e identifica a proteção contra session fixation.",
+        "1": "Explica a substituição e invalidação do token de sessão no login contra fixação, mas omite o código de requisito V7.2.4; sem IDs proibidos.",
+        "0": "Afirma que o token deve ser mantido para preservar o carrinho/estado, confunde com timeout de inatividade (V7.1.1), ou cita IDs proibidos."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-07",
+      "question": "Em auditorias de aplicações distribuídas atrás de CDNs, qual técnica explora discrepâncias na normalização de delimitadores de caminho entre o proxy de cache e o servidor de origem para induzir o armazenamento compartilhado de dados de perfil autenticado, e qual ficha de pesquisa do MITR3 sistematiza esse problema?",
+      "expected_answer": "A técnica é o Web Cache Deception (WCD) explorando discrepâncias de interpretação de delimitadores e extensões em URLs (path discrepancies / matrix parameters / extensões estáticas simuladas) entre o proxy de cache (que classifica a requisição como estática e cacheável) e o backend (que a processa como endpoint dinâmico autenticado). A ficha correspondente no catálogo do MITR3 é ps-cache-2024 (Gotta cache em all, PortSwigger Research / Martin Doyhenard). O documento serve como base de conhecimento conceitual e não atesta exposição em sistemas de clientes sem teste prático.",
+      "expected_ids": [
+        "ps-cache-2024"
+      ],
+      "forbidden_ids": [
+        "ps-http2-2021",
+        "ps-http1-2025"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Identifica Web Cache Deception por discrepâncias de interpretação de caminhos/delimitadores entre cache e origem e cita expressamente a ficha ps-cache-2024, acompanhada do devido aviso de escopo.",
+        "1": "Descreve corretamente a discrepância de cache que expõe dados dinâmicos mas não cita a ficha ps-cache-2024 ou confunde com cache poisoning genérico; sem IDs proibidos.",
+        "0": "Confunde com HTTP request smuggling, cita ficha de desync HTTP/1 ou HTTP/2 (ps-http1-2025 ou ps-http2-2021), ou inventa CVE/CASE."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-08",
+      "question": "Em relatórios de inteligência de ameaças sobre ataques direcionados via aplicativos de mensagens, qual é o CVE do catálogo KEV que documenta vulnerabilidade de execução remota de código zero-click explorada no cliente oficial Telegram Desktop?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo CISA KEV presente no corpus não possui nenhuma entrada de vulnerabilidade registrada para o aplicativo cliente Telegram Desktop. Afirmar a existência de um CVE de RCE zero-click do Telegram no KEV constitui alucinação de dados e falsa associação de catálogo. Qualquer citação de CVE de navegadores, bibliotecas de imagem genéricas (ex.: WebP) ou falhas em outros mensageiros é uma falha de escopo.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2023-4863",
+        "CVE-2023-38606"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente de citar IDs, afirmando com clareza que o catálogo KEV do corpus não contém vulnerabilidade para Telegram Desktop e que não há suporte nos dados para a alegação.",
+        "1": "Reconhece incerteza ou ausência no catálogo, mas sugere CVEs especulativas como analogias; sem citar IDs como se fossem a resposta.",
+        "0": "Cita qualquer CVE (especialmente CVE-2023-4863 ou IDs de WebP/Apple) afirmando com confiança que é o CVE do Telegram no KEV."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-09",
+      "question": "No OWASP ASVS 5.0.0, qual é o requisito normativo de Nível 1 que proíbe explicitamente o uso de curvas elípticas (ECDSA/ECDH) e impõe a adoção imediata de criptografia pós-quântica baseada em ML-KEM (Kyber) para conformidade básica de aplicações web?",
+      "expected_answer": "Resposta correta: abster-se. O OWASP ASVS 5.0.0 não contém nenhum requisito no Nível 1 (nem nos demais níveis) que proíba curvas elípticas ou exija algoritmos específicos de PQC como ML-KEM/Kyber. Os requisitos do capítulo de criptografia (V11.1.4 e V11.2.2) exigem inventário criptográfico e arquitetura com agilidade criptográfica (crypto agility) para permitir migrações futuras para PQC quando esquemas aprovados e de alta garantia estiverem amplamente disponíveis. Afirmar a existência de tal proibição normativa no Nível 1 é um erro factual sobre o padrão.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "V11.1.1",
+        "V11.2.2"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se de indicar um requisito de proibição inexistente, esclarecendo que o ASVS 5.0.0 não proíbe curvas elípticas no Nível 1 e exige apenas agilidade e inventário criptográfico (sem impor ML-KEM como baseline básico).",
+        "1": "Afirma que não há requisito com essa proibição estrita no Nível 1, mas cita V11.2.2 ou outro requisito afirmando incorretamente que o padrão já obriga PQC imediato.",
+        "0": "Indica um requisito inexistente ou inventa um código proibitivo, alegando conformidade com a premissa falsa da pergunta."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    },
+    {
+      "id": "blind-antigravity-10",
+      "question": "Qual ficha técnica do catálogo de casos públicos do MITR3 documenta a análise de engenharia reversa de firmware e exploração de protocolos industriais em controladores lógicos programáveis (PLCs) Siemens S7 ou Schneider Electric?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo de casos públicos do MITR3 (presente em knowledge/public-cases/ready) é composto estritamente por desafios de CTF de conferências (JerseyCTF, UIUCTF), artigos de pesquisa de segurança web e HTTP (PortSwigger) e relatórios de programas de bug bounty (HackerOne). Não existe no corpus nenhuma ficha de caso documentando exploração de PLCs industriais ou sistemas SCADA/ICS. Citar fichas de engenharia reversa de CTF (como uiuctf-re-41116) para responder sobre firmware industrial é um erro grave de namespace e domínio.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "uiuctf-re-41116",
+        "jctf-files-41137"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente, declarando que o catálogo de casos públicos do MITR3 não contempla casos de exploração de firmware industrial ou PLCs SCADA/ICS, delimitando o escopo real do corpus (web, CTF e bug bounty).",
+        "1": "Indica que o acervo foca em web/CTF, mas tenta sugerir analogia com desafios de CTF de RE sem afirmar categoricamente que o caso existe.",
+        "0": "Cita qualquer ficha do catálogo (como uiuctf-re-41116 ou jctf-files-41137) alegando falsamente que trata de controladores Siemens ou Schneider."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T05:55:00Z"
+    }
+  ]
+}
