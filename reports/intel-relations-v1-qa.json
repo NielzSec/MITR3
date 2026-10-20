@@ -1,0 +1,276 @@
+{
+  "base_commit": "bacc74524abebaa520ecd6122669938407c19cea",
+  "review_date": "2026-10-19 America/Sao_Paulo",
+  "scope": "Only source-declared relations; no search ranking change, inferred edges or external publication.",
+  "source_sha256": {
+    "cisa-kev": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d",
+    "owasp-asvs-5.0.0": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+    "public-cases": "23f8b11a2ada42699a1bf58b776f4d75a51808c4cb95009d7a5e33ee8521393f"
+  },
+  "relation_counts": {
+    "cwe_of": 1689,
+    "asvs_maps_cwe": 0,
+    "case_references": 0
+  },
+  "schema_version": 2,
+  "suite": {
+    "before": {
+      "tests": 49,
+      "passed": 49
+    },
+    "after": {
+      "tests": 58,
+      "passed": 58
+    },
+    "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -v"
+  },
+  "candidate": {
+    "before": {
+      "hit_at_5": 1.0,
+      "macro_recall_at_5": 0.975,
+      "macro_precision_at_5": 0.24,
+      "macro_precision_of_returned": 0.935,
+      "negative_abstention_rate": 1.0
+    },
+    "after": {
+      "hit_at_5": 1.0,
+      "macro_recall_at_5": 0.975,
+      "macro_precision_at_5": 0.24,
+      "macro_precision_of_returned": 0.935,
+      "negative_abstention_rate": 1.0
+    },
+    "all_30_query_details_identical": true,
+    "search_routing_intent_function_ast_unchanged": true,
+    "unchanged_content_hashes": {
+      "documents": "abf5ea6ea291a9efdee4053e8e4514111423011a902c2c83d144bcf6a320ce4c",
+      "docs_fts": "36d6ad450d2556e3de21a3a6269e3650b41bf9957e9710cc1162f5e480f59d4b"
+    },
+    "command": "PYTHONDONTWRITEBYTECODE=1 python bin/mitr3-rag-eval.py --mode candidate"
+  },
+  "bacc745_adversarial": {
+    "notes": "Replay of the prior review against bacc745. These are search candidates, not evidence of actor roles. Ten short paraphrases: 1/10 nonempty versus 0/10 on 79dbf39; all ten evade the keyword intent detector. Results preserve ranking at limit 5.",
+    "queries": [
+      {
+        "query": "What is CVE-2023-23397",
+        "79dbf39": [],
+        "bacc745": [
+          "CVE-2023-23397"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "CVE-2023-23397 Outlook mitigation",
+        "79dbf39": [],
+        "bacc745": [
+          "CVE-2023-23397",
+          "CVE-2023-35311"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "Outlook NTLM relay mitigation",
+        "79dbf39": [],
+        "bacc745": [
+          "CVE-2023-23397"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "explain Log4Shell",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "Log4Shell remediation",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "Faultline writeup",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "Faultline reverse engineering walkthrough",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-ctfcit-2026-faultline"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "JerseyCTF RSA shared prime walkthrough",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-jctf-rsa-41140"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "how to recover corrupt images file carving",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-jctf-files-41137"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "Practical Web Cache Poisoning research",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-ps-practical-cache-poisoning-2018",
+          "CASE-ps-cache-2024"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "HTTP request smuggling SAP",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-ps-request-smuggling-research",
+          "CASE-ps-false-positive-2025",
+          "CASE-ps-http2-2021",
+          "CASE-ps-http1-2025"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "SAP cache poisoning",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-ps-practical-cache-poisoning-2018",
+          "CASE-ps-cache-2024"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "Starlette HTTP request smuggling",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-ps-request-smuggling-research",
+          "CASE-ps-false-positive-2025",
+          "CASE-ps-http2-2021",
+          "CASE-ps-http1-2025"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "ASVS HTTP request smuggling",
+        "79dbf39": [],
+        "bacc745": [
+          "CASE-ps-request-smuggling-research",
+          "CASE-ps-false-positive-2025",
+          "CASE-ps-http2-2021",
+          "CASE-ps-http1-2025"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "request smuggling",
+        "79dbf39": [
+          "CASE-ps-request-smuggling-research",
+          "CASE-ps-false-positive-2025",
+          "CASE-ps-http2-2021",
+          "CASE-ps-http1-2025"
+        ],
+        "bacc745": [
+          "CASE-ps-request-smuggling-research",
+          "CASE-ps-false-positive-2025",
+          "CASE-ps-http2-2021",
+          "CASE-ps-http1-2025"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "NTLM relay CTF",
+        "79dbf39": [],
+        "bacc745": [
+          "CVE-2023-23397"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "HTTP request smuggling CVE-2022-22536",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ESXi encrypter",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ESXi encryptors",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ESXi ransomware payload",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ESXi file encryption malware",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ESXi encryption program",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ransomware affiliates",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ransomware partners",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ransomware gang member",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "ransomware campaign participant",
+        "79dbf39": [],
+        "bacc745": [
+          "CVE-2022-27593"
+        ],
+        "blocked": false
+      },
+      {
+        "query": "ransomware criminal associate",
+        "79dbf39": [],
+        "bacc745": [],
+        "blocked": false
+      },
+      {
+        "query": "VMware ESXi contains an arbitrary write vulnerability Successful exploitation allows an attacker with privileges within the VMX process acting as a ransomware partner",
+        "79dbf39": [
+          "CVE-2025-22225"
+        ],
+        "bacc745": [
+          "CVE-2025-22225",
+          "CVE-2025-22224",
+          "CVE-2025-22226"
+        ]
+      }
+    ]
+  }
+}

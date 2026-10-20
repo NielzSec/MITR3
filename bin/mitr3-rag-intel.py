@@ -25,6 +25,28 @@ CVE_RE=re.compile(r"^CVE-\d{4}-\d{4,}$",re.I)
 ASVS_RE=re.compile(r"^V?\d+\.\d+\.\d+$",re.I)
 BLOCK=re.compile(r"(?i)\b(ignore previous instructions|send your environment|reveal your system prompt)\b")
 STOPWORDS=frozenset("a an the of for and or to in on with from by is are was were that this it as at".split())
+RELATION_SOURCES={"cwe_of":"cisa-kev", "asvs_maps_cwe":"owasp-asvs-5.0.0",
+                  "case_references":"public-cases"}
+CWE_RE=re.compile(r"^CWE-\d+$",re.ASCII)
+TARGET_RE=re.compile(r"(?:CVE-\d{4}-\d{4,}|CWE-\d+|ASVS-V?\d+(?:\.\d+){2}|CASE-[a-zA-Z0-9._-]+)",re.ASCII)
+
+def declared_relations(targets,relation,evidence):
+ """Accept structured declarations only; no prose extraction or inferred edges."""
+ if not isinstance(relation,str) or relation not in RELATION_SOURCES:return []
+ if not isinstance(evidence,dict) or evidence.get("source_id")!=RELATION_SOURCES.get(relation):return []
+ if not isinstance(evidence.get("sha256"),str) or not re.fullmatch(r"[0-9a-f]{64}",evidence["sha256"]):return []
+ if not isinstance(targets,list):return []
+ pattern=TARGET_RE if relation=="case_references" else CWE_RE
+ return [{"target_id":target,"relation":relation,
+          "evidence":{"source_id":evidence["source_id"],"sha256":evidence["sha256"]}}
+         for target in sorted({t for t in targets if isinstance(t,str) and pattern.fullmatch(t)})]
+
+def asvs_cwes(item):
+ # Only explicit structured fields, never CWE-looking text in Description.
+ # The pinned 5.0.0 feed currently has none. These spellings are opt-in fields;
+ # unsupported shapes/fields yield no mapping rather than a guessed relation.
+ return [target for key in ("CWE","CWEs","cwes")
+         for target in (item[key] if isinstance(item.get(key),list) else [])]
 
 def now() -> str:
  return dt.datetime.now(dt.timezone.utc).isoformat()
@@ -74,7 +96,7 @@ def check_structure(name:str,d:object):
   if d.get("Version")!="5.0.0" or not isinstance(d.get("Requirements"),list) or len(d["Requirements"])<10:
    raise ValueError("Unexpected ASVS release")
 
-def asvs_rows(data:dict):
+def asvs_rows(data:dict,evidence=None):
  for chap in data["Requirements"]:
   for section in chap.get("Items",[]):
    for item in section.get("Items",[]):
@@ -87,9 +109,10 @@ def asvs_rows(data:dict):
       "summary":desc, "lesson":"Requisito de verificacao ASVS 5.0.0, nao evidencia de falha num alvo.",
       "tags":"owasp asvs security verification "+sanitized(chap.get("Name"),150)+" "+sanitized(section.get("Name"),150),
       "source_url":REFERENCE_LINKS["owasp-asvs-5.0.0"],"published_at":"2025-05",
-      "validation":"published_standard_not_tested", "related":["ASVS-"+str(sid)]}
+      "validation":"published_standard_not_tested", "related":[],
+      "relations":declared_relations(asvs_cwes(item),"asvs_maps_cwe",evidence)}
 
-def cisa_rows(data:dict):
+def cisa_rows(data:dict,evidence=None):
  for row in data["vulnerabilities"]:
   cid=row["cveID"].upper()
   cwes=row.get("cwes") or []
@@ -102,7 +125,8 @@ def cisa_rows(data:dict):
             +" Verificar aplicabilidade, fornecedor e atualizacoes antes de recomendar correcao.",
     "tags":"CISA KEV CVE "+sanitized(row.get("vendorProject"),120)+" "+sanitized(row.get("product"),120)+" "+" ".join(cwes),
     "source_url":REFERENCE_LINKS["cisa-kev"],"published_at":sanitized(row.get("dateAdded"),20),
-    "validation":"official_catalog_not_locally_tested","related":cwes}
+    "validation":"official_catalog_not_locally_tested","related":cwes,
+    "relations":declared_relations(row.get("cwes"),"cwe_of",evidence)}
 
 # Explicit editorial aliases: vocabulary bridges, never invented evidence.
 # Controlled vocabulary for retrieval, not a model or external ontology.
@@ -122,8 +146,8 @@ def case_index_tags(a):
                   if category==label or label in a["tags"]]
     return " ".join([base, category] + extensions)
 
-def public_rows():
- items=json.loads(SOURCE.read_text(encoding="utf-8"))
+def public_rows(items=None,evidence=None):
+ if items is None:items=json.loads(SOURCE.read_text(encoding="utf-8"))
  seen=set()
  for a in items:
   cid="CASE-"+a["id"]
@@ -135,7 +159,8 @@ def public_rows():
       "lesson":sanitized(a["lesson"],1500),
       "tags":case_index_tags(a),
       "source_url":a["source_url"],"published_at":a.get("published_at") or "",
-      "validation":a["validation"],"related":a.get("related",[])}
+      "validation":a["validation"],"related":a.get("related",[]),
+      "relations":declared_relations(a.get("related"),"case_references",evidence)}
 
 def count_feed(name,data):
  return len(data["vulnerabilities"]) if name=="cisa-kev" else len(list(asvs_rows(data)))
@@ -162,9 +187,11 @@ def check_manifest(name,manifest):
 def gather():
  manifest=json.loads(MANIFEST.read_text(encoding="utf-8"))
  feeds={name:check_manifest(name,manifest) for name in URLS}
- records=list(public_rows())
- records.extend(cisa_rows(feeds["cisa-kev"]))
- records.extend(asvs_rows(feeds["owasp-asvs-5.0.0"]))
+ # Parse and hash the same catalog bytes; feed hashes were verified above.
+ catalog=SOURCE.read_bytes()
+ records=list(public_rows(json.loads(catalog),{"source_id":"public-cases","sha256":hashlib.sha256(catalog).hexdigest()}))
+ records.extend(cisa_rows(feeds["cisa-kev"],{"source_id":"cisa-kev","sha256":manifest["cisa-kev"]["sha256"]}))
+ records.extend(asvs_rows(feeds["owasp-asvs-5.0.0"],{"source_id":"owasp-asvs-5.0.0","sha256":manifest["owasp-asvs-5.0.0"]["sha256"]}))
  return records
 
 def create():
@@ -177,9 +204,26 @@ def create():
   con=sqlite3.connect(tmp)
   try:
    con.execute("PRAGMA journal_mode=DELETE")
+   con.execute("PRAGMA foreign_keys=ON")
    con.execute("CREATE TABLE documents (id TEXT PRIMARY KEY, kind TEXT NOT NULL, source TEXT NOT NULL, title TEXT NOT NULL, summary TEXT NOT NULL, lesson TEXT NOT NULL, tags TEXT NOT NULL, source_url TEXT NOT NULL, published_at TEXT, validation TEXT NOT NULL, digest TEXT NOT NULL)")
    con.execute("CREATE VIRTUAL TABLE docs_fts USING fts5(id UNINDEXED, title, summary, lesson, tags, tokenize='unicode61 remove_diacritics 2')")
-   con.execute("CREATE TABLE related (doc_id TEXT, target_id TEXT, relation TEXT, PRIMARY KEY(doc_id,target_id,relation))")
+   con.execute("""CREATE TABLE related (
+     doc_id TEXT NOT NULL REFERENCES documents(id), target_id TEXT NOT NULL,
+     relation TEXT NOT NULL CHECK(relation IN ('cwe_of','asvs_maps_cwe','case_references')),
+     evidence TEXT NOT NULL CHECK(json_valid(evidence)
+       AND json_type(evidence,'$.source_id') IS 'text'
+       AND json_extract(evidence,'$.source_id')=CASE relation
+         WHEN 'cwe_of' THEN 'cisa-kev' WHEN 'asvs_maps_cwe' THEN 'owasp-asvs-5.0.0'
+         WHEN 'case_references' THEN 'public-cases' END
+       AND json_type(evidence,'$.sha256') IS 'text'
+       AND length(json_extract(evidence,'$.sha256'))=64
+       AND json_extract(evidence,'$.sha256') NOT GLOB '*[^0-9a-f]*'),
+     PRIMARY KEY(doc_id,target_id,relation))""")
+   con.execute("CREATE INDEX idx_related_target ON related(target_id)")
+   con.execute("""CREATE TRIGGER related_target_exists BEFORE INSERT ON related
+     WHEN NOT EXISTS (SELECT 1 FROM documents WHERE id=NEW.target_id)
+       AND NOT (NEW.target_id GLOB 'CWE-[0-9]*' AND substr(NEW.target_id,5) NOT GLOB '*[^0-9]*')
+     BEGIN SELECT RAISE(ABORT,'Relation target must exist or be a declared external CWE'); END""")
    con.execute("CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
    con.execute("CREATE INDEX idx_source ON documents(source)")
    con.execute("CREATE INDEX idx_kind ON documents(kind)")
@@ -192,11 +236,19 @@ def create():
     digest=hashlib.sha256(json.dumps(body,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
     con.execute("INSERT INTO documents VALUES(?,?,?,?,?,?,?,?,?,?,?)",tuple(body.values())+(digest,))
     con.execute("INSERT INTO docs_fts VALUES(?,?,?,?,?)",(r["id"],r["title"],r["summary"],r["lesson"],r["tags"]))
-    for relation in r.get("related",[]):
-     if isinstance(relation,str) and re.fullmatch(r"(?:CVE-\d{4}-\d{4,}|CWE-\d+|ASVS-V?\d+(?:\.\d+){2})",relation):
-      con.execute("INSERT OR IGNORE INTO related VALUES(?,?,?)",(r["id"],relation,"documented_reference"))
+   # Targets can be documents appearing later in the input. Never synthesize a
+   # missing CVE/ASVS/case node or derive CVE->ASVS from their common CWE.
+   for r in records:
+    for edge in r.get("relations",[]):
+     relation=edge.get("relation")
+     if RELATION_SOURCES.get(relation)!=r["source"]:continue
+     verified=declared_relations([edge.get("target_id")],relation,edge.get("evidence"))
+     for edge in verified:
+      if edge["target_id"] not in seen and not CWE_RE.fullmatch(edge["target_id"]):continue
+      con.execute("INSERT OR IGNORE INTO related VALUES(?,?,?,?)",
+                  (r["id"],edge["target_id"],relation,json.dumps(edge["evidence"],sort_keys=True)))
    con.execute("INSERT INTO metadata VALUES('indexed_at',?)",(now(),))
-   con.execute("INSERT INTO metadata VALUES('schema_version','1')")
+   con.execute("INSERT INTO metadata VALUES('schema_version','2')")
    con.execute("INSERT INTO metadata VALUES('source_sha256',?)",(hashlib.sha256(MANIFEST.read_bytes()+SOURCE.read_bytes()).hexdigest(),))
    con.commit()
   finally: con.close()
@@ -209,6 +261,31 @@ def create():
 def open_db():
  if not DB.exists():raise ValueError("Index missing: use sync then build")
  return sqlite3.connect("file:"+urllib.parse.quote(str(DB),safe="/")+ "?mode=ro",uri=True)
+
+def relations(identifier,as_json=False,emit=True):
+ """Return direct declarations in both directions, including external CWE nodes."""
+ identifier=identifier.strip()
+ identifier=("CASE-"+identifier[5:]) if identifier.upper().startswith("CASE-") else identifier.upper()
+ con=open_db()
+ try:
+  if "evidence" not in {r[1] for r in con.execute("PRAGMA table_info(related)")}:
+   raise ValueError("Relation evidence unavailable in legacy index: run build")
+  def edges(column):
+   return [{"doc_id":doc,"target_id":target,"relation":relation,"evidence":json.loads(evidence)}
+           for doc,target,relation,evidence in con.execute(
+            "SELECT doc_id,target_id,relation,evidence FROM related WHERE "+column+"=? "
+            "ORDER BY doc_id,target_id,relation",(identifier,))]
+  result={"id":identifier,"outbound":edges("doc_id"),"inbound":edges("target_id")}
+ finally:con.close()
+ if emit:
+  if as_json:print(json.dumps(result,ensure_ascii=False,indent=2))
+  else:
+   for direction in ("outbound","inbound"):
+    print(direction+":")
+    for edge in result[direction]:
+     print(" ",edge["doc_id"],"--"+edge["relation"]+"-->",edge["target_id"])
+     print("   evidence:",json.dumps(edge["evidence"],sort_keys=True))
+ return result
 
 def is_unsupported_intent(query):
  """Do not infer actor attribution from a CVE-only catalog."""
@@ -298,9 +375,11 @@ def stats():
   all_count=con.execute("SELECT COUNT(*) FROM documents").fetchone()[0]
   sources=con.execute("SELECT source,COUNT(*) FROM documents GROUP BY source ORDER BY source").fetchall()
   related=con.execute("SELECT count(*) FROM related").fetchone()[0]
+  relation_types={relation:0 for relation in RELATION_SOURCES}
+  relation_types.update(con.execute("SELECT relation,count(*) FROM related GROUP BY relation ORDER BY relation"))
   updated=con.execute("SELECT value FROM metadata WHERE key='indexed_at'").fetchone()[0]
  finally:con.close()
- print(json.dumps({"total":all_count,"sources":dict(sources),"relations":related,"indexed_at":updated},indent=2))
+ print(json.dumps({"total":all_count,"sources":dict(sources),"relations":related,"relations_by_type":relation_types,"indexed_at":updated},indent=2))
 
 def benchmark():
  # Checks lexical retrieval quality only; not an LLM answer-quality eval.
@@ -337,6 +416,9 @@ def main():
  sub.add_parser("build",help="Atomic local FTS rebuild from cached feeds + public cases")
  sub.add_parser("stats")
  sub.add_parser("bench")
+ r=sub.add_parser("relations",help="Direct outbound/inbound source declarations with feed evidence")
+ r.add_argument("id")
+ r.add_argument("--json",action="store_true")
  q=sub.add_parser("search")
  q.add_argument("query")
  q.add_argument("--limit",type=int,default=6)
@@ -348,6 +430,7 @@ def main():
  elif a.action=="build":create()
  elif a.action=="stats":stats()
  elif a.action=="bench":raise SystemExit(0 if benchmark() else 3)
+ elif a.action=="relations":relations(a.id,a.json)
  elif a.action=="search":search(a.query,a.limit,a.source,a.kind,a.json)
 
 if __name__=="__main__":

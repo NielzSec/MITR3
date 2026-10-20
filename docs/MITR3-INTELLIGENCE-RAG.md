@@ -28,6 +28,8 @@ Exemplos de consulta (usuário nielz):
     ~/MITR3/bin/mitr3-rag-intel.py search "ASVS-V1.2.5"
     ~/MITR3/bin/mitr3-rag-intel.py search "Faultline reverse" --source public-cases
     ~/MITR3/bin/mitr3-rag-intel.py search "CWE-79" --source cisa-kev --limit 5
+    ~/MITR3/bin/mitr3-rag-intel.py relations CVE-2023-23397 --json
+    ~/MITR3/bin/mitr3-rag-intel.py relations CWE-294
     ~/MITR3/bin/mitr3-rag-intel.py bench
 
 Atualização offline-first:
@@ -59,7 +61,7 @@ Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada down
 
 - O smoke test de 6 perguntas (`mitr3-rag-intel.py bench`) mede encanamento, não qualidade: são 6 pares escolhidos pelo autor e o matcher antigo fazia OR entre termos. `mitr3-rag-eval.py` é a medição que vale — 30 consultas em `tests/fixtures/intel-relevance-v1.json` (20 positivas, 10 negativas de abstenção), rodada em dois modos:
 
-| métrica | baseline (OR + bm25 antigo) | candidato (AND + roteamento de fonte) |
+| métrica | baseline (OR + bm25 antigo) | candidato (cobertura ≥60% + roteamento de fonte) |
 |---|---|---|
 | hit@5 | 1.000 | 1.000 |
 | macro recall@5 | 1.000 | 0.975 |
@@ -69,7 +71,12 @@ Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada down
 
   O corte é por cobertura: qualquer termo entra como candidato, mas só fica o documento que cobre ≥60% dos termos distintos (arredondado para cima), ordenado por cobertura com bm25 de desempate. AND estrito quebrava consulta real de 4+ termos ("cobalt strike cracked loader" voltava vazio); OR puro enchia de filler.
 
-  O ganho real é a abstenção: o baseline respondia a "esxi encryptor" e a "CVE-2099-999999"; o candidato cala. `precision dos retornados` sobe em parte por calar — não use como prova de acerto semântico. O recall perdeu 0.025: o AND derruba um documento esperado de uma das consultas de conceito. Fixture é curada, não cega; nenhum desses números é nota de LLM.
+  O ganho real é a abstenção: o baseline respondia a "esxi encryptor" e a "CVE-2099-999999"; o candidato cala. `precision dos retornados` sobe em parte por calar — não use como prova de acerto semântico. A cobertura de 60% manteve recall 0.975 no fixture, ainda sem um dos documentos esperados. Fixture é curada, não cega; nenhum desses números é nota de LLM.
+- Relações verificáveis usam somente declarações estruturadas: KEV `cwes[]` gera `cwe_of` (CVE → CWE); listas explícitas `CWE`, `CWEs` ou `cwes` no item ASVS geram `asvs_maps_cwe` (ASVS → CWE); `catalog.json`/`related[]` gera `case_references`. Apenas IDs completos são aceitos; descrições, tags e palavras parecidas não geram arestas. Outros campos e formatos de mapeamento ASVS não são interpretados. Não há ligação CVE → ASVS inferida por CWE comum, nem fechamento transitivo, nem auto-referência ASVS sintética.
+  A tabela `related` (schema 2) exige tipo e `evidence={"source_id": "cisa-kev|owasp-asvs-5.0.0|public-cases", "sha256": "<hash do JSON de origem>"}`. O hash é dos bytes do feed/catálogo, não do texto de uma página externa; os feeds são verificados contra o manifest antes da extração. Arestas repetidas são deduplicadas por `(doc_id,target_id,relation)`. Sem evidence válida, a relação não entra. Alvos devem existir em `documents` ou ser CWE externo explicitamente declarado; referências a CVE/ASVS/caso ausente são omitidas, não viram documentos fabricados.
+  `relations <ID> [--json]` mostra declarações diretas outbound e inbound com evidence; a visão inbound não cria outra aresta no banco. Um ID desconhecido retorna ambas as listas vazias. CWE externo declarado pode ter inbound mesmo sem linha em `documents`. `stats` informa `relations_by_type`, inclusive tipos com zero. Índices antigos precisam de `build` (reconstrução atômica); relações antigas sem evidência não são migradas por suposição.
+  No cache validado desta entrega há 1.689 `cwe_of`, zero `asvs_maps_cwe` e zero `case_references`: o JSON ASVS 5.0.0 atual não contém campos de mapeamento CWE e as 26 fichas não têm `related` preenchido. Ausência de aresta significa ausência de declaração aceita nesses insumos, não ausência de relação no mundo real. Esta camada não muda ranqueamento: as 30 saídas do eval candidate e os conteúdos de `documents`/FTS permaneceram idênticos; recall 0.975, hit@5 1.000, abstenção 1.000. Suite: 58 testes (49 anteriores + 9 de relações).
+- Revisão adversarial de `bacc745`: recuperou 7/8 consultas legítimas antes vazias; `Faultline writeup` continua vazio. Nas dez paráfrases anteriores, o regex de intenção continua sem detectar 10/10 e agora 1/10 retorna: `ransomware campaign participant` traz `CVE-2022-27593`, que menciona campanha, mas não comprova participação. `HTTP request smuggling SAP`, `Starlette HTTP request smuggling` e `ASVS HTTP request smuggling` agora devolvem os quatro casos de smuggling, descartando o termo discriminante, enquanto o roteamento esconde a CVE/norma correta. `SAP cache poisoning` também devolve casos genéricos. A consulta com `CVE-2022-22536` embutido continua vazia. O truncamento aos 15 termos persiste: a consulta longa com contexto de ESXi e final `ransomware partner` devolve três CVEs; nenhum retorno prova esse papel. Esses problemas de busca foram registrados e preservados, conforme o escopo desta entrega. Evidência reproduzível: `reports/intel-relations-v1-qa.json`.
 - O catálogo não conhece papéis ("encryptor" é função de ransomware, não atributo de CVE). Query de comportamento só acerta quando existe ficha de caso que fale disso; para o resto o resultado honesto é abster.
 - O MegaBrain remoto já redigiu 10 das 26 fichas publicadas (`state/public-rag-mcp-qa.json`). É necessário QA do gatilho: 38% de perda em conteúdo ofensivo não é aceitável como taxa estrutural. Nunca contornar o filtro.
 - O índice amplo é local; os 2.000+ requisitos/CVEs não foram enviados individualmente por MCP, evitando duplicação, custo e carga desnecessários.
