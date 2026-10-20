@@ -15,6 +15,10 @@ Isso exige controles adicionais mesmo com assinatura paga.
 |---|---|---|---|---|
 | `crt.sh` | public | public | domain | nenhuma |
 | `rdap.org` | public | public | domain, ip | nenhuma |
+
+## Redirects
+
+Padrao: REDIRECT_BLOCKED em qualquer 3xx (`NoRedirect`, opner dedicado por request). Unica excecao: fontes redirecionadoras por natureza (`rdap.org`), que delegam ao RDAP de cada registro. Para essas (`follow_redirects: true`) cada hop e revalidado — somente https, sem userinfo, sem fragment, teto de 3 hops (`REDIRECT_LOOP`); host final pode diferir do base_url por natureza do servico. Codigo: `FollowRedirect` em `bin/mitr3-osint.py`.
 | `urlscan.io` | public | public | domain, ip, url | `MITR3_OSINT_URLSCAN_KEY` opcional |
 | `openarchive-status` | public | public | somente health | nenhuma |
 | `virustotal` | paid | paid | ip, domain, hash | `MITR3_OSINT_VIRUSTOTAL_KEY` |

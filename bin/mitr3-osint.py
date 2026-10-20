@@ -33,15 +33,16 @@ PII_FIELDS = {'email': 'email', 'email_address': 'email', 'phone': 'phone', 'pho
               'name': 'name', 'first_name': 'name', 'last_name': 'name', 'full_name': 'name'}
 
 
-def source(base_url, category, risk, types, keys=(), *, optional_key=False, health=None, manual=()):
+def source(base_url, category, risk, types, keys=(), *, optional_key=False, health=None, manual=(), follow=False):
     return dict(base_url=base_url, category=category, risk=risk, types=types, keys=keys,
-                optional_key=optional_key, health=health, manual=manual)
+                optional_key=optional_key, health=health, manual=manual, follow_redirects=follow)
 
 
 # Each key tuple contains a canonical name and the user's short env alias.
 CATALOG = {
     'crt.sh': source('https://crt.sh', 'public', 'public', ['domain']),
-    'rdap.org': source('https://rdap.org', 'public', 'public', ['domain', 'ip']),
+    # Redirector by design: serves via per-registry redirects (e.g. verisign, afrinic).
+    'rdap.org': source('https://rdap.org', 'public', 'public', ['domain', 'ip'], follow=True),
     'urlscan.io': source('https://urlscan.io', 'public', 'public', ['domain', 'ip', 'url'],
                          [('MITR3_OSINT_URLSCAN_KEY', 'URLSCAN')], optional_key=True),
     'openarchive-status': source('https://status.openarchivex.net', 'public', 'public', [], health='/'),
@@ -184,10 +185,11 @@ def validate_value(kind, value):
 
 
 def check_destination(url, spec):
+    follow = bool(spec.get('follow_redirects'))
     try:
         actual, base = urllib.parse.urlsplit(url), urllib.parse.urlsplit(spec['base_url'])
         if (actual.scheme != 'https' or base.scheme != 'https' or not actual.hostname
-                or actual.hostname != base.hostname or actual.port not in (None, 443)
+                or (not follow and actual.hostname != base.hostname) or actual.port not in (None, 443)
                 or actual.username or actual.password or actual.fragment
                 or any(ord(c) < 32 for c in url)):
             fail('HOST_BLOCKED')
@@ -286,9 +288,41 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise error
 
 
-def urlopen(request, timeout=TIMEOUT):
+class FollowRedirect(urllib.request.HTTPRedirectHandler):
+    """Per-hop validated follow for redirector-by-design sources (rdap.org):
+    https only, no credentials, capped hops; destination host may differ
+    from base_url because the redirector's purpose is delegating to registries."""
+
+    MAX_HOPS = 3
+
+    def __init__(self):
+        self.hops = 0
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        fp.close()
+        self.hops += 1
+        if self.hops > self.MAX_HOPS:
+            error = PolicyError('REDIRECT_LOOP')
+            error.http_status = code
+            raise error
+        try:
+            parts = urllib.parse.urlsplit(newurl)
+            bad = (parts.scheme != 'https' or parts.port not in (None, 443)
+                   or parts.username or parts.password or not parts.hostname
+                   or parts.fragment or any(ord(c) < 32 for c in newurl))
+        except ValueError:
+            bad = True
+        if bad:
+            error = PolicyError('HOST_BLOCKED')
+            error.http_status = code
+            raise error
+        return urllib.request.Request(newurl, data=req.data, headers=req.headers, method=req.get_method())
+
+
+def urlopen(request, timeout=TIMEOUT, follow=False):
     # Dedicated opener, no global mutation; redirects/auth retries never send again.
-    return urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect()).open(request, timeout=timeout)
+    handler = FollowRedirect() if follow else NoRedirect()
+    return urllib.request.build_opener(urllib.request.ProxyHandler({}), handler).open(request, timeout=timeout)
 
 
 def retry_after(raw):
@@ -317,7 +351,7 @@ def transmit(request, spec):
     status, code, payload, retry = None, None, None, None
     try:
         try:
-            response = urlopen(req, timeout=TIMEOUT)
+            response = urlopen(req, timeout=TIMEOUT, follow=spec.get('follow_redirects', False))
         except urllib.error.HTTPError as exc:
             response = exc  # A response too: close it and save redacted status/body.
         with closing(response):

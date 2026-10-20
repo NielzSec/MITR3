@@ -213,6 +213,39 @@ class OsintConnectorTests(unittest.TestCase):
                 self.assertTrue(fp.closed)
         self.open.assert_not_called()
 
+    def test_follow_redirects_flag_only_on_rdap(self):
+        for ident, spec in osint.CATALOG.items():
+            with self.subTest(ident=ident):
+                self.assertEqual(bool(spec['follow_redirects']), ident == 'rdap.org')
+
+    def test_follow_handler_allows_https_capped_and_carries_request(self):
+        handler = osint.FollowRedirect()
+        fp = io.BytesIO()
+        req = urllib.request.Request('https://rdap.org/domain/example.com')
+        nxt = handler.redirect_request(req, fp, 302, 'Found', {},
+                                       'https://rdap.verisign.com/com/v1/domain/example.com')
+        self.assertEqual(nxt.full_url, 'https://rdap.verisign.com/com/v1/domain/example.com')
+        self.assertTrue(fp.closed)
+        with self.assertRaisesRegex(osint.PolicyError, '^REDIRECT_LOOP$'):
+            for _ in range(osint.FollowRedirect.MAX_HOPS + 1):
+                handler.redirect_request(req, io.BytesIO(), 302, '', {}, 'https://example.net/next')
+
+    def test_follow_handler_blocks_non_https_and_credentials(self):
+        handler = osint.FollowRedirect()
+        for bad in ('http://example.com/x', 'https://user:pass@example.com/x', 'https://example.com/x#frag'):
+            with self.subTest(url=bad), self.assertRaisesRegex(osint.PolicyError, '^HOST_BLOCKED$'):
+                handler.redirect_request(urllib.request.Request('https://rdap.org/x'), io.BytesIO(), 302, '', {}, bad)
+
+    def test_check_destination_relaxed_only_when_follow(self):
+        follow_spec = {'base_url': 'https://rdap.org', 'follow_redirects': True}
+        strict_spec = {'base_url': 'https://rdap.org', 'follow_redirects': False}
+        osint.check_destination('https://rdap.verisign.com/com/v1/domain/example.com', follow_spec)
+        with self.assertRaisesRegex(osint.PolicyError, '^HOST_BLOCKED$'):
+            osint.check_destination('https://rdap.verisign.com/com/v1/domain/example.com', strict_spec)
+        with self.assertRaisesRegex(osint.PolicyError, '^HOST_BLOCKED$'):
+            osint.check_destination('http://rdap.verisign.com/x', follow_spec)
+
+
     def test_response_changed_host_is_not_read(self):
         response = self.respond('https://other.example/', {'email': 'private@domain.com'})
         result = osint.query('crt.sh', 'domain', 'example.org', 'lab audit', allow_send=True)
