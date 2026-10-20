@@ -1,36 +1,33 @@
+
+apisec-capture-*.json
+# CISA KEV historical deltas (generated, local)
+/codeql-findings.md
+/codeql-results.sarif
+# Diagnósticos locais de exposição: nunca incluir metadados privados em commits.
+engagements/*/artifacts/
+engagements/codeql_*/runs/
 engagements/*/evidence/
 engagements/*/logs/
-engagements/*/artifacts/
-*.log
-
-# Resultados locais do CodeQL: podem conter trechos e caminhos sensíveis.
-engagements/codeql_*/runs/
-/codeql-results.sarif
-/codeql-findings.md
-__pycache__/
-*.pyc
-
-# Diagnósticos locais de exposição: nunca incluir metadados privados em commits.
-state/shared-secret-check-latest.json
-
-# Public RAG local index and remote receipts (derived data)
-state/public-rag.sqlite3
-state/public-rag-mcp-receipts.json
-state/public-rag-mcp-qa.json
-
-# Public official feeds cached locally, FTS index and QA status
-knowledge/reference-datasets/cache/
-state/mitr3-intel.sqlite3
-state/mitr3-intel-refresh-latest.json
+findsomething_*.json
+*.har
 knowledge/public-cases/queue/
-
-# CISA KEV historical deltas (generated, local)
-state/mitr3-kev-snapshot.json
-state/mitr3-kev-delta-history.jsonl
-
+knowledge/reference-datasets/cache/
+*.log
+# OSINT leads may contain personal data; never commit generated reports.
+# Public official feeds cached locally, FTS index and QA status
+# Public RAG local index and remote receipts (derived data)
+*.pyc
+__pycache__/
+reports/osint/
+response.json
+# Resultados locais do CodeQL: podem conter trechos e caminhos sensíveis.
 # Separate ATT&CK graph (derived from its own cached STIX bundle)
 state/mitr3-attack.sqlite3
-response.json
-
-# OSINT leads may contain personal data; never commit generated reports.
-reports/osint/
+state/mitr3-intel-refresh-latest.json
+state/mitr3-intel.sqlite3
+state/mitr3-kev-delta-history.jsonl
+state/mitr3-kev-snapshot.json
+state/public-rag-mcp-qa.json
+state/public-rag-mcp-receipts.json
+state/public-rag.sqlite3
+state/shared-secret-check-latest.json
