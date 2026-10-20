@@ -1,0 +1,213 @@
+{
+  "_header": {
+    "dataset": "blind-answers-robin-v3",
+    "version": "v3",
+    "author": "robin",
+    "written_at_utc": "2026-10-20T06:20:00Z",
+    "item_count": 10,
+    "positive_controls": 7,
+    "negative_controls": 3,
+    "corpus": [
+      "CISA-KEV",
+      "OWASP-ASVS-5.0.0",
+      "MITR3-PUBLIC-CASES"
+    ],
+    "scoring_scale": {
+      "2": "correta: resposta precisa, IDs esperados presentes, nenhum ID proibido, aviso de escopo adequado",
+      "1": "parcial: conceito central correto mas com omiss\u00e3o de detalhe relevante ou formula\u00e7\u00e3o incompleta",
+      "0": "errada: erro conceitual, alucina\u00e7\u00e3o de fontes/IDs, cita\u00e7\u00e3o de forbidden_ids, ou resposta com confian\u00e7a em item de absten\u00e7\u00e3o"
+    },
+    "sha256_canonical_items": "4060761a654bc1498b12a57d7e8299b0bb2f7cdba1ebcc9c8bf3262251446460"
+  },
+  "rows": [
+    {
+      "id": "blind-robin-21",
+      "question": "Estou revendo um relat\u00f3rio de triagem e quero escrever 'o produto do alvo est\u00e1 sob explora\u00e7\u00e3o ativa porque a CVE dele consta no cat\u00e1logo do KEV que o sistema consulta'. Essa formula\u00e7\u00e3o est\u00e1 correta? O que ela pressup\u00f5e?",
+      "expected_answer": "A formula\u00e7\u00e3o est\u00e1 incorreta como prova. Constar no KEV significa explora\u00e7\u00e3o conhecida e ativa catalogada para produto/vers\u00f5es espec\u00edficos; isso n\u00e3o demonstra que o alvo em avalia\u00e7\u00e3o est\u00e1 exposto nem que a vulnerabilidade \u00e9 explor\u00e1vel no contexto do objeto analisado. A resposta deve separar 'catalogado como explorado' de 'falha presente no alvo' \u2014 cita\u00e7\u00e3o ao cat\u00e1logo \u00e9 insumo de prioridade, n\u00e3o diagn\u00f3stico.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2020-1472"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Corrige a formula\u00e7\u00e3o: KEV = cat\u00e1logo de explora\u00e7\u00e3o conhecida, n\u00e3o prova de exposi\u00e7\u00e3o do alvo nem de explora\u00e7\u00e3o no objeto avaliado; separa registro de diagn\u00f3stico sem ambiguidade.",
+        "1": "Reconhece que KEV n\u00e3o \u00e9 prova do alvo, mas formula com ressalva vaga ou omite o limite produto/vers\u00e3o, sem erro conceitual grave.",
+        "0": "Concorda que a formula\u00e7\u00e3o prova explora\u00e7\u00e3o ativa no alvo, ou cita CVE/ID tratando-o como demonstra\u00e7\u00e3o de falha real no objeto."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-22",
+      "question": "No escopo de uma avalia\u00e7\u00e3o de aplica\u00e7\u00e3o web, o que o ASVS cobre e o que ele n\u00e3o cobre? Com que papel exato o ASVS pode entrar num relat\u00f3rio?",
+      "expected_answer": "O ASVS cobre requisitos de seguran\u00e7a de aplica\u00e7\u00e3o: define o que verificar em design, constru\u00e7\u00e3o e testes (categorias de requisitos por n\u00edveis de profundidade), n\u00e3o \u00e9 \u00edndice de CVEs nem prova de aus\u00eancia de falha. Ele organiza o escopo do teste e d\u00e1 crit\u00e9rio para o engenheiro, n\u00e3o valida o alvo nem atesta que o resultado est\u00e1 correto. A resposta deve dizer que ASVS n\u00e3o atribui CVE e n\u00e3o \u00e9 evid\u00eancia de vulnerabilidade em produto espec\u00edfico.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2021-34527"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Posiciona ASVS como framework de requisitos de seguran\u00e7a de aplica\u00e7\u00e3o (o que verificar), distingue de \u00edndice de CVE e de prova de falha; aponta que n\u00e3o valida o alvo.",
+        "1": "Descreve ASVS como 'padr\u00e3o' de seguran\u00e7a de aplica\u00e7\u00e3o sem o limite claro de que n\u00e3o \u00e9 prova nem \u00edndice, sem erro grave.",
+        "0": "Afirma que ASVS cataloga CVEs ou que cumprir ASVS atesta seguran\u00e7a do alvo; confunde com fonte de vulnerabilidades."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-23",
+      "question": "Vejo no cat\u00e1logo uma CVE do KEV da fam\u00edlia XWorm aplicada a um roteador de borda do alvo e uma ficha que descreve t\u00e9cnica ATT&CK de t\u00fanel de C2. Posso combin\u00e1-las para provar que o t\u00fanel observado na rede do alvo usa aquela t\u00e9cnica?",
+      "expected_answer": "Fundir fontes de naturezas diferentes como cadeia de prova \u00e9 falha: ATT&CK descreve t\u00e9cnica gen\u00e9rica (n\u00e3o demonstra que a fam\u00edlia usou aquela exata t\u00e9cnica naquele alvo), e o KEV atesta explora\u00e7\u00e3o conhecida, n\u00e3o presen\u00e7a da atividade na rede observada. A resposta deve explicar que aresta ATT&CK + CVE n\u00e3o valida v\u00ednculo local; separa\u00e7\u00e3o de namespace: requintar que t\u00e9cnica documentada n\u00e3o \u00e9 evid\u00eancia de uso no alvo.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2022-39197"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Identifica a fus\u00e3o como falha: cita\u00e7\u00e3o de t\u00e9cnica/aresta n\u00e3o prova uso da t\u00e9cnica nem de CVE no alvo; exige evid\u00eancia de atividade no objeto em avalia\u00e7\u00e3o.",
+        "1": "Percebe que h\u00e1 problema na combina\u00e7\u00e3o mas trata a t\u00e9cnica como poss\u00edvel evid\u00eancia se citada corretamente, sem separar namespace.",
+        "0": "Valida a combina\u00e7\u00e3o como prova de que o t\u00fanel do alvo usa aquela t\u00e9cnica com aquela CVE; trata aresta ATT&CK como v\u00ednculo CVE\u2192t\u00e9cnica comprovado."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-24",
+      "question": "Nos logs de um sistema Windows aparecem solicita\u00e7\u00f5es de compartilhamento SMB com strings de autentica\u00e7\u00e3o NTLM em eventos de agenda. Que CVE do cat\u00e1logo explica essa exfiltra\u00e7\u00e3o de credencial sem intera\u00e7\u00e3o do usu\u00e1rio al\u00e9m de um lembrete de reuni\u00e3o?",
+      "expected_answer": "CVE-2023-23397 \u2014 vulnerabilidade no Microsoft Outlook que permite roubo de hash NTLM via lembrete de reuni\u00e3o (o client monta caminho UNC remoto no corpo), sem intera\u00e7\u00e3o real do usu\u00e1rio, e o hash viaja para o servidor do atacante. Catalogada no KEV com explora\u00e7\u00e3o conhecida. A resposta deve citar componente (Outlook), vetor (lembrete/caminho UNC) e efeito (exfiltra\u00e7\u00e3o de hash NTLM), com aviso de escopo.",
+      "expected_ids": [
+        "CVE-2023-23397"
+      ],
+      "forbidden_ids": [
+        "CVE-2020-1472"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2023-23397, Outlook, lembrete/caminho UNC remoto e exfiltra\u00e7\u00e3o de hash NTLM; aviso de escopo presente.",
+        "1": "Cita CVE-2023-23397 e Outlook, mas omite o mecanismo de lembretes/UNC ou o aviso KEV; nenhum ID proibido.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, ou confunde com Zerologon e NTLM relay de outra cadeia."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-25",
+      "question": "Em um servidor de aplica\u00e7\u00e3o Java o time achou a biblioteca Log4j em vers\u00e3o antiga. Antes de declarar Risco Alto s\u00f3 por isso, o que o cat\u00e1logo permite afirmar? Que CVE nomeia essa falha de log4j e qual o seu status no cat\u00e1logo?",
+      "expected_answer": "CVE-2021-44228 (Log4Shell) \u2014 RCE no Apache Log4j via JNDI/Lookup, explorada ativamente e catalogada no KEV. Mas a presen\u00e7a da biblioteca n\u00e3o basta: vers\u00e3o exata, configura\u00e7\u00e3o (JNDI/Lookup habilitados, padr\u00f5es at\u00e9 2.17.1), ingressos e mitiga\u00e7\u00e3o devem ser verificados. A resposta deve separar 'CVE no cat\u00e1logo' de 'explor\u00e1vel aqui'.",
+      "expected_ids": [
+        "CVE-2021-44228"
+      ],
+      "forbidden_ids": [
+        "CVE-2021-34527"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2021-44228, associa ao Apache Log4j RCE via lookup JNDI, cataloga como explorada ativa no KEV, e condiciona a aplicabilidade \u00e0 vers\u00e3o/configura\u00e7\u00e3o \u2014 n\u00e3o declara risco s\u00f3 pela biblioteca.",
+        "1": "Cita CVE-2021-44228 e associ ao Log4j, mas n\u00e3o condiciona ao ambiente nem d\u00e1 o aviso de escopo.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, ou declara risco alto unicamente pela presen\u00e7a da biblioteca sem condicionantes."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-26",
+      "question": "Vou redigir uma se\u00e7\u00e3o de 'contexto de amea\u00e7a' e preciso explicar que a famosa cadeia de explora\u00e7\u00e3o de Outubro de 2021 no Microsoft Exchange (ProxyLogon) envolveu uma cadeia de falhas. Qual classe de falha associada a essa cadeia est\u00e1 no cat\u00e1logo e qual efeito ela permitiu?",
+      "expected_answer": "ProxyLogon combina EoP e SSRF: a classe mais citada \u00e9 a SSRF no proxy do Exchange que permite acessar endpoints internos; o efeito \u00e9 acesso n\u00e3o autorizado a contas/mailboxes. A resposta deve apontar a falha na camada proxy do Exchange e seu efeito de acesso n\u00e3o autorizado a contas/mailboxes, com aviso de que o cat\u00e1logo registra explora\u00e7\u00e3o conhecida, n\u00e3o exposi\u00e7\u00e3o do alvo. (Desenho do item: sem exigir ID espec\u00edfico \u2014 conceitual-anal\u00edtica; quem citar um ID deve faz\u00ea-lo s\u00f3 com fonte local.)",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2021-34527"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Descreve ProxyLogon como SSRF no proxy do Exchange com efeito de acesso n\u00e3o autorizado a contas/mailboxes, entende a cadeia (EoP+SSRF) e d\u00e1 aviso de escopo KEV; n\u00e3o inventa ID.",
+        "1": "Menciona ProxyLogon de forma parcial (omite SSRF ou efeito) ou cita corretamente a classe sem aviso de escopo; nenhum ID proibido.",
+        "0": "Inventa ID de CVE sem fonte local, cita forbidden_ids, ou afirma que o KEV n\u00e3o registra a cadeia."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-27",
+      "question": "No meu monitor de amea\u00e7as apareceu entrada dizendo haver explora\u00e7\u00e3o ativa de falha em produto de seguran\u00e7a anti-ransomware. O que isso significa e como trato num relat\u00f3rio?",
+      "expected_answer": "CVE-2024-7694 \u2014 falha em produto da TeamT5 (anti-ransomware/dissector), portanto n\u00e3o \u00e9 falha explorada do fen\u00f4meno ransomware e sim falha em ferramenta de defesa; isso a torna relevante para quem usa o produto (revisar atualiza\u00e7\u00e3o), n\u00e3o evid\u00eancia de campanha de ransomware em si. A resposta deve distinguir 'falha em produto de defesa' de 'falha explorada do alvo', e n\u00e3o tratar o produto como o alvo da campanha.",
+      "expected_ids": [
+        "CVE-2024-7694"
+      ],
+      "forbidden_ids": [
+        "CVE-2022-27593"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita CVE-2024-7694, identifica que a falha \u00e9 em produto TeamT5, posiciona como falha em ferramenta de defesa e a separa de falha do fen\u00f4meno/processo; aviso de escopo.",
+        "1": "Cita o caso de 'falha em produto de seguran\u00e7a' sem especificar o ID correto ou omite que \u00e9 ferramenta de defesa.",
+        "0": "Cita CVE incorreta, cita forbidden_ids (ex.: QNAP/Photo Station), ou trata a falha do produto de defesa como prova de explora\u00e7\u00e3o de ransomware no alvo."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-28",
+      "question": "Nos artefatos do meu laborat\u00f3rio, o RAT AsyncRAT aparece como importante para correla\u00e7\u00e3o. O corpus tem fonte que diga quais CVEs o AsyncRAT usa?",
+      "expected_answer": "Absten\u00e7\u00e3o correta: o corpus n\u00e3o cont\u00e9m fichas sobre o AsyncRAT nem sobre as CVEs que ele usaria. Qualquer cita\u00e7\u00e3o de CVE ou ficha nesse tema seria erro/alucina\u00e7\u00e3o.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2022-39197",
+        "CVE-2022-42948"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Responde que o corpus n\u00e3o sustenta a pergunta, abst\u00e9m-se, e n\u00e3o cita nenhum ID.",
+        "1": "Menciona que n\u00e3o h\u00e1 fonte, mas ainda sugere um CVE como 'prov\u00e1vel'.",
+        "0": "Cita qualquer CVE/ficha ou responde com confian\u00e7a na pergunta abstain."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-29",
+      "question": "Quero incluir no relat\u00f3rio que o 'LockBit builder' \u00e9 um artefato catalogado com CVE associado. O cat\u00e1logo registra isso?",
+      "expected_answer": "Absten\u00e7\u00e3o correta: o corpus n\u00e3o possui ficha que associe um CVE ao builder do LockBit nem ao uso de builders como vulnerabilidade catalogada. Citar CVE qualquer nesse contexto seria erro.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2021-44228",
+        "CVE-2022-27593"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Responde que o corpus n\u00e3o sustenta a pergunta e abst\u00e9m-se, sem citar ID.",
+        "1": "Reconhece lacuna mas sugere CVE 'comum nesse ecossistema'.",
+        "0": "Cita qualquer CVE ou afirma exist\u00eancia de ficha para o builder."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    },
+    {
+      "id": "blind-robin-30",
+      "question": "Para escrever sobre a infec\u00e7\u00e3o de um RAT conhecido como Lumma, preciso saber qual CVE do cat\u00e1logo corresponde ao vetor de entrega usado por ele. Qual \u00e9?",
+      "expected_answer": "Absten\u00e7\u00e3o correta: o corpus n\u00e3o cont\u00e9m ficha sobre o Lumma nem sobre vetor de entrega do Lumma associado a CVE. Qualquer ID citado aqui \u00e9 alucina\u00e7\u00e3o; a resposta certa \u00e9 declarar que n\u00e3o h\u00e1 base no cat\u00e1logo.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2020-1472",
+        "CVE-2021-34527"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Responde que o corpus n\u00e3o sustenta a pergunta, abst\u00e9m-se, sem citar IDs.",
+        "1": "Menciona falta de fonte mas prop\u00f5e um CVE 'prov\u00e1vel'.",
+        "0": "Cita CVE/ficha com confian\u00e7a em item abstain \u2014 alucina\u00e7\u00e3o."
+      },
+      "expected_score": 2,
+      "author": "robin",
+      "written_at_utc": "2026-10-20T06:20:00Z"
+    }
+  ]
+}
