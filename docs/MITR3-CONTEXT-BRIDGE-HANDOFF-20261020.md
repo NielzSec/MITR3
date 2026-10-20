@@ -34,21 +34,6 @@ de segurança de API. A ponte manteve o remoto separado.
     ~/.local/share/mitr3-nexus-venv/bin/python ~/MITR3/bin/mitr3-context-bridge.py CVE-2023-23397 --remote
     ~/.local/share/mitr3-nexus-venv/bin/python ~/MITR3/bin/mitr3-context-bridge.py "cache poisoning" --remote --json
 
-## Fallback de vocabulário em perguntas
-
-O bridge preserva a marca opcional `fallback` da busca em `local.matches`:
-`vocabulary` aplica cobertura ≥60% apenas aos termos presentes no corpus;
-`vocabulary_rare` exige dois dos três termos mais raros presentes. Essa marca
-explica o caminho lexical de recuperação; não valida relevância, atribuição ou
-relações. Guardas de intenção, IDs, consultas curtas e namespaces continuam
-protegidos. Nenhuma citação remota corrige a ausência de evidência local.
-
-Na regressão cega posterior ao congelamento do código/testes, foram recuperados
-0/7 alvos. Houve um retorno por `vocabulary_rare` fora do alvo e nenhuma citação
-nos três itens de abstenção. Veja o relatório
-`reports/intel-vocabulary-fallback-v1-qa.json`; esse conjunto não foi usado para
-ajustar o algoritmo nem os testes.
-
 ## Limites de evidência
 
 Não confundir capacidade de pesquisar contexto com comprovação de vínculo.
