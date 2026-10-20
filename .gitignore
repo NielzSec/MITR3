@@ -12,3 +12,8 @@ __pycache__/
 
 # Diagnósticos locais de exposição: nunca incluir metadados privados em commits.
 state/shared-secret-check-latest.json
+
+# Public RAG local index and remote receipts (derived data)
+state/public-rag.sqlite3
+state/public-rag-mcp-receipts.json
+state/public-rag-mcp-qa.json
