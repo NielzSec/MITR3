@@ -1,0 +1,11 @@
+[Unit]
+Description=MITR3 monthly ATT&CK graph refresh (separate from CVE/CWE index)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/MITR3/bin/mitr3-rag-intel.py graph-refresh
+LimitAS=1200000000
+MemoryMax=1200000000
+CPUQuota=65%
+Nice=10
+TimeoutStartSec=150

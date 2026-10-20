@@ -85,6 +85,92 @@ Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada down
 - Manter no máximo atualizações leves semanais no Arch, preservando RAM e swap.
 - KEV sem histórico é `rsync` caro: `bin/mitr3-rag-intel-refresh.py` grava snapshot + delta (`state/mitr3-kev-snapshot.json`, `state/mitr3-kev-delta-history.jsonl`, ambos fora do git) e nunca marca a primeira execução como "tudo novo".
 
+## Grafo ATT&CK v1 — disjunto de CVE/CWE/ASVS
+
+Fonte única: [MITRE Enterprise ATT&CK STIX](https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json).
+O bundle validado possui 55.271.014 bytes e 26.690 objetos, SHA256
+`81113ba98afa2928f3dcff62022539f7ce30c315c32e14422f11ff95ce534352`.
+
+**Este grafo é DISJUNTO do catálogo CVE/CWE/ASVS.** O bundle tem zero
+`external_references` CVE ou CWE e 36 referências CAPEC. Não se deduz ponte
+CVE ↔ técnica, nem por descrição, nome, CWE comum ou co-ocorrência. CAPEC
+pode ser um próximo passo com proveniência própria; não foi implementado.
+
+Somente objetos `relationship` ativos geram arestas; os tipos aceitos são
+`uses`, `mitigates`, `subtechnique-of`, `attributed-to`. Cada aresta preserva
+ID STIX, `modified` e SHA256 dos bytes do bundle. Entidades aceitas:
+`attack-pattern`, `malware`, `tool`, `intrusion-set`, `campaign`,
+`course-of-action`. Objetos `revoked=true` ou `x_mitre_deprecated=true` ficam
+fora, assim como arestas com ponta excluída/ausente. FK e triggers de
+INSERT/UPDATE rejeitam pontas ausentes, inclusive inserção com FK desabilitada.
+Não há inferência de aresta por texto, aliases, nome parecido ou agrupamento.
+
+| Entidades ativas | Contagem | Arestas explícitas | Contagem |
+|---|---:|---|---:|
+| attack-pattern | 706 | uses | 18.975 |
+| malware | 747 | mitigates | 1.477 |
+| tool | 95 | subtechnique-of | 479 |
+| intrusion-set | 178 | attributed-to | 26 |
+| campaign | 57 | **Total** | **20.957** |
+| course-of-action | 44 | | |
+| **Total** | **1.827** | | |
+
+Foram excluídas 403 entidades revogadas/deprecated, 703 relações `detects`,
+157 `revoked-by` e duas relações de sub-técnica com ponta inativa. Os demais
+tipos STIX (táticas, matrizes, analíticas, identidades, detecção etc.) não
+entram na v1. A descrição do relationship não vira outro vínculo.
+
+Operação separada da busca FTS e do refresh semanal:
+
+```bash
+python3 bin/mitr3-rag-intel.py graph-refresh          # sync mensal + build
+python3 bin/mitr3-rag-intel.py graph-sync             # só cache; gate mensal
+python3 bin/mitr3-rag-intel.py graph-build            # rebuild totalmente offline
+python3 bin/mitr3-rag-intel.py graph-stats
+python3 bin/mitr3-rag-intel.py graph Mimikatz --limit 5
+python3 bin/mitr3-rag-intel.py graph T1059 --json
+```
+
+A consulta aceita nome exato (sem distinguir caixa), ID MITRE ou ID STIX;
+nomes ambíguos retornam todas as entidades correspondentes. Mostra outbound
++ inbound, tipo, nomes das pontas e origem (ID da relação, modified, hash e URL).
+Limite padrão: 50 arestas por direção, máximo 200, com totais visíveis;
+ID desconhecido retorna listas vazias. Não faz busca aproximada nem altera
+`search()` ou seu ranqueamento.
+
+Banco: `state/mitr3-attack.sqlite3`. Bundle e manifest separados:
+`knowledge/reference-datasets/cache/enterprise-attack.json` e
+`enterprise-attack-manifest.json`. Ambos os feeds antigos e seu timer de domingo
+continuam independentes. O download ATT&CK usa URL fixa, HTTPS, host verificado
+antes de seguir redirects e no destino final, cap de 80.000.000 bytes, escrita
+atômica e SHA256 no manifest. A leitura offline verifica tamanho/hash no mesmo
+descritor usado pelo parse. Falha de hash/parse/build não troca o grafo anterior.
+Rebuild é idempotente nas entidades/arestas; `built_at` é metadado operacional.
+
+`graph-sync`/`graph-refresh` consultam a rede no máximo uma vez por mês UTC;
+no mesmo mês reaproveitam o cache verificado. `graph-build` nunca usa a rede.
+O novo `mitr3-attack-refresh.timer` usa `OnCalendar=monthly`, com atraso
+aleatório de até 30 minutos, e está instalado/ativo neste host. Units
+versionadas em `systemd/user/`; para outro host, vincular essas duas units a
+`~/.config/systemd/user/`, fazer daemon-reload e habilitar o timer. O timer
+`mitr3-intel-refresh.timer` de domingo foi preservado, inclusive seu hash.
+
+Todos os comandos de ingestão aplicam **RLIMIT_AS de 1.200.000.000 bytes**
+(sem elevar limite preexistente menor); o serviço mensal repete esse limite.
+O refresh completo mediu pico de **300.328 KiB (293,3 MiB) de RSS**. Um rebuild
+offline independente, limitado antes do exec, mediu 295.560 KiB e saiu com
+código 0. Nenhum parse falhou e o limite não foi aumentado.
+
+Validação: `python3 -W error::ResourceWarning -m unittest discover -s tests`
+passou **80/80**, sem ResourceWarning (69 anteriores + 11 de grafo). Os testes
+reais usam o cache offline; sem cache, três métodos reais são pulados, enquanto
+os oito testes com bundles sintéticos continuam independentes da rede. Cobrem
+contagem por tipo com tolerância de 25% (mínimo 5), ausência de órfãos, exclusão
+de inativos, rebuild idempotente, proteções do cache/HTTPS/cap e igualdade exata
+das arestas com os relationships de origem. `search()` permaneceu idêntico à
+base da tarefa B; o eval candidate completo não mudou (recall 0.975,
+abstenção 1.000). Evidências: `reports/intel-attack-graph-v1-qa.json`.
+
 ## Referências de política
 
 HackerOne sobre relatórios divulgados:

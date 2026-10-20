@@ -432,6 +432,12 @@ def main():
  r=sub.add_parser("relations",help="Direct outbound/inbound source declarations with feed evidence")
  r.add_argument("id")
  r.add_argument("--json",action="store_true")
+ g=sub.add_parser("graph",help="Separate ATT&CK STIX graph; exact name, MITRE ID or STIX ID")
+ g.add_argument("query")
+ g.add_argument("--limit",type=int,default=50)
+ g.add_argument("--json",action="store_true")
+ for action in ("graph-sync","graph-build","graph-refresh","graph-stats"):
+  sub.add_parser(action,help="ATT&CK only; monthly sync, offline build, refresh or stats")
  q=sub.add_parser("search")
  q.add_argument("query")
  q.add_argument("--limit",type=int,default=6)
@@ -444,6 +450,11 @@ def main():
  elif a.action=="stats":stats()
  elif a.action=="bench":raise SystemExit(0 if benchmark() else 3)
  elif a.action=="relations":relations(a.id,a.json)
+ elif a.action.startswith("graph"):
+  import importlib.util
+  spec=importlib.util.spec_from_file_location("mitr3_attack_graph",ROOT/"bin/mitr3-attack-graph.py")
+  graph=importlib.util.module_from_spec(spec);spec.loader.exec_module(graph)
+  graph.run(a.action,getattr(a,"query",""),getattr(a,"limit",50),getattr(a,"json",False))
  elif a.action=="search":search(a.query,a.limit,a.source,a.kind,a.json)
 
 if __name__=="__main__":

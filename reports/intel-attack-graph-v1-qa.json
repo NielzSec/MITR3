@@ -1,0 +1,115 @@
+{
+  "source": {
+    "source_id": "mitre-attack-enterprise",
+    "url": "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json",
+    "sha256": "81113ba98afa2928f3dcff62022539f7ce30c315c32e14422f11ff95ce534352",
+    "bytes": 55271014,
+    "checked_at": "2026-10-20T03:20:55.146365+00:00",
+    "bundle_id": "bundle--fc207382-c9d1-4ece-bce2-6ef555c62d0a",
+    "object_count": 26690
+  },
+  "counts": {
+    "raw_objects": 26690,
+    "raw_types": {
+      "x-mitre-collection": 1,
+      "campaign": 57,
+      "course-of-action": 268,
+      "intrusion-set": 193,
+      "malware": 750,
+      "tool": 95,
+      "attack-pattern": 867,
+      "x-mitre-matrix": 1,
+      "x-mitre-tactic": 15,
+      "x-mitre-analytic": 1770,
+      "x-mitre-data-component": 109,
+      "x-mitre-data-source": 38,
+      "x-mitre-detection-strategy": 705,
+      "relationship": 21819,
+      "identity": 1,
+      "marking-definition": 1
+    },
+    "raw_relationship_types": {
+      "uses": 18975,
+      "mitigates": 1477,
+      "subtechnique-of": 481,
+      "detects": 703,
+      "revoked-by": 157,
+      "attributed-to": 26
+    },
+    "entities": 1827,
+    "entities_by_type": {
+      "attack-pattern": 706,
+      "campaign": 57,
+      "course-of-action": 44,
+      "intrusion-set": 178,
+      "malware": 747,
+      "tool": 95
+    },
+    "edges": 20957,
+    "edges_by_type": {
+      "attributed-to": 26,
+      "mitigates": 1477,
+      "subtechnique-of": 479,
+      "uses": 18975
+    },
+    "excluded_inactive_entities": 403,
+    "rejected_relationships": {
+      "unsupported_type": 860,
+      "inactive_or_missing_endpoint": 2
+    },
+    "external_references": {
+      "CVE": 0,
+      "CWE": 0,
+      "CAPEC": 36
+    }
+  },
+  "graph_integrity": {
+    "orphan_edges": 0,
+    "all_stored_edges_match_raw_stix_relationship_id_type_source_target_modified_and_sha256": true,
+    "tables": [
+      "edges",
+      "entities",
+      "metadata"
+    ],
+    "cross_cve_cwe_capec_edges_implemented": false
+  },
+  "memory": {
+    "address_space_limit_bytes": 1200000000,
+    "network_refresh_peak_rss_kib": 300328,
+    "offline_ingest": {
+      "command": "python3 bin/mitr3-rag-intel.py graph-build",
+      "rlimit_as_bytes": 1200000000,
+      "limit_imposed_before_exec": true,
+      "exit_code": 0,
+      "peak_rss_kib_waited_child": 295560,
+      "stderr": ""
+    },
+    "offline_cli_self_peak_rss_kib": 295560,
+    "maximum_ingest_peak_rss_kib": 300328,
+    "note": "RLIMIT_AS applied in CLI; also imposed before exec for independent offline process RSS measurement. No limit increase or failed parse."
+  },
+  "validation": {
+    "task_a_commit": "67d349b",
+    "task_a_tests": 69,
+    "final_suite_tests": 80,
+    "suite_command": "python3 -W error::ResourceWarning -m unittest discover -s tests",
+    "resource_warnings": 0,
+    "skips": 0,
+    "search_ast_unchanged_since_task_a": true,
+    "complete_candidate_report_unchanged": true,
+    "recall_at_5": 0.975,
+    "negative_abstention_rate": 1.0
+  },
+  "scheduling": {
+    "new_timer": "mitr3-attack-refresh.timer",
+    "calendar": "monthly",
+    "enabled": true,
+    "bundle_refresh_guard": "At most once per UTC calendar month; verified cache otherwise. graph-build is offline.",
+    "weekly_timer_unchanged_sha256": "90bfad8ffb6b55aedcb20972c41166cdbcba0e198f0604265910631c7668cb18",
+    "service_smoke_test": {
+      "Result": "success",
+      "ExecMainStatus": "0",
+      "LimitAS": "1200000000"
+    }
+  }
+}
