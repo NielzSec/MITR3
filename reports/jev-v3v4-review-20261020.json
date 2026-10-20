@@ -1,0 +1,149 @@
+{
+ "contract": "jev-judge-shadow/evidence-pass",
+ "date": "2026-10-20",
+ "provider": "typesafe",
+ "model": "jev-latest",
+ "input": "20 claims do packet v3/v4 (sem gabarito)",
+ "thresholds": {
+  "supported": 0.8,
+  "partial": 0.5
+ },
+ "counts": {
+  "supported": 7,
+  "partial_or_flag": 12,
+  "unsupported": 1,
+  "needs_review": 8
+ },
+ "by_set": {
+  "v3": {
+   "n": 14,
+   "supported": 7
+  },
+  "v4": {
+   "n": 6,
+   "supported": 0
+  }
+ },
+ "verdicts": [
+  {
+   "k": "v3p1-01c1",
+   "p": 0.88,
+   "nr": false,
+   "d": "jev_dec_53e2c7d8a52d4b3e"
+  },
+  {
+   "k": "v3p1-02c1",
+   "p": 0.82,
+   "nr": false,
+   "d": "jev_dec_e503ace0d28b4916"
+  },
+  {
+   "k": "v3p1-03c1",
+   "p": 0.92,
+   "nr": false,
+   "d": "jev_dec_89b2364a4f5a4f11"
+  },
+  {
+   "k": "v3p1-03c2",
+   "p": 0.7,
+   "nr": false,
+   "d": "jev_dec_e6262004779d4018"
+  },
+  {
+   "k": "v3p1-03c3",
+   "p": 0.77,
+   "nr": false,
+   "d": "jev_dec_d179ad9f2f184ee6"
+  },
+  {
+   "k": "v3p1-04c1",
+   "p": 0.91,
+   "nr": false,
+   "d": "jev_dec_9a0a4b96e7c04672"
+  },
+  {
+   "k": "v3p1-05c1",
+   "p": 0.57,
+   "nr": true,
+   "d": "jev_dec_308a8e520ada43bb"
+  },
+  {
+   "k": "v3p2-01c1",
+   "p": 0.83,
+   "nr": false,
+   "d": "jev_dec_e958219d98544c90"
+  },
+  {
+   "k": "v3p2-01c2",
+   "p": 0.69,
+   "nr": true,
+   "d": "jev_dec_fd83facf78a94a3b"
+  },
+  {
+   "k": "v3p2-02c1",
+   "p": 0.81,
+   "nr": false,
+   "d": "jev_dec_171660a8f2da4cae"
+  },
+  {
+   "k": "v3p2-03c1",
+   "p": 0.79,
+   "nr": false,
+   "d": "jev_dec_6ae20423489046bd"
+  },
+  {
+   "k": "v3p2-03c2",
+   "p": 0.7,
+   "nr": false,
+   "d": "jev_dec_2df0d01b3aa047db"
+  },
+  {
+   "k": "v3p2-04c1",
+   "p": 0.84,
+   "nr": false,
+   "d": "jev_dec_b697914fc67844d0"
+  },
+  {
+   "k": "v3p2-05c1",
+   "p": 0.5,
+   "nr": true,
+   "d": "jev_dec_772cd9855d434877"
+  },
+  {
+   "k": "v4p1-03c1",
+   "p": 0.63,
+   "nr": true,
+   "d": "jev_dec_f0f8b6d3c61647b8"
+  },
+  {
+   "k": "v4p1-03c2",
+   "p": 0.64,
+   "nr": true,
+   "d": "jev_dec_77ecd1c04cae4711"
+  },
+  {
+   "k": "v4p1-06c1",
+   "p": 0.71,
+   "nr": false,
+   "d": "jev_dec_56f8f53441414888"
+  },
+  {
+   "k": "v4p1-06c2",
+   "p": 0.63,
+   "nr": true,
+   "d": "jev_dec_a48a50c99b5f4e4b"
+  },
+  {
+   "k": "v4p2-06c1",
+   "p": 0.57,
+   "nr": true,
+   "d": "jev_dec_4719f40703024219"
+  },
+  {
+   "k": "v4p2-06c2",
+   "p": 0.32,
+   "nr": true,
+   "d": "jev_dec_87b56b2c18034e60"
+  }
+ ]
+}
