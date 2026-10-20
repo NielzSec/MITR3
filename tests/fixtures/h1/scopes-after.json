@@ -1,0 +1,31 @@
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "structured-scope",
+      "attributes": {
+        "asset_type": "URL",
+        "asset_identifier": "https://one.example.test",
+        "eligible_for_submission": false,
+        "eligible_for_bounty": false,
+        "instruction": "Synthetic public DEV; no testing authorization",
+        "max_severity": "high"
+      }
+    },
+    {
+      "id": "3",
+      "type": "structured-scope",
+      "attributes": {
+        "asset_type": "URL",
+        "asset_identifier": "https://three.example.test",
+        "eligible_for_submission": true,
+        "eligible_for_bounty": true,
+        "instruction": "Synthetic public DEV; no testing authorization",
+        "max_severity": "high"
+      }
+    }
+  ],
+  "links": {
+    "next": null
+  }
+}

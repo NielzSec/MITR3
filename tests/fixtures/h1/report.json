@@ -1,0 +1,39 @@
+{
+  "program": "public-dev",
+  "title": "Public synthetic structural report",
+  "summary": "Offline validation control, not a vulnerability finding.",
+  "asset": {
+    "identifier": "https://one.example.test",
+    "type": "URL",
+    "endpoint": "https://one.example.test/public-dev",
+    "method": "GET"
+  },
+  "weakness": "CWE-200",
+  "preconditions": "Synthetic local fixture only.",
+  "steps_to_reproduce": [
+    "Read the offline synthetic record."
+  ],
+  "expected_result": "A synthetic observation is recorded.",
+  "observed_result": "The fixture contains HTTP status 200.",
+  "impact": "No vulnerability established; vector is solely a validator control.",
+  "test_users": false,
+  "cvss": {
+    "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "base_score": 9.8,
+    "justification": "Synthetic score calculation control, not severity of HTTP 200."
+  },
+  "policy": {
+    "scope_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "policy_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "evidence": [
+    {
+      "label": "Public synthetic fixture",
+      "at_utc": "2026-10-20T00:00:00Z",
+      "sha256": "8d1fb8e1d8068205e61c3618625dcccbde920e453c74840105b45ec07bb6c44b",
+      "redacted": true,
+      "request": "GET /public-dev HTTP/1.1\nHost: one.example.test\nAuthorization: [REDACTED]\nCookie: [REDACTED]",
+      "response": "HTTP/1.1 200 OK\nSet-Cookie: [REDACTED]\n\nSynthetic response; proves HTTP availability only."
+    }
+  ]
+}
