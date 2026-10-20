@@ -32,6 +32,15 @@ ANSI = re.compile(r'\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)|\x1b\[[0-?]*[ -/]*[@-~]|\x
 IDENTIFIER = re.compile(r'(?<!\w)(?:CVE-\d{4}-\d{4,}|CWE-\d+|ASVS-V?\d+(?:\.\d+){2}|T\d{4}(?:\.\d{3})?|TA\d{4}|[GSM]\d{4})(?!\w)', re.I)
 LOCAL_MARKER = re.compile(r'\b(?:CVE|CWE|ASVS)\b|\bCASE-', re.I)
 ATTACK_MARKER = re.compile(r'ATT&CK|\bATTACK\b|\b(?:T\d{4}(?:\.\d{3})?|TA\d{4}|[GSM]\d{4})\b|\b(?:attack-pattern|intrusion-set|relationship)--', re.I)
+# Conteudo dirigido ao agente nao vira afirmacao, mesmo citado literalmente.
+INSTRUCTION_MARKER = re.compile(
+    r'(?:\b(?:ignore|disregard|forget)\b[^.\n]{0,40}\b(?:previous|above|prior|all|the rules|instructions)\b'
+    r'|\b(?:desconsidere|ignore|esque[cç]a)\b[^.\n]{0,40}\b(?:regras?|instru[cç][oõ]es|acima|anteriores)\b'
+    r'|\bsystem\s+prompt\b|\bprompt\s+do\s+sistema\b'
+    r'|\byou\s+are\s+now\b|\bvoc[eê]\s+agora\s+[eé]\b'
+    r'|\bdo\s+not\s+(?:follow|obey)\b|\bn[aã]o\s+(?:siga|obede[cç]a)\b'
+    r'|\b(?:respond|answer|reply)\s+only\b|\b(?:responda|responder)\s+apenas\b'
+    r'|\bcite\s+(?:only\s+)?CVE-\d|\bcite\s+apenas\s+CVE-\d)', re.I)
 SOURCES = {'cisa-kev', 'owasp-asvs-5.0.0', 'public-cases'}
 LOCAL_EDGES = {'cwe_of': 'cisa-kev', 'asvs_maps_cwe': 'owasp-asvs-5.0.0', 'case_references': 'public-cases'}
 ATTACK_EDGES = {'uses', 'mitigates', 'subtechnique-of', 'attributed-to'}
@@ -341,6 +350,8 @@ def gate(composition, package):
             fail('UNCITED_CLAIM')
         if redacted(claim) or any(unicodedata.category(c).startswith('C') and c not in '\n\t' for c in claim['text']):
             fail('UNSAFE_CLAIM')
+        if INSTRUCTION_MARKER.search(claim['text']):
+            fail('INSTRUCTION_CLAIM')
         namespaces, citations = set(), []
         for cite in claim['citations']:
             if (not isinstance(cite, dict) or set(cite) != {'id', 'quote'}
@@ -354,6 +365,8 @@ def gate(composition, package):
             if (not normalized(cite['quote'])
                     or normalized(cite['quote']) not in normalized(doc['snippet'])):
                 fail('QUOTE_NOT_LITERAL')
+            if INSTRUCTION_MARKER.search(cite['quote']):
+                fail('INSTRUCTION_QUOTE')
             namespaces.add(doc['namespace'])
             citations.append({'id': doc['id'], 'quote': cite['quote'], 'source_url': doc['source_url'],
                               'sha256': doc['sha256'], 'namespace': doc['namespace']})
