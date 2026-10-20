@@ -1,0 +1,533 @@
+{
+  "positive_queries": 20,
+  "negative_queries": 10,
+  "hit_at_5": 1.0,
+  "macro_recall_at_5": 0.988,
+  "macro_precision_at_5": 0.24,
+  "macro_precision_of_returned": 0.64,
+  "negative_abstention_rate": 0.2,
+  "by_kind": {
+    "concept": {
+      "n": 10,
+      "hit_at_5": 1.0,
+      "recall_at_5": 0.975,
+      "precision_at_5": 0.28,
+      "precision_of_returned": 0.28
+    },
+    "exact": {
+      "n": 10,
+      "hit_at_5": 1.0,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0
+    }
+  },
+  "details": [
+    {
+      "query": "CVE-2023-23397",
+      "kind": "exact",
+      "expected": [
+        "CVE-2023-23397"
+      ],
+      "returned": [
+        "CVE-2023-23397"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2021-44228",
+      "kind": "exact",
+      "expected": [
+        "CVE-2021-44228"
+      ],
+      "returned": [
+        "CVE-2021-44228"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2023-34362",
+      "kind": "exact",
+      "expected": [
+        "CVE-2023-34362"
+      ],
+      "returned": [
+        "CVE-2023-34362"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2024-3400",
+      "kind": "exact",
+      "expected": [
+        "CVE-2024-3400"
+      ],
+      "returned": [
+        "CVE-2024-3400"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2023-4863",
+      "kind": "exact",
+      "expected": [
+        "CVE-2023-4863"
+      ],
+      "returned": [
+        "CVE-2023-4863"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2022-30190",
+      "kind": "exact",
+      "expected": [
+        "CVE-2022-30190"
+      ],
+      "returned": [
+        "CVE-2022-30190"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2020-1472",
+      "kind": "exact",
+      "expected": [
+        "CVE-2020-1472"
+      ],
+      "returned": [
+        "CVE-2020-1472"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2021-34527",
+      "kind": "exact",
+      "expected": [
+        "CVE-2021-34527"
+      ],
+      "returned": [
+        "CVE-2021-34527"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "ASVS-V1.1.1",
+      "kind": "exact",
+      "expected": [
+        "ASVS-V1.1.1"
+      ],
+      "returned": [
+        "ASVS-V1.1.1"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "ASVS-V1.2.5",
+      "kind": "exact",
+      "expected": [
+        "ASVS-V1.2.5"
+      ],
+      "returned": [
+        "ASVS-V1.2.5"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "NTLM relay Outlook",
+      "kind": "concept",
+      "expected": [
+        "CVE-2023-23397",
+        "CVE-2025-24054"
+      ],
+      "returned": [
+        "CVE-2023-23397",
+        "CVE-2023-35311",
+        "CVE-2024-21413",
+        "CVE-2017-11774",
+        "CVE-2025-24054"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "precision_of_returned": 0.4,
+      "abstained": null
+    },
+    {
+      "query": "cache poisoning",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-cache-2024",
+        "CASE-ps-practical-cache-poisoning-2018"
+      ],
+      "returned": [
+        "CASE-ps-practical-cache-poisoning-2018",
+        "CASE-ps-cache-2024",
+        "CVE-2026-45247",
+        "ASVS-V14.2.5",
+        "ASVS-V14.3.2"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "precision_of_returned": 0.4,
+      "abstained": null
+    },
+    {
+      "query": "web cache deception",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-cache-2024"
+      ],
+      "returned": [
+        "CASE-ps-practical-cache-poisoning-2018",
+        "CASE-ps-cache-2024",
+        "ASVS-V14.2.5",
+        "CVE-2026-45247",
+        "ASVS-V14.3.2"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.2,
+      "abstained": null
+    },
+    {
+      "query": "HTTP request smuggling",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http1-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-request-smuggling-research"
+      ],
+      "returned": [
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CVE-2022-22536",
+        "CVE-2026-48710",
+        "CASE-ps-http2-2021"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 0.75,
+      "precision_at_5": 0.6,
+      "precision_of_returned": 0.6,
+      "abstained": null
+    },
+    {
+      "query": "false positive request smuggling",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-false-positive-2025"
+      ],
+      "returned": [
+        "CASE-ps-false-positive-2025",
+        "CASE-projectdiscovery-templates",
+        "CASE-ps-request-smuggling-research",
+        "CVE-2022-22536",
+        "CVE-2026-48710"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.2,
+      "abstained": null
+    },
+    {
+      "query": "CTF RSA shared prime",
+      "kind": "concept",
+      "expected": [
+        "CASE-jctf-rsa-41140"
+      ],
+      "returned": [
+        "CASE-jctf-rsa-41140",
+        "CVE-2015-0666",
+        "CASE-ctfcit-2026-saymyname",
+        "CASE-ctfcit-2026-faultline",
+        "CASE-ctfcit-2026-click"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.2,
+      "abstained": null
+    },
+    {
+      "query": "CTF pcap forensics",
+      "kind": "concept",
+      "expected": [
+        "CASE-jctf-pcap-41139"
+      ],
+      "returned": [
+        "CASE-jctf-pcap-41139",
+        "CASE-ctfcit-2026-click",
+        "CASE-ctftime-catalog",
+        "CASE-jctf-signal-41138",
+        "CASE-ctfcit-2026-saymyname"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.2,
+      "abstained": null
+    },
+    {
+      "query": "file carving corrupt images",
+      "kind": "concept",
+      "expected": [
+        "CASE-jctf-files-41137"
+      ],
+      "returned": [
+        "CASE-jctf-files-41137",
+        "ASVS-V5.2.6",
+        "CVE-2021-22205",
+        "CVE-2015-3246",
+        "CVE-2013-1347"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.2,
+      "abstained": null
+    },
+    {
+      "query": "reverse engineering differential testing",
+      "kind": "concept",
+      "expected": [
+        "CASE-ctfcit-2026-faultline"
+      ],
+      "returned": [
+        "CASE-ctfcit-2026-faultline",
+        "CASE-uiuctf-re-41116",
+        "CASE-ctfcit-2026-saymyname",
+        "CASE-owasp-wstg",
+        "CASE-ctftime-catalog"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.2,
+      "abstained": null
+    },
+    {
+      "query": "CTF browser history PowerShell forensics",
+      "kind": "concept",
+      "expected": [
+        "CASE-ctfcit-2026-click"
+      ],
+      "returned": [
+        "CASE-ctfcit-2026-click",
+        "CASE-ctftime-catalog",
+        "CASE-jctf-signal-41138",
+        "CASE-ctfcit-2026-saymyname",
+        "CASE-ctfcit-2026-faultline"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.2,
+      "abstained": null
+    },
+    {
+      "query": "esxi encryptor",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "CVE-2024-37085",
+        "CVE-2020-3992",
+        "CVE-2025-22225",
+        "CVE-2019-5544",
+        "CVE-2025-22226"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    },
+    {
+      "query": "LockBit ESXi encryptor",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "CVE-2024-37085",
+        "CVE-2020-3992",
+        "CVE-2025-22225",
+        "CVE-2019-5544",
+        "CVE-2025-22226"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    },
+    {
+      "query": "ransomware affiliate infrastructure mapping",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "CVE-2024-7694",
+        "CVE-2021-38649",
+        "CVE-2021-38645",
+        "CVE-2021-38648",
+        "CVE-2021-38647"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    },
+    {
+      "query": "Ra Osiris domain backup key extracted",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "CVE-2014-6324",
+        "CVE-2023-27532",
+        "CVE-2024-40711",
+        "CVE-2021-27877",
+        "CVE-2021-27878"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    },
+    {
+      "query": "CVE-2099-999999",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "ASVS-V99.99.99",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "most recent unknown private bug bounty reward",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "CASE-bb-markdown",
+        "CASE-owasp-cheatsheets",
+        "CASE-owasp-wstg",
+        "CVE-2017-12319",
+        "CVE-2015-5287"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    },
+    {
+      "query": "MITR3 operator password leaked from Maestri",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "ASVS-V6.2.8",
+        "ASVS-V6.3.8",
+        "CASE-uiuctf-osint-41117",
+        "ASVS-V6.2.6",
+        "ASVS-V6.2.3"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    },
+    {
+      "query": "malware decryptor private key discovery",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "ASVS-V10.4.16",
+        "ASVS-V11.1.1",
+        "CVE-2017-8540",
+        "CVE-2022-23748",
+        "ASVS-V9.2.4"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    },
+    {
+      "query": "worm malware C2 operator attribution",
+      "kind": "negative",
+      "expected": [],
+      "returned": [
+        "CVE-2017-8540",
+        "CVE-2024-4978",
+        "CVE-2013-7331",
+        "CVE-2026-45321",
+        "CVE-2019-11001"
+      ],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": false
+    }
+  ],
+  "mode": "baseline",
+  "fixture": "/home/nielz/MITR3/tests/fixtures/intel-relevance-v1.json",
+  "notes": "Original 4bfb4f9 index rebuilt from official feeds and 26 cases, using unmodified legacy OR retrieval. Comparison before candidate aliases/routing."
+}

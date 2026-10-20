@@ -57,11 +57,23 @@ Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada down
 
 ## Limitações medidas
 
-- A avaliação atual mede somente recall lexical@5 em 6 perguntas de referência. Isso não é uma nota de desempenho dos LLMs.
-- O MegaBrain remoto já redigiu 6 das primeiras 16 fichas em safe_content. É necessário QA das fichas recém-publicadas e tratamento de falso positivo com os responsáveis. Nunca contornar o filtro.
+- O smoke test de 6 perguntas (`mitr3-rag-intel.py bench`) mede encanamento, não qualidade: são 6 pares escolhidos pelo autor e o matcher antigo fazia OR entre termos. `mitr3-rag-eval.py` é a medição que vale — 30 consultas em `tests/fixtures/intel-relevance-v1.json` (20 positivas, 10 negativas de abstenção), rodada em dois modos:
+
+| métrica | baseline (OR + bm25 antigo) | candidato (AND + roteamento de fonte) |
+|---|---|---|
+| hit@5 | 1.000 | 1.000 |
+| macro recall@5 | 1.000 | 0.975 |
+| precision@5 (denominador 5) | 0.250 | 0.240 |
+| precision dos retornados | 0.650 | 0.975 |
+| abstenção em negativas | 0.200 | 1.000 |
+
+  O ganho real é a abstenção: o baseline respondia a "esxi encryptor" e a "CVE-2099-999999"; o candidato cala. `precision dos retornados` sobe em parte por calar — não use como prova de acerto semântico. O recall perdeu 0.025: o AND derruba um documento esperado de uma das consultas de conceito. Fixture é curada, não cega; nenhum desses números é nota de LLM.
+- O catálogo não conhece papéis ("encryptor" é função de ransomware, não atributo de CVE). Query de comportamento só acerta quando existe ficha de caso que fale disso; para o resto o resultado honesto é abster.
+- O MegaBrain remoto já redigiu 10 das 26 fichas publicadas (`state/public-rag-mcp-qa.json`). É necessário QA do gatilho: 38% de perda em conteúdo ofensivo não é aceitável como taxa estrutural. Nunca contornar o filtro.
 - O índice amplo é local; os 2.000+ requisitos/CVEs não foram enviados individualmente por MCP, evitando duplicação, custo e carga desnecessários.
 - Não confundir números de itens de um catálogo oficial com número de relatos reais analisados.
 - Manter no máximo atualizações leves semanais no Arch, preservando RAM e swap.
+- KEV sem histórico é `rsync` caro: `bin/mitr3-rag-intel-refresh.py` grava snapshot + delta (`state/mitr3-kev-snapshot.json`, `state/mitr3-kev-delta-history.jsonl`, ambos fora do git) e nunca marca a primeira execução como "tudo novo".
 
 ## Referências de política
 

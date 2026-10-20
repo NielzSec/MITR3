@@ -1,0 +1,450 @@
+{
+  "positive_queries": 20,
+  "negative_queries": 10,
+  "hit_at_5": 1.0,
+  "macro_recall_at_5": 0.975,
+  "macro_precision_at_5": 0.24,
+  "macro_precision_of_returned": 0.975,
+  "negative_abstention_rate": 1.0,
+  "by_kind": {
+    "concept": {
+      "n": 10,
+      "hit_at_5": 1.0,
+      "recall_at_5": 0.95,
+      "precision_at_5": 0.28,
+      "precision_of_returned": 0.95
+    },
+    "exact": {
+      "n": 10,
+      "hit_at_5": 1.0,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0
+    }
+  },
+  "details": [
+    {
+      "query": "CVE-2023-23397",
+      "kind": "exact",
+      "expected": [
+        "CVE-2023-23397"
+      ],
+      "returned": [
+        "CVE-2023-23397"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2021-44228",
+      "kind": "exact",
+      "expected": [
+        "CVE-2021-44228"
+      ],
+      "returned": [
+        "CVE-2021-44228"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2023-34362",
+      "kind": "exact",
+      "expected": [
+        "CVE-2023-34362"
+      ],
+      "returned": [
+        "CVE-2023-34362"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2024-3400",
+      "kind": "exact",
+      "expected": [
+        "CVE-2024-3400"
+      ],
+      "returned": [
+        "CVE-2024-3400"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2023-4863",
+      "kind": "exact",
+      "expected": [
+        "CVE-2023-4863"
+      ],
+      "returned": [
+        "CVE-2023-4863"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2022-30190",
+      "kind": "exact",
+      "expected": [
+        "CVE-2022-30190"
+      ],
+      "returned": [
+        "CVE-2022-30190"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2020-1472",
+      "kind": "exact",
+      "expected": [
+        "CVE-2020-1472"
+      ],
+      "returned": [
+        "CVE-2020-1472"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CVE-2021-34527",
+      "kind": "exact",
+      "expected": [
+        "CVE-2021-34527"
+      ],
+      "returned": [
+        "CVE-2021-34527"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "ASVS-V1.1.1",
+      "kind": "exact",
+      "expected": [
+        "ASVS-V1.1.1"
+      ],
+      "returned": [
+        "ASVS-V1.1.1"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "ASVS-V1.2.5",
+      "kind": "exact",
+      "expected": [
+        "ASVS-V1.2.5"
+      ],
+      "returned": [
+        "ASVS-V1.2.5"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "NTLM relay Outlook",
+      "kind": "concept",
+      "expected": [
+        "CVE-2023-23397",
+        "CVE-2025-24054"
+      ],
+      "returned": [
+        "CVE-2023-23397"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 0.5,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "cache poisoning",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-cache-2024",
+        "CASE-ps-practical-cache-poisoning-2018"
+      ],
+      "returned": [
+        "CASE-ps-practical-cache-poisoning-2018",
+        "CASE-ps-cache-2024"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.4,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "web cache deception",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-cache-2024"
+      ],
+      "returned": [
+        "CASE-ps-cache-2024",
+        "CASE-ps-practical-cache-poisoning-2018"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 0.5,
+      "abstained": null
+    },
+    {
+      "query": "HTTP request smuggling",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http1-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-request-smuggling-research"
+      ],
+      "returned": [
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-http1-2025"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.8,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "false positive request smuggling",
+      "kind": "concept",
+      "expected": [
+        "CASE-ps-false-positive-2025"
+      ],
+      "returned": [
+        "CASE-ps-false-positive-2025"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CTF RSA shared prime",
+      "kind": "concept",
+      "expected": [
+        "CASE-jctf-rsa-41140"
+      ],
+      "returned": [
+        "CASE-jctf-rsa-41140"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CTF pcap forensics",
+      "kind": "concept",
+      "expected": [
+        "CASE-jctf-pcap-41139"
+      ],
+      "returned": [
+        "CASE-jctf-pcap-41139"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "file carving corrupt images",
+      "kind": "concept",
+      "expected": [
+        "CASE-jctf-files-41137"
+      ],
+      "returned": [
+        "CASE-jctf-files-41137"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "reverse engineering differential testing",
+      "kind": "concept",
+      "expected": [
+        "CASE-ctfcit-2026-faultline"
+      ],
+      "returned": [
+        "CASE-ctfcit-2026-faultline"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "CTF browser history PowerShell forensics",
+      "kind": "concept",
+      "expected": [
+        "CASE-ctfcit-2026-click"
+      ],
+      "returned": [
+        "CASE-ctfcit-2026-click"
+      ],
+      "hit_at_5": true,
+      "recall_at_5": 1.0,
+      "precision_at_5": 0.2,
+      "precision_of_returned": 1.0,
+      "abstained": null
+    },
+    {
+      "query": "esxi encryptor",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "LockBit ESXi encryptor",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "ransomware affiliate infrastructure mapping",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "Ra Osiris domain backup key extracted",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "CVE-2099-999999",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "ASVS-V99.99.99",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "most recent unknown private bug bounty reward",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "MITR3 operator password leaked from Maestri",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "malware decryptor private key discovery",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    },
+    {
+      "query": "worm malware C2 operator attribution",
+      "kind": "negative",
+      "expected": [],
+      "returned": [],
+      "hit_at_5": false,
+      "recall_at_5": null,
+      "precision_at_5": null,
+      "precision_of_returned": null,
+      "abstained": true
+    }
+  ],
+  "mode": "candidate",
+  "fixture": "/home/nielz/MITR3/tests/fixtures/intel-relevance-v1.json",
+  "notes": "Human-curated corpus examples, not blinded. P@5 uses fixed denominator 5. Precision-of-returned is conditional on how many results the system chooses to return, so it can rise by abstaining; NOT an independent semantic correctness measure."
+}

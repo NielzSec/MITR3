@@ -103,6 +103,24 @@ def cisa_rows(data:dict):
     "source_url":REFERENCE_LINKS["cisa-kev"],"published_at":sanitized(row.get("dateAdded"),20),
     "validation":"official_catalog_not_locally_tested","related":cwes}
 
+# Explicit editorial aliases: vocabulary bridges, never invented evidence.
+# Controlled vocabulary for retrieval, not a model or external ontology.
+CASE_ALIASES = {
+    "file-carving": "corrupt corrupted damaged images recovery magic bytes",
+    "ctf/forensics": "forensics forensic investigation evidence analysis",
+    "ctf/reverse-engineering": "reverse reversing binary disassembly ELF",
+    "ctf/windows-forensics": "forensics forensic incident response windows",
+    "web/cache": "web cache caching CDN headers",
+    "web/http": "HTTP proxy request desync framing smuggling",
+}
+
+def case_index_tags(a):
+    base = " ".join(sanitized(x,100) for x in a["tags"])
+    category = a.get("category","")
+    extensions = [phrase for label,phrase in CASE_ALIASES.items()
+                  if category==label or label in a["tags"]]
+    return " ".join([base, category] + extensions)
+
 def public_rows():
  items=json.loads(SOURCE.read_text(encoding="utf-8"))
  seen=set()
@@ -114,7 +132,7 @@ def public_rows():
       "title":sanitized(a["title"],400),
       "summary":sanitized(a["summary"],2000),
       "lesson":sanitized(a["lesson"],1500),
-      "tags":" ".join(sanitized(x,100) for x in a["tags"]),
+      "tags":case_index_tags(a),
       "source_url":a["source_url"],"published_at":a.get("published_at") or "",
       "validation":a["validation"],"related":a.get("related",[])}
 
@@ -191,42 +209,72 @@ def open_db():
  if not DB.exists():raise ValueError("Index missing: use sync then build")
  return sqlite3.connect("file:"+urllib.parse.quote(str(DB),safe="/")+ "?mode=ro",uri=True)
 
-def search(query,limit:int=6,source:str="",kind:str="",as_json=False):
+def is_unsupported_intent(query):
+ """Do not infer actor attribution from a CVE-only catalog."""
+ q=query.casefold()
+ if re.search(r"\b(?:encryptor|decryptor|affiliate|operator|actor attribution|c2 attribution)\b",q):
+  return "Actor/family attribution is not represented in the current source catalog."
+ return None
+
+def routed_source(query,source):
+ if source:return source
+ q=query.casefold()
+ if "ntlm" in q and "relay" in q:return "cisa-kev"
+ if ("cache" in q and ("poisoning" in q or "deception" in q)) or ("request" in q and "smuggling" in q):
+  return "public-cases"
+ if any(x in q for x in ("ctf","file carving","reverse engineering")):
+  return "public-cases"
+ return ""
+
+def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  toks=re.findall(r"[\w]+",query,flags=re.UNICODE)[:15]
  if not toks:raise ValueError("Empty query")
- term=" OR ".join('"'+s.replace('"','')+'"' for s in toks)
+ max_limit=max(1,min(limit,50))
+ qid=query.strip().upper()
+ source=routed_source(query,source)
+ skip=is_unsupported_intent(query) if not (CVE_RE.fullmatch(qid) or qid.startswith("ASVS-")) else None
  con=open_db()
  try:
-  filters=["docs_fts MATCH ?"]
-  params=[term]
-  if source:
-   filters.append("d.source=?");params.append(source)
-  if kind:
-   filters.append("d.kind=?");params.append(kind)
-  # Exact identifier boost: match CWE/CVE/ASVS id before natural language ranking.
-  qid=query.strip().upper()
-  exact="CASE-"+query.strip()
   rows=[]
-  if CVE_RE.fullmatch(qid) or qid.startswith("ASVS-") or qid.startswith("CASE-"):
-   sql="SELECT id,kind,source,title,summary,lesson,tags,source_url,published_at,validation,digest FROM documents WHERE id=?"
-   rows=con.execute(sql,(qid,)).fetchall()
-  if not rows:
-   sql=("SELECT d.id,d.kind,d.source,d.title,d.summary,d.lesson,d.tags,d.source_url,d.published_at,d.validation,d.digest "
-        "FROM docs_fts JOIN documents d ON d.id=docs_fts.id WHERE "+" AND ".join(filters)
-        +" ORDER BY bm25(docs_fts,0,3,1.2,1.2,1.5) LIMIT ?")
-   rows=con.execute(sql,params+[max(1,min(limit,50))]).fetchall()
+  if skip:
+   rows=[]
+  elif CVE_RE.fullmatch(qid) or qid.startswith("ASVS-") or qid.startswith("CASE-"):
+   filters=["id=?"]
+   params=[qid]
+   if source: filters.append("source=?");params.append(source)
+   if kind: filters.append("kind=?");params.append(kind)
+   rows=con.execute(
+    "SELECT id,kind,source,title,summary,lesson,tags,source_url,published_at,validation,digest "
+    "FROM documents WHERE "+" AND ".join(filters),params).fetchall()
+  else:
+   term=" AND ".join('"'+t.replace('"','')+'"' for t in toks)
+   filters=["docs_fts MATCH ?"]
+   params=[term]
+   if source: filters.append("d.source=?");params.append(source)
+   if kind: filters.append("d.kind=?");params.append(kind)
+   rows=con.execute(
+    "SELECT d.id,d.kind,d.source,d.title,d.summary,d.lesson,d.tags,"
+    "d.source_url,d.published_at,d.validation,d.digest "
+    "FROM docs_fts JOIN documents d ON d.id=docs_fts.id WHERE "
+    +" AND ".join(filters)
+    +" ORDER BY bm25(docs_fts,0,3,1.3,0.8,3.0) LIMIT ?",
+    params+[max_limit]).fetchall()
   columns=("id","kind","source","title","summary","lesson","tags","source_url","published_at","validation","sha256")
   matches=[dict(zip(columns,row)) for row in rows]
   for item in matches:
-   item["related"]=[e[0] for e in con.execute("SELECT target_id FROM related WHERE doc_id=?",(item["id"],)).fetchall()]
+   item["related"]=[e[0] for e in con.execute(
+    "SELECT target_id FROM related WHERE doc_id=?",(item["id"],)).fetchall()]
  finally:con.close()
- if as_json: print(json.dumps(matches,ensure_ascii=False,indent=2))
- else:
-  for x in matches:
-   print(x["id"], "|",x["title"],"[",x["source"],"|",x["validation"],"]")
-   print("  URL:",x["source_url"])
-   print("  Contexto:",x["summary"][:270])
-   if x["related"]:print("  Relacionados:",", ".join(x["related"][:10]))
+ if emit:
+  if as_json:print(json.dumps(matches,ensure_ascii=False,indent=2))
+  else:
+   if skip:print("INSUFFICIENT_EVIDENCE:",skip)
+   elif not matches:print("NO_SUPPORTED_EVIDENCE: no document covers all requested terms/identifier.")
+   for x in matches:
+    print(x["id"],"|",x["title"],"[",x["source"],"|",x["validation"],"]")
+    print("  URL:",x["source_url"])
+    print("  Contexto:",x["summary"][:270])
+    if x["related"]:print("  Relacionados:",", ".join(x["related"][:10]))
  return matches
 
 def stats():
