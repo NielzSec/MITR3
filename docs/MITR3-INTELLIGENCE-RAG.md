@@ -85,6 +85,8 @@ Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada down
 - Manter no máximo atualizações leves semanais no Arch, preservando RAM e swap.
 - KEV sem histórico é `rsync` caro: `bin/mitr3-rag-intel-refresh.py` grava snapshot + delta (`state/mitr3-kev-snapshot.json`, `state/mitr3-kev-delta-history.jsonl`, ambos fora do git) e nunca marca a primeira execução como "tudo novo".
 
+- Ponte de contexto ATT&CK: IDs `T####`, `T####.###`, `TA####`, `G####`, `S####`, `M####` são resolvidos pela CLI `graph --json --all`. O envelope `attack_relations` é separado de `source_declared_relations` (CVE/CWE/ASVS/CASE). A ponte só expõe `uses`, `mitigates`, `subtechnique-of`, `attributed-to`, com ID relationship STIX, modified e SHA256; exige igualdade entre bytes do bundle, manifest, metadata do banco e origem de cada aresta. Divergência/falta de prova gera LocalError sem resultado parcial. Não faz parse de prosa STIX. ATT&CK não prova relações do catálogo nem o inverso; citações MegaBrain também não validam arestas. Para `T1059.001`, são 243 arestas (237 uses, 5 mitigates, 1 subtechnique-of); `T9999` é vazio sem erro. A leitura completa evita o antigo limite de 200 por direção. `graph` humano e `search()` permaneceram inalterados; suite 118/118 sem ResourceWarning, eval candidate completo idêntico (recall 0.975, abstenção 1.000). Contrato e recusas em `docs/MITR3-CONTEXT-BRIDGE-HANDOFF-20261020.md`; evidência em `reports/context-bridge-attack-v1-qa.json`.
+
 ## Grafo ATT&CK v1 — disjunto de CVE/CWE/ASVS
 
 Fonte única: [MITRE Enterprise ATT&CK STIX](https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json).
@@ -129,12 +131,14 @@ python3 bin/mitr3-rag-intel.py graph-build            # rebuild totalmente offli
 python3 bin/mitr3-rag-intel.py graph-stats
 python3 bin/mitr3-rag-intel.py graph Mimikatz --limit 5
 python3 bin/mitr3-rag-intel.py graph T1059 --json
+python3 bin/mitr3-rag-intel.py graph T1059.001 --json --all # leitura completa para ponte
 ```
 
 A consulta aceita nome exato (sem distinguir caixa), ID MITRE ou ID STIX;
 nomes ambíguos retornam todas as entidades correspondentes. Mostra outbound
 + inbound, tipo, nomes das pontas e origem (ID da relação, modified, hash e URL).
 Limite padrão: 50 arestas por direção, máximo 200, com totais visíveis;
+`--json --all` expõe todas, com metadata SHA256 do banco no mesmo snapshot;
 ID desconhecido retorna listas vazias. Não faz busca aproximada nem altera
 `search()` ou seu ranqueamento.
 

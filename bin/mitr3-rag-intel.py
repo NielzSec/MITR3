@@ -436,6 +436,7 @@ def main():
  g.add_argument("query")
  g.add_argument("--limit",type=int,default=50)
  g.add_argument("--json",action="store_true")
+ g.add_argument("--all",action="store_true",help="JSON only: all incident ATT&CK edges")
  for action in ("graph-sync","graph-build","graph-refresh","graph-stats"):
   sub.add_parser(action,help="ATT&CK only; monthly sync, offline build, refresh or stats")
  q=sub.add_parser("search")
@@ -454,7 +455,7 @@ def main():
   import importlib.util
   spec=importlib.util.spec_from_file_location("mitr3_attack_graph",ROOT/"bin/mitr3-attack-graph.py")
   graph=importlib.util.module_from_spec(spec);spec.loader.exec_module(graph)
-  graph.run(a.action,getattr(a,"query",""),getattr(a,"limit",50),getattr(a,"json",False))
+  graph.run(a.action,getattr(a,"query",""),getattr(a,"limit",50),getattr(a,"json",False),all_edges=getattr(a,"all",False))
  elif a.action=="search":search(a.query,a.limit,a.source,a.kind,a.json)
 
 if __name__=="__main__":

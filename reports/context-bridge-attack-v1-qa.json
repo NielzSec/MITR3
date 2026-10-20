@@ -1,0 +1,163 @@
+{
+  "base_commit": "18757caa3c11bdfe0502c359974a274e059fd58c",
+  "query": "T1059.001",
+  "namespace": "attack",
+  "entities": [
+    {
+      "stix_id": "attack-pattern--970a3432-3237-47ad-bcca-7d8cbb217736",
+      "type": "attack-pattern",
+      "name": "PowerShell",
+      "external_id": "T1059.001",
+      "namespace": "attack"
+    }
+  ],
+  "attack_relation_count": 243,
+  "attack_relations_by_type": {
+    "attributed-to": 0,
+    "mitigates": 5,
+    "subtechnique-of": 1,
+    "uses": 237
+  },
+  "directions": {
+    "outbound": 1,
+    "inbound": 242
+  },
+  "verified_hashes": {
+    "manifest": "81113ba98afa2928f3dcff62022539f7ce30c315c32e14422f11ff95ce534352",
+    "database_metadata": "81113ba98afa2928f3dcff62022539f7ce30c315c32e14422f11ff95ce534352",
+    "all_edge_hashes": [
+      "81113ba98afa2928f3dcff62022539f7ce30c315c32e14422f11ff95ce534352"
+    ]
+  },
+  "sample_edges": [
+    {
+      "direction": "outbound",
+      "predicate": "subtechnique-of",
+      "source_node": "attack-pattern--970a3432-3237-47ad-bcca-7d8cbb217736",
+      "target_node": "attack-pattern--7385dfaf-6886-4229-9ecd-6fd678040830",
+      "source_name": "PowerShell",
+      "target_name": "Command and Scripting Interpreter",
+      "stix_id": "relationship--b7dc0db4-b1fb-4235-8b49-0792e7019377",
+      "modified": "2026-04-29T14:23:06.176Z",
+      "sha256": "81113ba98afa2928f3dcff62022539f7ce30c315c32e14422f11ff95ce534352",
+      "source_id": "mitre-attack-enterprise",
+      "source_url": "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json",
+      "assertion_type": "source_declared_only",
+      "namespace": "attack"
+    },
+    {
+      "direction": "inbound",
+      "predicate": "mitigates",
+      "source_node": "course-of-action--a6a47a06-08fc-4ec4-bdc3-20373375ebb9",
+      "target_node": "attack-pattern--970a3432-3237-47ad-bcca-7d8cbb217736",
+      "source_name": "Antivirus/Antimalware",
+      "target_name": "PowerShell",
+      "stix_id": "relationship--758cbc32-6b33-4012-8622-cd7d218a799c",
+      "modified": "2026-04-29T14:23:06.086Z",
+      "sha256": "81113ba98afa2928f3dcff62022539f7ce30c315c32e14422f11ff95ce534352",
+      "source_id": "mitre-attack-enterprise",
+      "source_url": "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json",
+      "assertion_type": "source_declared_only",
+      "namespace": "attack"
+    }
+  ],
+  "unknown_id": {
+    "query": "T9999",
+    "status": "no_local_document",
+    "attack_entities": [],
+    "attack_relations": []
+  },
+  "namespace_isolation": {
+    "attack_query_catalog_edges": 0,
+    "cve_query": "CVE-2023-23397",
+    "cve_query_catalog_edges": 1,
+    "cve_query_attack_edges": 0,
+    "remote_citations_validate_attack_edges": false,
+    "note": "ATT&CK edges do not prove CVE/CWE/ASVS/CASE relations, and those relations do not prove ATT&CK edges. MegaBrain citations do not validate edges in either namespace, including ATT&CK; they are background only."
+  },
+  "refusals": [
+    {
+      "case": "metadata_sha256",
+      "error_type": "LocalError",
+      "reason": "ATT&CK manifest/database SHA256 or source mismatch; no ATT&CK edges promoted",
+      "returned_partial_edges": false
+    },
+    {
+      "case": "last_edge_sha256",
+      "error_type": "LocalError",
+      "reason": "ATT&CK edge SHA256/source mismatch; no ATT&CK edges promoted",
+      "returned_partial_edges": false
+    },
+    {
+      "case": "temporary_manifest_sha256",
+      "error_type": "LocalError",
+      "reason": "ATT&CK bundle/manifest SHA256 mismatch; no ATT&CK edges promoted",
+      "returned_partial_edges": false
+    }
+  ],
+  "other_rejected_cases_tested": [
+    "unsupported predicates detects/revoked-by/cwe_of/probably-related",
+    "missing STIX relationship ID/modified/source proof",
+    "CVE node in attack envelope or attack node in catalog envelope",
+    "truncated graph JSON",
+    "edge not incident to resolved entity",
+    "remote rescue after local failure"
+  ],
+  "validation": {
+    "before_suite_tests": 104,
+    "suite_tests": 118,
+    "new_methods": 14,
+    "suite_command": "python3 -W error::ResourceWarning -m unittest discover -s tests",
+    "resource_warnings": 0,
+    "complete_eval_unchanged": true,
+    "search_unchanged": true,
+    "recall_at_5": 0.975,
+    "negative_abstention_rate": 1.0,
+    "graph_human_text_byte_identical": true,
+    "graph_human_text_sha256": "c98c0f393bbb560dce23c170a53cef4b9323e5fdad742d9478983f93af92d951"
+  },
+  "cli_json_extension": "--all exposes all incident edges and metadata reads source_id/url/sha256 from the same SQLite read transaction. Default human text is unchanged. No STIX prose parsed, no remote call made in this QA.",
+  "identifier_smoke": [
+    {
+      "query": "T1059",
+      "entities": 1,
+      "counts": {
+        "mitigates": 9,
+        "subtechnique-of": 13,
+        "uses": 45
+      },
+      "catalog_edges": 0
+    },
+    {
+      "query": "TA0002",
+      "entities": 0,
+      "counts": {},
+      "catalog_edges": 0
+    },
+    {
+      "query": "G0007",
+      "entities": 1,
+      "counts": {
+        "attributed-to": 1,
+        "uses": 122
+      },
+      "catalog_edges": 0
+    },
+    {
+      "query": "S0002",
+      "entities": 1,
+      "counts": {
+        "uses": 77
+      },
+      "catalog_edges": 0
+    },
+    {
+      "query": "M1049",
+      "entities": 1,
+      "counts": {
+        "mitigates": 23
+      },
+      "catalog_edges": 0
+    }
+  ]
+}

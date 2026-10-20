@@ -143,6 +143,17 @@ class GraphTests(unittest.TestCase):
             graph.build()
         self.assertEqual(graph.DB.read_bytes(), original)
 
+    def test_json_all_edges_and_database_metadata_snapshot(self):
+        limited = graph.query("T1000", limit=1)
+        complete = graph.query("T1000", limit=1, all_edges=True)
+        self.assertEqual(len(limited["inbound"]), 1)
+        self.assertEqual(len(complete["inbound"]), complete["counts"]["inbound"])
+        self.assertGreater(len(complete["inbound"]), 1)
+        self.assertIsNone(complete["limit_per_direction"])
+        self.assertEqual(complete["metadata"], {key: self.metadata[key] for key in ("source_id", "url", "sha256")})
+        with self.assertRaisesRegex(ValueError, "requires --json"):
+            graph.run("graph", "T1000", all_edges=True)
+
     def test_monthly_cache_does_not_fetch_again_and_boundary_is_calendar_month(self):
         with mock.patch.object(graph.urllib.request, "build_opener", side_effect=AssertionError("unexpected network")):
             bundle, metadata = graph.sync_bundle()

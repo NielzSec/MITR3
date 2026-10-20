@@ -290,14 +290,18 @@ def stats():
         return graph_stats(con)
 
 
-def query(identifier, limit=50):
+def query(identifier, limit=50, all_edges=False):
     identifier = identifier.strip()
     limit = max(1, min(limit, 200))
     with closing(connect()) as con:
+        con.execute("BEGIN")  # Metadata, entities and edges share one read snapshot.
         nodes = con.execute("SELECT stix_id,type,name,external_id FROM entities WHERE stix_id=? OR external_id=? OR name_fold=? ORDER BY stix_id",
                             (identifier, identifier.upper(), identifier.casefold())).fetchall()
         entity_columns = ("stix_id", "type", "name", "external_id")
-        result = {"query": identifier, "entities": [dict(zip(entity_columns, n)) for n in nodes], "outbound": [], "inbound": [], "counts": {}}
+        metadata = {key: json.loads(value) for key, value in con.execute(
+            "SELECT key,value FROM metadata WHERE key IN ('sha256','source_id','url')")}
+        result = {"query": identifier, "entities": [dict(zip(entity_columns, n)) for n in nodes],
+                  "metadata": metadata, "outbound": [], "inbound": [], "counts": {}}
         for direction, column in (("outbound", "source_ref"), ("inbound", "target_ref")):
             # Match nodes in SQL rather than interpolate IDs or produce 1000s of placeholders.
             where = "e." + column + " IN (SELECT stix_id FROM entities WHERE stix_id=? OR external_id=? OR name_fold=?)"
@@ -306,17 +310,20 @@ def query(identifier, limit=50):
             result["counts"][direction] = total
             rows = con.execute("SELECT e.stix_id,e.type,e.modified,e.bundle_sha256,s.stix_id,s.name,s.type,t.stix_id,t.name,t.type "
                                "FROM edges e JOIN entities s ON s.stix_id=e.source_ref JOIN entities t ON t.stix_id=e.target_ref WHERE " + where +
-                               " ORDER BY e.type,s.name,t.name,e.stix_id LIMIT ?", params + (limit,))
+                               " ORDER BY e.type,s.name,t.name,e.stix_id" + ("" if all_edges else " LIMIT ?"),
+                               params if all_edges else params + (limit,))
             for edge_id, edge_type, timestamp, sha, sid, sname, stype, tid, tname, ttype in rows:
                 result[direction].append({"stix_id": edge_id, "type": edge_type,
                     "source": {"stix_id": sid, "name": sname, "type": stype},
                     "target": {"stix_id": tid, "name": tname, "type": ttype},
                     "origin": {"source_id": SOURCE, "url": URL, "modified": timestamp, "bundle_sha256": sha}})
-        result["limit_per_direction"] = limit
+        result["limit_per_direction"] = None if all_edges else limit
         return result
 
 
-def run(action, identifier="", limit=50, as_json=False):
+def run(action, identifier="", limit=50, as_json=False, all_edges=False):
+    if all_edges and not as_json:
+        raise ValueError("--all requires --json")
     if action in ("graph-sync", "graph-build", "graph-refresh"):
         limit_memory()
     if action == "graph-sync":
@@ -329,7 +336,7 @@ def run(action, identifier="", limit=50, as_json=False):
     elif action == "graph-stats":
         result = stats()
     else:
-        result = query(identifier, limit)
+        result = query(identifier, limit, all_edges)
     if as_json or action != "graph":
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
