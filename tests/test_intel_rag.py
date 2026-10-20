@@ -61,6 +61,15 @@ class IntelTests(unittest.TestCase):
         self.assertEqual(results[0]["id"],"CVE-2023-23397")
         self.assertTrue(results[0]["source_url"].startswith("https://"))
 
+    def test_exact_id_lookup_accepts_mixed_case(self):
+        # regressao v3: lookup exato por CASE-... era uppercased e errava por case
+        with mock.patch.object(intel.urllib.request,"urlopen",side_effect=AssertionError("unexpected network call")):
+            with mock.patch("builtins.print"):
+                for qid in ("CASE-jctf-rsa-41140","CASE-ps-practical-cache-poisoning-2018"):
+                    results=intel.search(qid,limit=3,as_json=True)
+                    self.assertEqual(len(results),1, qid)
+                    self.assertEqual(results[0]["id"],qid)
+
     def test_new_ctf_curated_and_source_linked(self):
         records={x["id"]:x for x in intel.public_rows()}
         self.assertIn("CASE-ctfcit-2026-faultline",records)

@@ -331,8 +331,10 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
   if skip:
    rows=[]
   elif CVE_RE.fullmatch(qid) or qid.startswith("ASVS-") or qid.startswith("CASE-"):
-   filters=["id=?"]
-   params=[qid]
+   # Lookup exato de identificador: ids mistos (CASE-jctf-...) nao sao maiusculos;
+   # candidata a forma normalizada E a literal, senao lowercase vira DOCUMENT_IDENTITY.
+   filters=["id IN (?,?)"]
+   params=[qid, query.strip()]
    if source: filters.append("source=?");params.append(source)
    if kind: filters.append("kind=?");params.append(kind)
    rows=con.execute(
