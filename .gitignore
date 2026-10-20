@@ -25,3 +25,7 @@ state/mitr3-intel-refresh-latest.json
 state/mitr3-kev-snapshot.json
 state/mitr3-kev-delta-history.jsonl
 knowledge/public-cases/queue/
+
+# CISA KEV historical deltas (generated, local)
+state/mitr3-kev-snapshot.json
+state/mitr3-kev-delta-history.jsonl

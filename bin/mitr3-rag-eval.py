@@ -67,12 +67,16 @@ def evaluate(queries:list[dict],runner)->dict:
          "by_kind":buckets,"details":details}
 def main():
  p=argparse.ArgumentParser()
- p.add_argument("--mode",choices=["baseline","candidate"],default="baseline")
+ p.add_argument("--mode",choices=["baseline","candidate"],default="candidate")
+ p.add_argument("--reference-index",type=Path,help="Required for baseline: database rebuilt using original code of commit 4bfb4f9. Use archived report for audit.")
  p.add_argument("--save",type=Path)
  a=p.parse_args()
+ if a.mode=="baseline" and a.reference_index is None:
+  p.error("baseline requires --reference-index pointing at an index rebuilt from commit 4bfb4f9; do not compare OR on a modified index")
  queries=json.loads(TESTS.read_text())
  assert len(queries)==30
- db=sqlite3.connect("file:"+str(DB)+"?mode=ro",uri=True)
+ index_path=a.reference_index if a.mode=="baseline" else DB
+ db=sqlite3.connect("file:"+str(index_path)+"?mode=ro",uri=True)
  try:
   if a.mode=="baseline":
    result=evaluate(queries,lambda q:baseline(db,q))

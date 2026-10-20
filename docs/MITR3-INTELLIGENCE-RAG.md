@@ -122,3 +122,7 @@ Os limites incluem 512 MB de cgroup, 65% de CPU, prioridade reduzida
 e timeout de 150 segundos. Só o banco local é refeito; nada roda
 contra alvos externos de pentest ou sistemas de clientes.
 
+
+## Relevance benchmark and KEV changes (2026-10-19)
+
+See docs/MITR3-RAG-FEEDBACK-QA-20261019.md for honest held-aside evaluation (20 positives and 10 negatives), types/aliases, limitations and CISA KEV snapshot delta. The old 6/6 smoke test is not a quality benchmark.
