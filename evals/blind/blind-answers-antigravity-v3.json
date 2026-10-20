@@ -1,0 +1,610 @@
+{
+  "_header": {
+    "dataset": "blind-answers-antigravity-v3",
+    "version": "v3",
+    "author": "antigravity",
+    "written_at_utc": "2026-10-20T11:15:00Z",
+    "item_count": 10,
+    "positive_controls": 7,
+    "negative_controls": 3,
+    "corpus": [
+      "CISA-KEV",
+      "OWASP-ASVS-5.0.0",
+      "MITR3-PUBLIC-CASES"
+    ],
+    "scoring_scale": {
+      "2": "correta: resposta precisa, IDs esperados presentes, nenhum ID proibido, aviso de escopo adequado",
+      "1": "parcial: conceito central correto mas com omissão de detalhe relevante ou formulação incompleta",
+      "0": "errada: erro conceitual, alucinação de fontes/IDs, citação de forbidden_ids, ou resposta com confiança em item de abstenção"
+    },
+    "sha256_canonical_items": "1657d886cf551419589b9fd9af34111e3192f7df09f1a43adfe1fdfd4bb95cc1"
+  },
+  "rows": [
+    {
+      "id": "blind-antigravity-01",
+      "question": "Em avaliações de segurança de perímetro em firewalls corporativos de próxima geração, qual CVE catalogada no KEV explora injeção de comandos no recurso GlobalProtect do Palo Alto Networks PAN-OS sem autenticação prévia, permitindo execução de código root no appliance?",
+      "expected_answer": "CVE-2024-3400 — Vulnerabilidade de injeção de comandos no recurso GlobalProtect do Palo Alto Networks PAN-OS, permitindo a um atacante não autenticado executar código arbitrário com privilégios de root no firewall; catalogada no CISA KEV com histórico comprovado de exploração ativa em campanhas direcionadas. Distinguir de falhas em gateways de outros fabricantes (como Ivanti ou Fortinet). A inclusão no KEV atesta relevância de ameaça conhecida, não sendo prova de que um host auditado esteja vulnerável.",
+      "expected_ids": [
+        "CVE-2024-3400"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-21887",
+        "CVE-2023-27997"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2024-3400, associa ao Palo Alto Networks PAN-OS GlobalProtect, classe injeção de comandos pré-autenticada com execução root, e adverte que citação no KEV não comprova vulnerabilidade no alvo.",
+        "1": "Cita CVE-2024-3400 e PAN-OS GlobalProtect, mas omite privilégios/classe ou alerta de escopo KEV; nenhum ID proibido.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde com Ivanti/Fortinet, ou afirma ausência de catalogação."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-02",
+      "question": "Durante a auditoria de exposição externa de concentradores SSL-VPN, qual é a falha catalogada no KEV que afeta o Fortinet FortiOS e FortiProxy via heap-based buffer overflow em requisições HTTP especialmente formatadas, possibilitando execução remota de código pré-autenticada?",
+      "expected_answer": "CVE-2023-27997 — Heap-based buffer overflow no componente SSL-VPN do Fortinet FortiOS e FortiProxy, permitindo que atacantes remotos executem código arbitrário sem autenticação prévia através de requisições HTTP manipuladas; catalogada no CISA KEV. A resposta deve identificar o fabricante e produto (Fortinet FortiOS/FortiProxy), a classe de falha de corrupção de memória (heap overflow) e a ausência de necessidade de autenticação. Escopo KEV: base de catalogação defensiva, não prova de exposição no alvo.",
+      "expected_ids": [
+        "CVE-2023-27997"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-3400",
+        "CVE-2022-42475"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-27997, associa ao Fortinet FortiOS/FortiProxy SSL-VPN, identifica heap buffer overflow pré-autenticado e inclui ressalva de escopo.",
+        "1": "Cita CVE-2023-27997 e Fortinet mas descreve como falha genérica de autenticação sem citar heap buffer overflow, ou omite alerta de escopo; sem IDs proibidos.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde fabricante ou afirma ausência de exploração."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-03",
+      "question": "Qual vulnerabilidade catalogada no KEV em appliances dedicados de filtragem de e-mail corporativo decorreu de falha na sanitização de nomes de arquivos em arquivos compactados (.tar) processados por script Perl interno, resultando em injeção de comandos e persistência por grupos avançados?",
+      "expected_answer": "CVE-2023-2868 — Falha de validação de entrada no Barracuda Email Security Gateway (ESG) appliance que permitia injeção de comandos remotos através de arquivos de anexo .tar com nomes de arquivos especialmente formatados (executados via qx() no módulo de inspeção); catalogada no CISA KEV. A resposta deve associar ao Barracuda ESG, citar o vetor de processamento de anexos tar/comando e destacar a presença no catálogo KEV. Presença no catálogo não atesta vulnerabilidade no ambiente em teste.",
+      "expected_ids": [
+        "CVE-2023-2868"
+      ],
+      "forbidden_ids": [
+        "CVE-2023-34362",
+        "CVE-2021-26855"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-2868, identifica o Barracuda Email Security Gateway (ESG), detalha o mecanismo de injeção de comandos via parsing de anexos .tar e contextualiza a catalogação no KEV.",
+        "1": "Cita CVE-2023-2868 e Barracuda ESG mas omite detalhes do processamento de anexos .tar; sem IDs proibidos.",
+        "0": "Cita CVE de Exchange ou outro produto, cita forbidden_ids, ou erra completamente a natureza do vetor."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-04",
+      "question": "Na modelagem de controles de controle de acesso (authorization) em APIs REST e GraphQL segundo o OWASP ASVS 5.0.0, qual requisito normativo exige que o acesso a itens de dados específicos seja restrito a consumidores com permissão explícita, prevenindo vulnerabilidades de Insecure Direct Object Reference (IDOR) e Broken Object Level Authorization (BOLA)?",
+      "expected_answer": "O OWASP ASVS 5.0.0 estabelece no requisito V8.2.2 que a aplicação deve assegurar que o acesso a dados específicos (data-specific access) seja restrito a consumidores com permissões explícitas para os respectivos itens de dados, mitigando diretamente IDOR e BOLA. A resposta deve citar expressamente V8.2.2 (distinguindo de V8.2.1, que trata de function-level access, e V8.2.3, que trata de field-level/BOPLA) e explicar a validação de propriedade/autorização sobre o objeto referenciado. Requisitos normativos orientam verificação e não comprovam falha no alvo.",
+      "expected_ids": [
+        "V8.2.2"
+      ],
+      "forbidden_ids": [
+        "V8.2.1",
+        "V8.2.3"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente o requisito V8.2.2 do ASVS 5.0.0, associa com precisão ao controle de acesso a dados específicos contra IDOR e BOLA, e diferencia de controles de função ou campo.",
+        "1": "Explica o controle de acesso por objeto contra IDOR/BOLA no ASVS mas omite o código V8.2.2 ou cita genericamente o capítulo V8; sem IDs proibidos.",
+        "0": "Confunde com controle de função (V8.2.1) ou nível de campo (V8.2.3), cita IDs de autenticação, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-05",
+      "question": "Segundo os requisitos de política de credenciais do OWASP ASVS 5.0.0, qual controle obrigatório de verificação de senhas deve ser executado no momento do registro de conta ou troca de senha para impedir que o usuário selecione credenciais comuns ou previamente vazadas?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve no requisito V6.2.4 que senhas submetidas durante o registro ou alteração de credenciais devem ser verificadas contra uma lista de, no mínimo, as 3.000 senhas mais frequentes/vazadas que atendam à política da aplicação (evitando padrões comuns e credential stuffing). A resposta deve citar o requisito V6.2.4 e a conferência mandatória contra a lista mínima de 3000 senhas, distinguindo de requisitos de comprimento mínimo (V6.2.1) ou rate-limiting (V6.1.1). Padrões ASVS não constituem achados de vulnerabilidade sem teste no sistema.",
+      "expected_ids": [
+        "V6.2.4"
+      ],
+      "forbidden_ids": [
+        "V6.2.1",
+        "V6.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita o requisito V6.2.4 do ASVS 5.0.0, detalha a checagem obrigatória contra lista de no mínimo 3.000 senhas comuns/vazadas na criação/alteração e distingue de regras de complexidade obsoletas.",
+        "1": "Explica a verificação contra senhas vazadas/comuns mas omite o código V6.2.4 ou o limiar de 3.000 senhas; sem IDs proibidos.",
+        "0": "Exige regras tradicionais de composição/complexidade (caractere especial/maiúscula obrigatória), cita forbidden_ids, ou erra o requisito."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-06",
+      "question": "Em testes de segurança contra caches compartilhados e CDNs, como atacantes utilizam entradas não incluídas na chave de cache (unkeyed inputs, como cabeçalhos HTTP adicionais) para forçar o proxy a servir respostas envenenadas com conteúdo malicioso a múltiplos usuários legítimos, e qual ficha histórica do MITR3 introduziu essa metodologia?",
+      "expected_answer": "O ataque de Web Cache Poisoning clássico explora o fato de o proxy de cache utilizar apenas um subconjunto da requisição para formar a chave de cache (ex.: método e path da URL), ignorando cabeçalhos como X-Forwarded-Host, X-Original-URL ou headers customizados (unkeyed inputs). Quando o backend reflete ou usa esses headers na resposta e o proxy armazena a resposta associada à chave comum, todos os usuários subsequentes que requisitarem a mesma URL recebem a resposta envenenada. A ficha correspondente no catálogo MITR3 é ps-practical-cache-poisoning-2018 (pesquisa seminal de James Kettle / PortSwigger Research). Fichas do catálogo não atestam exposição no alvo em avaliação.",
+      "expected_ids": [
+        "ps-practical-cache-poisoning-2018"
+      ],
+      "forbidden_ids": [
+        "ps-cache-2024",
+        "ps-http1-2025"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a exploração de unkeyed inputs (headers ignorados na chave de cache) refletidos na resposta compartilhada e cita expressamente a ficha ps-practical-cache-poisoning-2018 com alerta de escopo.",
+        "1": "Descreve o envenenamento de cache por headers não chaveados mas erra o ID da ficha ou não contextualiza unkeyed inputs; sem IDs proibidos.",
+        "0": "Confunde com Web Cache Deception (ps-cache-2024), request smuggling, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-07",
+      "question": "Em análises criptográficas forenses de artefatos RSA gerados por múltiplos dispositivos ou sessões, qual vulnerabilidade estrutural permite a quebra completa de chaves privadas sem necessidade de busca exaustiva se dois módulos públicos compartilharem um número primo, e qual ficha de caso de CTF do catálogo MITR3 exemplifica essa resolução por GCD?",
+      "expected_answer": "Quando duas instâncias RSA geram módulos n1 = p * q1 e n2 = p * q2 utilizando geradores de números pseudo-aleatórios (PRNGs) com entropia insuficiente ou sementes correlacionadas, o fator primo compartilhado p pode ser recuperado instantaneamente calculando-se o Máximo Divisor Comum entre os módulos: mdc(n1, n2) = p (Greatest Common Divisor - GCD via algoritmo de Euclides), quebrando ambas as chaves privadas. A ficha do catálogo MITR3 que documenta esse desafio é jctf-rsa-41140 (JerseyCTF VI: Relay Artifact TX-7 (RSA), por danielpeng/NYUSEC). Casos de CTF no acervo servem como referência analítica de técnicas e não provam vulnerabilidade em alvos corporativos.",
+      "expected_ids": [
+        "jctf-rsa-41140"
+      ],
+      "forbidden_ids": [
+        "jctf-pcap-41139",
+        "jctf-files-41137"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a quebra por cálculo de GCD/MDC de módulos RSA com fator primo compartilhado decorrente de falha de PRNG/entropia e cita expressamente a ficha jctf-rsa-41140.",
+        "1": "Explica o princípio do primo compartilhado e GCD mas omite o ID jctf-rsa-41140 ou descreve de forma superficial; sem IDs proibidos.",
+        "0": "Confunde com ataques de Wiener, Coppersmith ou fatoração por força bruta, cita fichas forenses proibidas, ou inventa IDs."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-08",
+      "question": "Qual é o identificador CVE catalogado no CISA KEV que registra vulnerabilidade crítica de execução remota de código zero-click explorada no cliente oficial Discord Desktop através do processamento de links de convite ou chamadas de voz?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo CISA KEV presente no corpus não contém nenhuma vulnerabilidade catalogada para o aplicativo cliente Discord Desktop. Afirmar a existência de uma CVE no KEV para RCE zero-click no Discord Desktop é um erro factual e alucinação de dados. Quaisquer CVEs de frameworks Electron genéricos ou bibliotecas de mídia citadas como se fossem o Discord violam os limites de evidência do corpus.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2023-4863",
+        "CVE-2024-3400"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente de citar IDs, afirmando com clareza que o catálogo KEV do corpus não contém vulnerabilidade para Discord Desktop e que não há suporte nos dados para a alegação.",
+        "1": "Reconhece incerteza ou ausência no catálogo, mas sugere CVEs especulativas como analogias; sem citar IDs como se fossem a resposta.",
+        "0": "Cita qualquer CVE (especialmente CVE-2023-4863 ou IDs de Electron/WebP) afirmando com confiança que é o CVE do Discord no KEV."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-09",
+      "question": "No OWASP ASVS 5.0.0, qual requisito normativo de arquitetura de dados (Nível 1) exige que todas as operações de escrita em bancos de dados relacionais sejam validadas por consenso de prova de trabalho (Proof-of-Work) ou ledger distribuído imutável para prevenir adulterações por administradores?",
+      "expected_answer": "Resposta correta: abster-se. O OWASP ASVS 5.0.0 não contém nenhum requisito, no Nível 1 ou em qualquer outro nível, que exija blockchain, ledger distribuído ou consenso Proof-of-Work para validação de escritas em bancos de dados. O padrão foca em controles tradicionais de integridade, controle de transações, segregação de funções e trilhas de auditoria protegidas (capítulos V8 e V16). Afirmar que o ASVS exige blockchain para conformidade básica de dados é uma premissa completamente falsa.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "V14.1.1",
+        "V8.2.1"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se de indicar um requisito inexistente, esclarecendo que o ASVS 5.0.0 não exige blockchain ou proof-of-work e foca em controles estabelecidos de controle de acesso, integridade e auditoria.",
+        "1": "Afirma que não há tal requisito no Nível 1, mas especula sobre outros capítulos sem rejeitar categoricamente a premissa; sem IDs proibidos.",
+        "0": "Indica um código de requisito fictício ou cita V14/V8 alegando conformidade com a premissa falsa da pergunta."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-10",
+      "question": "Qual ficha técnica do catálogo de casos públicos do MITR3 descreve a engenharia reversa de mensagens de barramento CAN (CAN-bus) e a reprogramação de unidades de controle eletrônico (ECU) automotivas para interceptação física de telemetria veicular?",
+      "expected_answer": "Resposta correta: abster-se. O acervo de casos públicos do MITR3 (em knowledge/public-cases/ready) restringe-se a desafios de CTF acadêmicos (criptografia RSA, análise PCAP web, esteganografia), pesquisas em protocolos web e HTTP (PortSwigger) e relatórios de programas de recompensa (HackerOne). Não existe no corpus nenhuma ficha relacionada a barramento CAN, eletrônica automotiva ou exploração de ECUs veiculares. Citar fichas forenses de rede (como jctf-pcap-41139) para responder sobre redes veiculares automotivas é um erro grave de contexto e atribuição.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "jctf-pcap-41139",
+        "uiuctf-pwn-41119"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente, declarando que o catálogo de casos públicos do MITR3 não contempla casos de redes automotivas CAN-bus ou ECUs, delimitando o escopo real do acervo (web, CTF e bug bounty).",
+        "1": "Indica que o acervo foca em web/CTF, mas tenta sugerir analogia com desafios forenses sem afirmar categoricamente que o caso existe.",
+        "0": "Cita qualquer ficha do catálogo (como jctf-pcap-41139 ou uiuctf-pwn-41119) alegando falsamente que aborda redes veiculares."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    }
+  ],
+  "items": [
+    {
+      "id": "blind-antigravity-01",
+      "question": "Em avaliações de segurança de perímetro em firewalls corporativos de próxima geração, qual CVE catalogada no KEV explora injeção de comandos no recurso GlobalProtect do Palo Alto Networks PAN-OS sem autenticação prévia, permitindo execução de código root no appliance?",
+      "expected_answer": "CVE-2024-3400 — Vulnerabilidade de injeção de comandos no recurso GlobalProtect do Palo Alto Networks PAN-OS, permitindo a um atacante não autenticado executar código arbitrário com privilégios de root no firewall; catalogada no CISA KEV com histórico comprovado de exploração ativa em campanhas direcionadas. Distinguir de falhas em gateways de outros fabricantes (como Ivanti ou Fortinet). A inclusão no KEV atesta relevância de ameaça conhecida, não sendo prova de que um host auditado esteja vulnerável.",
+      "expected_ids": [
+        "CVE-2024-3400"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-21887",
+        "CVE-2023-27997"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2024-3400, associa ao Palo Alto Networks PAN-OS GlobalProtect, classe injeção de comandos pré-autenticada com execução root, e adverte que citação no KEV não comprova vulnerabilidade no alvo.",
+        "1": "Cita CVE-2024-3400 e PAN-OS GlobalProtect, mas omite privilégios/classe ou alerta de escopo KEV; nenhum ID proibido.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde com Ivanti/Fortinet, ou afirma ausência de catalogação."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-02",
+      "question": "Durante a auditoria de exposição externa de concentradores SSL-VPN, qual é a falha catalogada no KEV que afeta o Fortinet FortiOS e FortiProxy via heap-based buffer overflow em requisições HTTP especialmente formatadas, possibilitando execução remota de código pré-autenticada?",
+      "expected_answer": "CVE-2023-27997 — Heap-based buffer overflow no componente SSL-VPN do Fortinet FortiOS e FortiProxy, permitindo que atacantes remotos executem código arbitrário sem autenticação prévia através de requisições HTTP manipuladas; catalogada no CISA KEV. A resposta deve identificar o fabricante e produto (Fortinet FortiOS/FortiProxy), a classe de falha de corrupção de memória (heap overflow) e a ausência de necessidade de autenticação. Escopo KEV: base de catalogação defensiva, não prova de exposição no alvo.",
+      "expected_ids": [
+        "CVE-2023-27997"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-3400",
+        "CVE-2022-42475"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-27997, associa ao Fortinet FortiOS/FortiProxy SSL-VPN, identifica heap buffer overflow pré-autenticado e inclui ressalva de escopo.",
+        "1": "Cita CVE-2023-27997 e Fortinet mas descreve como falha genérica de autenticação sem citar heap buffer overflow, ou omite alerta de escopo; sem IDs proibidos.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde fabricante ou afirma ausência de exploração."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-03",
+      "question": "Qual vulnerabilidade catalogada no KEV em appliances dedicados de filtragem de e-mail corporativo decorreu de falha na sanitização de nomes de arquivos em arquivos compactados (.tar) processados por script Perl interno, resultando em injeção de comandos e persistência por grupos avançados?",
+      "expected_answer": "CVE-2023-2868 — Falha de validação de entrada no Barracuda Email Security Gateway (ESG) appliance que permitia injeção de comandos remotos através de arquivos de anexo .tar com nomes de arquivos especialmente formatados (executados via qx() no módulo de inspeção); catalogada no CISA KEV. A resposta deve associar ao Barracuda ESG, citar o vetor de processamento de anexos tar/comando e destacar a presença no catálogo KEV. Presença no catálogo não atesta vulnerabilidade no ambiente em teste.",
+      "expected_ids": [
+        "CVE-2023-2868"
+      ],
+      "forbidden_ids": [
+        "CVE-2023-34362",
+        "CVE-2021-26855"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-2868, identifica o Barracuda Email Security Gateway (ESG), detalha o mecanismo de injeção de comandos via parsing de anexos .tar e contextualiza a catalogação no KEV.",
+        "1": "Cita CVE-2023-2868 e Barracuda ESG mas omite detalhes do processamento de anexos .tar; sem IDs proibidos.",
+        "0": "Cita CVE de Exchange ou outro produto, cita forbidden_ids, ou erra completamente a natureza do vetor."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-04",
+      "question": "Na modelagem de controles de controle de acesso (authorization) em APIs REST e GraphQL segundo o OWASP ASVS 5.0.0, qual requisito normativo exige que o acesso a itens de dados específicos seja restrito a consumidores com permissão explícita, prevenindo vulnerabilidades de Insecure Direct Object Reference (IDOR) e Broken Object Level Authorization (BOLA)?",
+      "expected_answer": "O OWASP ASVS 5.0.0 estabelece no requisito V8.2.2 que a aplicação deve assegurar que o acesso a dados específicos (data-specific access) seja restrito a consumidores com permissões explícitas para os respectivos itens de dados, mitigando diretamente IDOR e BOLA. A resposta deve citar expressamente V8.2.2 (distinguindo de V8.2.1, que trata de function-level access, e V8.2.3, que trata de field-level/BOPLA) e explicar a validação de propriedade/autorização sobre o objeto referenciado. Requisitos normativos orientam verificação e não comprovam falha no alvo.",
+      "expected_ids": [
+        "V8.2.2"
+      ],
+      "forbidden_ids": [
+        "V8.2.1",
+        "V8.2.3"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente o requisito V8.2.2 do ASVS 5.0.0, associa com precisão ao controle de acesso a dados específicos contra IDOR e BOLA, e diferencia de controles de função ou campo.",
+        "1": "Explica o controle de acesso por objeto contra IDOR/BOLA no ASVS mas omite o código V8.2.2 ou cita genericamente o capítulo V8; sem IDs proibidos.",
+        "0": "Confunde com controle de função (V8.2.1) ou nível de campo (V8.2.3), cita IDs de autenticação, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-05",
+      "question": "Segundo os requisitos de política de credenciais do OWASP ASVS 5.0.0, qual controle obrigatório de verificação de senhas deve ser executado no momento do registro de conta ou troca de senha para impedir que o usuário selecione credenciais comuns ou previamente vazadas?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve no requisito V6.2.4 que senhas submetidas durante o registro ou alteração de credenciais devem ser verificadas contra uma lista de, no mínimo, as 3.000 senhas mais frequentes/vazadas que atendam à política da aplicação (evitando padrões comuns e credential stuffing). A resposta deve citar o requisito V6.2.4 e a conferência mandatória contra a lista mínima de 3000 senhas, distinguindo de requisitos de comprimento mínimo (V6.2.1) ou rate-limiting (V6.1.1). Padrões ASVS não constituem achados de vulnerabilidade sem teste no sistema.",
+      "expected_ids": [
+        "V6.2.4"
+      ],
+      "forbidden_ids": [
+        "V6.2.1",
+        "V6.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita o requisito V6.2.4 do ASVS 5.0.0, detalha a checagem obrigatória contra lista de no mínimo 3.000 senhas comuns/vazadas na criação/alteração e distingue de regras de complexidade obsoletas.",
+        "1": "Explica a verificação contra senhas vazadas/comuns mas omite o código V6.2.4 ou o limiar de 3.000 senhas; sem IDs proibidos.",
+        "0": "Exige regras tradicionais de composição/complexidade (caractere especial/maiúscula obrigatória), cita forbidden_ids, ou erra o requisito."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-06",
+      "question": "Em testes de segurança contra caches compartilhados e CDNs, como atacantes utilizam entradas não incluídas na chave de cache (unkeyed inputs, como cabeçalhos HTTP adicionais) para forçar o proxy a servir respostas envenenadas com conteúdo malicioso a múltiplos usuários legítimos, e qual ficha histórica do MITR3 introduziu essa metodologia?",
+      "expected_answer": "O ataque de Web Cache Poisoning clássico explora o fato de o proxy de cache utilizar apenas um subconjunto da requisição para formar a chave de cache (ex.: método e path da URL), ignorando cabeçalhos como X-Forwarded-Host, X-Original-URL ou headers customizados (unkeyed inputs). Quando o backend reflete ou usa esses headers na resposta e o proxy armazena a resposta associada à chave comum, todos os usuários subsequentes que requisitarem a mesma URL recebem a resposta envenenada. A ficha correspondente no catálogo MITR3 é ps-practical-cache-poisoning-2018 (pesquisa seminal de James Kettle / PortSwigger Research). Fichas do catálogo não atestam exposição no alvo em avaliação.",
+      "expected_ids": [
+        "ps-practical-cache-poisoning-2018"
+      ],
+      "forbidden_ids": [
+        "ps-cache-2024",
+        "ps-http1-2025"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a exploração de unkeyed inputs (headers ignorados na chave de cache) refletidos na resposta compartilhada e cita expressamente a ficha ps-practical-cache-poisoning-2018 com alerta de escopo.",
+        "1": "Descreve o envenenamento de cache por headers não chaveados mas erra o ID da ficha ou não contextualiza unkeyed inputs; sem IDs proibidos.",
+        "0": "Confunde com Web Cache Deception (ps-cache-2024), request smuggling, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-07",
+      "question": "Em análises criptográficas forenses de artefatos RSA gerados por múltiplos dispositivos ou sessões, qual vulnerabilidade estrutural permite a quebra completa de chaves privadas sem necessidade de busca exaustiva se dois módulos públicos compartilharem um número primo, e qual ficha de caso de CTF do catálogo MITR3 exemplifica essa resolução por GCD?",
+      "expected_answer": "Quando duas instâncias RSA geram módulos n1 = p * q1 e n2 = p * q2 utilizando geradores de números pseudo-aleatórios (PRNGs) com entropia insuficiente ou sementes correlacionadas, o fator primo compartilhado p pode ser recuperado instantaneamente calculando-se o Máximo Divisor Comum entre os módulos: mdc(n1, n2) = p (Greatest Common Divisor - GCD via algoritmo de Euclides), quebrando ambas as chaves privadas. A ficha do catálogo MITR3 que documenta esse desafio é jctf-rsa-41140 (JerseyCTF VI: Relay Artifact TX-7 (RSA), por danielpeng/NYUSEC). Casos de CTF no acervo servem como referência analítica de técnicas e não provam vulnerabilidade em alvos corporativos.",
+      "expected_ids": [
+        "jctf-rsa-41140"
+      ],
+      "forbidden_ids": [
+        "jctf-pcap-41139",
+        "jctf-files-41137"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a quebra por cálculo de GCD/MDC de módulos RSA com fator primo compartilhado decorrente de falha de PRNG/entropia e cita expressamente a ficha jctf-rsa-41140.",
+        "1": "Explica o princípio do primo compartilhado e GCD mas omite o ID jctf-rsa-41140 ou descreve de forma superficial; sem IDs proibidos.",
+        "0": "Confunde com ataques de Wiener, Coppersmith ou fatoração por força bruta, cita fichas forenses proibidas, ou inventa IDs."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-08",
+      "question": "Qual é o identificador CVE catalogado no CISA KEV que registra vulnerabilidade crítica de execução remota de código zero-click explorada no cliente oficial Discord Desktop através do processamento de links de convite ou chamadas de voz?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo CISA KEV presente no corpus não contém nenhuma vulnerabilidade catalogada para o aplicativo cliente Discord Desktop. Afirmar a existência de uma CVE no KEV para RCE zero-click no Discord Desktop é um erro factual e alucinação de dados. Quaisquer CVEs de frameworks Electron genéricos ou bibliotecas de mídia citadas como se fossem o Discord violam os limites de evidência do corpus.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2023-4863",
+        "CVE-2024-3400"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente de citar IDs, afirmando com clareza que o catálogo KEV do corpus não contém vulnerabilidade para Discord Desktop e que não há suporte nos dados para a alegação.",
+        "1": "Reconhece incerteza ou ausência no catálogo, mas sugere CVEs especulativas como analogias; sem citar IDs como se fossem a resposta.",
+        "0": "Cita qualquer CVE (especialmente CVE-2023-4863 ou IDs de Electron/WebP) afirmando com confiança que é o CVE do Discord no KEV."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-09",
+      "question": "No OWASP ASVS 5.0.0, qual requisito normativo de arquitetura de dados (Nível 1) exige que todas as operações de escrita em bancos de dados relacionais sejam validadas por consenso de prova de trabalho (Proof-of-Work) ou ledger distribuído imutável para prevenir adulterações por administradores?",
+      "expected_answer": "Resposta correta: abster-se. O OWASP ASVS 5.0.0 não contém nenhum requisito, no Nível 1 ou em qualquer outro nível, que exija blockchain, ledger distribuído ou consenso Proof-of-Work para validação de escritas em bancos de dados. O padrão foca em controles tradicionais de integridade, controle de transações, segregação de funções e trilhas de auditoria protegidas (capítulos V8 e V16). Afirmar que o ASVS exige blockchain para conformidade básica de dados é uma premissa completamente falsa.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "V14.1.1",
+        "V8.2.1"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se de indicar um requisito inexistente, esclarecendo que o ASVS 5.0.0 não exige blockchain ou proof-of-work e foca em controles estabelecidos de controle de acesso, integridade e auditoria.",
+        "1": "Afirma que não há tal requisito no Nível 1, mas especula sobre outros capítulos sem rejeitar categoricamente a premissa; sem IDs proibidos.",
+        "0": "Indica um código de requisito fictício ou cita V14/V8 alegando conformidade com a premissa falsa da pergunta."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-10",
+      "question": "Qual ficha técnica do catálogo de casos públicos do MITR3 descreve a engenharia reversa de mensagens de barramento CAN (CAN-bus) e a reprogramação de unidades de controle eletrônico (ECU) automotivas para interceptação física de telemetria veicular?",
+      "expected_answer": "Resposta correta: abster-se. O acervo de casos públicos do MITR3 (em knowledge/public-cases/ready) restringe-se a desafios de CTF acadêmicos (criptografia RSA, análise PCAP web, esteganografia), pesquisas em protocolos web e HTTP (PortSwigger) e relatórios de programas de recompensa (HackerOne). Não existe no corpus nenhuma ficha relacionada a barramento CAN, eletrônica automotiva ou exploração de ECUs veiculares. Citar fichas forenses de rede (como jctf-pcap-41139) para responder sobre redes veiculares automotivas é um erro grave de contexto e atribuição.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "jctf-pcap-41139",
+        "uiuctf-pwn-41119"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente, declarando que o catálogo de casos públicos do MITR3 não contempla casos de redes automotivas CAN-bus ou ECUs, delimitando o escopo real do acervo (web, CTF e bug bounty).",
+        "1": "Indica que o acervo foca em web/CTF, mas tenta sugerir analogia com desafios forenses sem afirmar categoricamente que o caso existe.",
+        "0": "Cita qualquer ficha do catálogo (como jctf-pcap-41139 ou uiuctf-pwn-41119) alegando falsamente que aborda redes veiculares."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    }
+  ],
+  "questions": [
+    {
+      "id": "blind-antigravity-01",
+      "question": "Em avaliações de segurança de perímetro em firewalls corporativos de próxima geração, qual CVE catalogada no KEV explora injeção de comandos no recurso GlobalProtect do Palo Alto Networks PAN-OS sem autenticação prévia, permitindo execução de código root no appliance?",
+      "expected_answer": "CVE-2024-3400 — Vulnerabilidade de injeção de comandos no recurso GlobalProtect do Palo Alto Networks PAN-OS, permitindo a um atacante não autenticado executar código arbitrário com privilégios de root no firewall; catalogada no CISA KEV com histórico comprovado de exploração ativa em campanhas direcionadas. Distinguir de falhas em gateways de outros fabricantes (como Ivanti ou Fortinet). A inclusão no KEV atesta relevância de ameaça conhecida, não sendo prova de que um host auditado esteja vulnerável.",
+      "expected_ids": [
+        "CVE-2024-3400"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-21887",
+        "CVE-2023-27997"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2024-3400, associa ao Palo Alto Networks PAN-OS GlobalProtect, classe injeção de comandos pré-autenticada com execução root, e adverte que citação no KEV não comprova vulnerabilidade no alvo.",
+        "1": "Cita CVE-2024-3400 e PAN-OS GlobalProtect, mas omite privilégios/classe ou alerta de escopo KEV; nenhum ID proibido.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde com Ivanti/Fortinet, ou afirma ausência de catalogação."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-02",
+      "question": "Durante a auditoria de exposição externa de concentradores SSL-VPN, qual é a falha catalogada no KEV que afeta o Fortinet FortiOS e FortiProxy via heap-based buffer overflow em requisições HTTP especialmente formatadas, possibilitando execução remota de código pré-autenticada?",
+      "expected_answer": "CVE-2023-27997 — Heap-based buffer overflow no componente SSL-VPN do Fortinet FortiOS e FortiProxy, permitindo que atacantes remotos executem código arbitrário sem autenticação prévia através de requisições HTTP manipuladas; catalogada no CISA KEV. A resposta deve identificar o fabricante e produto (Fortinet FortiOS/FortiProxy), a classe de falha de corrupção de memória (heap overflow) e a ausência de necessidade de autenticação. Escopo KEV: base de catalogação defensiva, não prova de exposição no alvo.",
+      "expected_ids": [
+        "CVE-2023-27997"
+      ],
+      "forbidden_ids": [
+        "CVE-2024-3400",
+        "CVE-2022-42475"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-27997, associa ao Fortinet FortiOS/FortiProxy SSL-VPN, identifica heap buffer overflow pré-autenticado e inclui ressalva de escopo.",
+        "1": "Cita CVE-2023-27997 e Fortinet mas descreve como falha genérica de autenticação sem citar heap buffer overflow, ou omite alerta de escopo; sem IDs proibidos.",
+        "0": "Cita CVE incorreta, cita forbidden_ids, confunde fabricante ou afirma ausência de exploração."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-03",
+      "question": "Qual vulnerabilidade catalogada no KEV em appliances dedicados de filtragem de e-mail corporativo decorreu de falha na sanitização de nomes de arquivos em arquivos compactados (.tar) processados por script Perl interno, resultando em injeção de comandos e persistência por grupos avançados?",
+      "expected_answer": "CVE-2023-2868 — Falha de validação de entrada no Barracuda Email Security Gateway (ESG) appliance que permitia injeção de comandos remotos através de arquivos de anexo .tar com nomes de arquivos especialmente formatados (executados via qx() no módulo de inspeção); catalogada no CISA KEV. A resposta deve associar ao Barracuda ESG, citar o vetor de processamento de anexos tar/comando e destacar a presença no catálogo KEV. Presença no catálogo não atesta vulnerabilidade no ambiente em teste.",
+      "expected_ids": [
+        "CVE-2023-2868"
+      ],
+      "forbidden_ids": [
+        "CVE-2023-34362",
+        "CVE-2021-26855"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente CVE-2023-2868, identifica o Barracuda Email Security Gateway (ESG), detalha o mecanismo de injeção de comandos via parsing de anexos .tar e contextualiza a catalogação no KEV.",
+        "1": "Cita CVE-2023-2868 e Barracuda ESG mas omite detalhes do processamento de anexos .tar; sem IDs proibidos.",
+        "0": "Cita CVE de Exchange ou outro produto, cita forbidden_ids, ou erra completamente a natureza do vetor."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-04",
+      "question": "Na modelagem de controles de controle de acesso (authorization) em APIs REST e GraphQL segundo o OWASP ASVS 5.0.0, qual requisito normativo exige que o acesso a itens de dados específicos seja restrito a consumidores com permissão explícita, prevenindo vulnerabilidades de Insecure Direct Object Reference (IDOR) e Broken Object Level Authorization (BOLA)?",
+      "expected_answer": "O OWASP ASVS 5.0.0 estabelece no requisito V8.2.2 que a aplicação deve assegurar que o acesso a dados específicos (data-specific access) seja restrito a consumidores com permissões explícitas para os respectivos itens de dados, mitigando diretamente IDOR e BOLA. A resposta deve citar expressamente V8.2.2 (distinguindo de V8.2.1, que trata de function-level access, e V8.2.3, que trata de field-level/BOPLA) e explicar a validação de propriedade/autorização sobre o objeto referenciado. Requisitos normativos orientam verificação e não comprovam falha no alvo.",
+      "expected_ids": [
+        "V8.2.2"
+      ],
+      "forbidden_ids": [
+        "V8.2.1",
+        "V8.2.3"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita expressamente o requisito V8.2.2 do ASVS 5.0.0, associa com precisão ao controle de acesso a dados específicos contra IDOR e BOLA, e diferencia de controles de função ou campo.",
+        "1": "Explica o controle de acesso por objeto contra IDOR/BOLA no ASVS mas omite o código V8.2.2 ou cita genericamente o capítulo V8; sem IDs proibidos.",
+        "0": "Confunde com controle de função (V8.2.1) ou nível de campo (V8.2.3), cita IDs de autenticação, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-05",
+      "question": "Segundo os requisitos de política de credenciais do OWASP ASVS 5.0.0, qual controle obrigatório de verificação de senhas deve ser executado no momento do registro de conta ou troca de senha para impedir que o usuário selecione credenciais comuns ou previamente vazadas?",
+      "expected_answer": "O OWASP ASVS 5.0.0 prescreve no requisito V6.2.4 que senhas submetidas durante o registro ou alteração de credenciais devem ser verificadas contra uma lista de, no mínimo, as 3.000 senhas mais frequentes/vazadas que atendam à política da aplicação (evitando padrões comuns e credential stuffing). A resposta deve citar o requisito V6.2.4 e a conferência mandatória contra a lista mínima de 3000 senhas, distinguindo de requisitos de comprimento mínimo (V6.2.1) ou rate-limiting (V6.1.1). Padrões ASVS não constituem achados de vulnerabilidade sem teste no sistema.",
+      "expected_ids": [
+        "V6.2.4"
+      ],
+      "forbidden_ids": [
+        "V6.2.1",
+        "V6.1.1"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Cita o requisito V6.2.4 do ASVS 5.0.0, detalha a checagem obrigatória contra lista de no mínimo 3.000 senhas comuns/vazadas na criação/alteração e distingue de regras de complexidade obsoletas.",
+        "1": "Explica a verificação contra senhas vazadas/comuns mas omite o código V6.2.4 ou o limiar de 3.000 senhas; sem IDs proibidos.",
+        "0": "Exige regras tradicionais de composição/complexidade (caractere especial/maiúscula obrigatória), cita forbidden_ids, ou erra o requisito."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-06",
+      "question": "Em testes de segurança contra caches compartilhados e CDNs, como atacantes utilizam entradas não incluídas na chave de cache (unkeyed inputs, como cabeçalhos HTTP adicionais) para forçar o proxy a servir respostas envenenadas com conteúdo malicioso a múltiplos usuários legítimos, e qual ficha histórica do MITR3 introduziu essa metodologia?",
+      "expected_answer": "O ataque de Web Cache Poisoning clássico explora o fato de o proxy de cache utilizar apenas um subconjunto da requisição para formar a chave de cache (ex.: método e path da URL), ignorando cabeçalhos como X-Forwarded-Host, X-Original-URL ou headers customizados (unkeyed inputs). Quando o backend reflete ou usa esses headers na resposta e o proxy armazena a resposta associada à chave comum, todos os usuários subsequentes que requisitarem a mesma URL recebem a resposta envenenada. A ficha correspondente no catálogo MITR3 é ps-practical-cache-poisoning-2018 (pesquisa seminal de James Kettle / PortSwigger Research). Fichas do catálogo não atestam exposição no alvo em avaliação.",
+      "expected_ids": [
+        "ps-practical-cache-poisoning-2018"
+      ],
+      "forbidden_ids": [
+        "ps-cache-2024",
+        "ps-http1-2025"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a exploração de unkeyed inputs (headers ignorados na chave de cache) refletidos na resposta compartilhada e cita expressamente a ficha ps-practical-cache-poisoning-2018 com alerta de escopo.",
+        "1": "Descreve o envenenamento de cache por headers não chaveados mas erra o ID da ficha ou não contextualiza unkeyed inputs; sem IDs proibidos.",
+        "0": "Confunde com Web Cache Deception (ps-cache-2024), request smuggling, ou cita forbidden_ids."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-07",
+      "question": "Em análises criptográficas forenses de artefatos RSA gerados por múltiplos dispositivos ou sessões, qual vulnerabilidade estrutural permite a quebra completa de chaves privadas sem necessidade de busca exaustiva se dois módulos públicos compartilharem um número primo, e qual ficha de caso de CTF do catálogo MITR3 exemplifica essa resolução por GCD?",
+      "expected_answer": "Quando duas instâncias RSA geram módulos n1 = p * q1 e n2 = p * q2 utilizando geradores de números pseudo-aleatórios (PRNGs) com entropia insuficiente ou sementes correlacionadas, o fator primo compartilhado p pode ser recuperado instantaneamente calculando-se o Máximo Divisor Comum entre os módulos: mdc(n1, n2) = p (Greatest Common Divisor - GCD via algoritmo de Euclides), quebrando ambas as chaves privadas. A ficha do catálogo MITR3 que documenta esse desafio é jctf-rsa-41140 (JerseyCTF VI: Relay Artifact TX-7 (RSA), por danielpeng/NYUSEC). Casos de CTF no acervo servem como referência analítica de técnicas e não provam vulnerabilidade em alvos corporativos.",
+      "expected_ids": [
+        "jctf-rsa-41140"
+      ],
+      "forbidden_ids": [
+        "jctf-pcap-41139",
+        "jctf-files-41137"
+      ],
+      "abstain": false,
+      "rubric": {
+        "2": "Explica a quebra por cálculo de GCD/MDC de módulos RSA com fator primo compartilhado decorrente de falha de PRNG/entropia e cita expressamente a ficha jctf-rsa-41140.",
+        "1": "Explica o princípio do primo compartilhado e GCD mas omite o ID jctf-rsa-41140 ou descreve de forma superficial; sem IDs proibidos.",
+        "0": "Confunde com ataques de Wiener, Coppersmith ou fatoração por força bruta, cita fichas forenses proibidas, ou inventa IDs."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-08",
+      "question": "Qual é o identificador CVE catalogado no CISA KEV que registra vulnerabilidade crítica de execução remota de código zero-click explorada no cliente oficial Discord Desktop através do processamento de links de convite ou chamadas de voz?",
+      "expected_answer": "Resposta correta: abster-se. O catálogo CISA KEV presente no corpus não contém nenhuma vulnerabilidade catalogada para o aplicativo cliente Discord Desktop. Afirmar a existência de uma CVE no KEV para RCE zero-click no Discord Desktop é um erro factual e alucinação de dados. Quaisquer CVEs de frameworks Electron genéricos ou bibliotecas de mídia citadas como se fossem o Discord violam os limites de evidência do corpus.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "CVE-2023-4863",
+        "CVE-2024-3400"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente de citar IDs, afirmando com clareza que o catálogo KEV do corpus não contém vulnerabilidade para Discord Desktop e que não há suporte nos dados para a alegação.",
+        "1": "Reconhece incerteza ou ausência no catálogo, mas sugere CVEs especulativas como analogias; sem citar IDs como se fossem a resposta.",
+        "0": "Cita qualquer CVE (especialmente CVE-2023-4863 ou IDs de Electron/WebP) afirmando com confiança que é o CVE do Discord no KEV."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-09",
+      "question": "No OWASP ASVS 5.0.0, qual requisito normativo de arquitetura de dados (Nível 1) exige que todas as operações de escrita em bancos de dados relacionais sejam validadas por consenso de prova de trabalho (Proof-of-Work) ou ledger distribuído imutável para prevenir adulterações por administradores?",
+      "expected_answer": "Resposta correta: abster-se. O OWASP ASVS 5.0.0 não contém nenhum requisito, no Nível 1 ou em qualquer outro nível, que exija blockchain, ledger distribuído ou consenso Proof-of-Work para validação de escritas em bancos de dados. O padrão foca em controles tradicionais de integridade, controle de transações, segregação de funções e trilhas de auditoria protegidas (capítulos V8 e V16). Afirmar que o ASVS exige blockchain para conformidade básica de dados é uma premissa completamente falsa.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "V14.1.1",
+        "V8.2.1"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se de indicar um requisito inexistente, esclarecendo que o ASVS 5.0.0 não exige blockchain ou proof-of-work e foca em controles estabelecidos de controle de acesso, integridade e auditoria.",
+        "1": "Afirma que não há tal requisito no Nível 1, mas especula sobre outros capítulos sem rejeitar categoricamente a premissa; sem IDs proibidos.",
+        "0": "Indica um código de requisito fictício ou cita V14/V8 alegando conformidade com a premissa falsa da pergunta."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    },
+    {
+      "id": "blind-antigravity-10",
+      "question": "Qual ficha técnica do catálogo de casos públicos do MITR3 descreve a engenharia reversa de mensagens de barramento CAN (CAN-bus) e a reprogramação de unidades de controle eletrônico (ECU) automotivas para interceptação física de telemetria veicular?",
+      "expected_answer": "Resposta correta: abster-se. O acervo de casos públicos do MITR3 (em knowledge/public-cases/ready) restringe-se a desafios de CTF acadêmicos (criptografia RSA, análise PCAP web, esteganografia), pesquisas em protocolos web e HTTP (PortSwigger) e relatórios de programas de recompensa (HackerOne). Não existe no corpus nenhuma ficha relacionada a barramento CAN, eletrônica automotiva ou exploração de ECUs veiculares. Citar fichas forenses de rede (como jctf-pcap-41139) para responder sobre redes veiculares automotivas é um erro grave de contexto e atribuição.",
+      "expected_ids": [],
+      "forbidden_ids": [
+        "jctf-pcap-41139",
+        "uiuctf-pwn-41119"
+      ],
+      "abstain": true,
+      "rubric": {
+        "2": "Abstém-se formalmente, declarando que o catálogo de casos públicos do MITR3 não contempla casos de redes automotivas CAN-bus ou ECUs, delimitando o escopo real do acervo (web, CTF e bug bounty).",
+        "1": "Indica que o acervo foca em web/CTF, mas tenta sugerir analogia com desafios forenses sem afirmar categoricamente que o caso existe.",
+        "0": "Cita qualquer ficha do catálogo (como jctf-pcap-41139 ou uiuctf-pwn-41119) alegando falsamente que aborda redes veiculares."
+      },
+      "author": "antigravity",
+      "written_at_utc": "2026-10-20T11:15:00Z"
+    }
+  ]
+}
