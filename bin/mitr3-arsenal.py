@@ -174,7 +174,9 @@ def install(name, logdir):
     cfg = REGISTRY[name]
     row = check(name)
     if row['status'] in ('validated', 'smoke_ok'):
-        row.update(install='already present', wrappers=expose(name))
+        wrappers = expose(name)
+        row = check(name)
+        row.update(install='already present', wrappers=wrappers)
         return row
     base = TOOLS / name
     log = []
@@ -315,6 +317,10 @@ def main():
     else:
         rows = [check(name) for name in names]
     report = dict(timestamp=now.isoformat(), action=args.action, selector=args.selector, tools=rows)
+    if args.action == 'install':
+        archive = logdir / 'result.json'
+        archive.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
+        archive.chmod(0o600)
     path = ROOT / 'reports/arsenal-phase23-latest.json'
     path.parent.mkdir(parents=True, exist_ok=True)
     # A phase-specific check must not erase the complete health snapshot.

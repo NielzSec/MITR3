@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-10-19T18:23:53.471245+00:00",
+  "timestamp": "2026-10-19T22:29:07.433396+00:00",
   "config": "/home/nielz/.config/opencode/opencode.json",
-  "opencode_list_error": "unavailable (exit 1)",
+  "opencode_list_error": null,
   "servers": [
     {
       "name": "megabrain",
       "type": "remote",
-      "opencode": "unavailable (exit 1)",
+      "opencode": "not listed",
       "process_alive": null,
       "boot": "pass",
       "boot_detail": "HTTP 406",
@@ -15,25 +15,25 @@
     {
       "name": "rea",
       "type": "local",
-      "opencode": "unavailable (exit 1)",
+      "opencode": "not listed",
       "process_alive": false,
-      "boot": "fail",
-      "boot_detail": "exit 1 before 5s",
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
       "issues": []
     },
     {
       "name": "chrome-devtools",
       "type": "local",
-      "opencode": "unavailable (exit 1)",
+      "opencode": "not listed",
       "process_alive": false,
-      "boot": "fail",
-      "boot_detail": "exit 1 before 5s",
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
       "issues": []
     },
     {
       "name": "apisec-ng",
       "type": "local",
-      "opencode": "unavailable (exit 1)",
+      "opencode": "not listed",
       "process_alive": false,
       "boot": "pass",
       "boot_detail": "alive after 5s",
@@ -42,16 +42,16 @@
     {
       "name": "playwright",
       "type": "local",
-      "opencode": "unavailable (exit 1)",
+      "opencode": "not listed",
       "process_alive": false,
-      "boot": "fail",
-      "boot_detail": "exit 1 before 5s",
+      "boot": "pass",
+      "boot_detail": "alive after 5s",
       "issues": []
     },
     {
       "name": "context7",
       "type": "remote",
-      "opencode": "unavailable (exit 1)",
+      "opencode": "not listed",
       "process_alive": null,
       "boot": "pass",
       "boot_detail": "HTTP 405",
@@ -60,7 +60,7 @@
     {
       "name": "mitr3-nexus",
       "type": "local",
-      "opencode": "unavailable (exit 1)",
+      "opencode": "not listed",
       "process_alive": true,
       "boot": "pass",
       "boot_detail": "alive after 5s",

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "ps-cache-2024",
+    "title": "Gotta cache 'em all: discrepancias em URL e cache",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-cache-2024.md",
+    "sha256": "e15149f8eb0b16f4c0305370802f5743b7f3bb84bacc36d6c9a4f9e5e683189b",
+    "origin": "mitr3:public-rag:v1:ps-cache-2024",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-http1-2025",
+    "title": "HTTP/1.1 must die: o problema do desync",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-http1-2025.md",
+    "sha256": "deb4617807cd44cb2b287dd53572c5b4000b89c78564231efd721d7cce23777c",
+    "origin": "mitr3:public-rag:v1:ps-http1-2025",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-false-positive-2025",
+    "title": "Separar pipelining de HTTP request smuggling",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-false-positive-2025.md",
+    "sha256": "85418ebc08cf9c31bded91e4c25ec963eb46d57dae646e8449efb6d1fa47c1e4",
+    "origin": "mitr3:public-rag:v1:ps-false-positive-2025",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-http2-2021",
+    "title": "HTTP/2: The Sequel is Always Worse",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ps-http2-2021.md",
+    "sha256": "8475dce0cf784b478cc4ad2f3f327ed8dfa6af10017e1ac271a550a2e3a36a06",
+    "origin": "mitr3:public-rag:v1:ps-http2-2021",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-rsa-41140",
+    "title": "JerseyCTF VI: Relay Artifact TX-7 (RSA)",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/jctf-rsa-41140.md",
+    "sha256": "53fa51789567dae8e703b1e4a3640625d90a550739452950322cde7e3134ea6d",
+    "origin": "mitr3:public-rag:v1:jctf-rsa-41140",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-pcap-41139",
+    "title": "JerseyCTF VI: qaStaH nuq (PCAP HTTP)",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/jctf-pcap-41139.md",
+    "sha256": "c3ca1318456da6a0d9795e951c7ec62e5668d231628ee2ae992fac8087677371",
+    "origin": "mitr3:public-rag:v1:jctf-pcap-41139",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-signal-41138",
+    "title": "JerseyCTF VI: Recovered Signal File (codificacoes)",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/jctf-signal-41138.md",
+    "sha256": "c9b76a32487143f0702adee6bbdadd6479457292fa8302adba53efd78c84590a",
+    "origin": "mitr3:public-rag:v1:jctf-signal-41138",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-files-41137",
+    "title": "JerseyCTF VI: Fix Your Ship (file carving)",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/jctf-files-41137.md",
+    "sha256": "afc800140e6fb6adc645d7fb3085ba48388667e8c9fe177722cf6e4f33796aa6",
+    "origin": "mitr3:public-rag:v1:jctf-files-41137",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "uiuctf-osint-41117",
+    "title": "UIUCTF 2026: Something Handmade (OSINT)",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/uiuctf-osint-41117.md",
+    "sha256": "16fb426161327e13fe80060b06dab7cafa4bc11e5d538f854836cf264c80f9f3",
+    "origin": "mitr3:public-rag:v1:uiuctf-osint-41117",
+    "validation": "index_only_unreviewed"
+  },
+  {
+    "id": "uiuctf-re-41116",
+    "title": "UIUCTF 2026: glyphs (engenharia reversa)",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/uiuctf-re-41116.md",
+    "sha256": "be83f786f56d3851538625e0ff72cd600d32b25eadba158bbb4f454223a7949c",
+    "origin": "mitr3:public-rag:v1:uiuctf-re-41116",
+    "validation": "index_only_unreviewed"
+  },
+  {
+    "id": "uiuctf-pwn-41119",
+    "title": "UIUCTF 2026: Sparxie Vanishing Encore (PWN)",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/uiuctf-pwn-41119.md",
+    "sha256": "1557e1ffd1760555e94463f1d25ec6cd5844e00f4d7075b6b80793e8bdea4b38",
+    "origin": "mitr3:public-rag:v1:uiuctf-pwn-41119",
+    "validation": "index_only_unreviewed"
+  },
+  {
+    "id": "h1-hacktivity",
+    "title": "HackerOne Hacktivity — atividades e relatorios divulgados",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/h1-hacktivity.md",
+    "sha256": "0adf98f8eca25a66b2b72130411f91668d69bb9210cc362973031b623cbf1b5d",
+    "origin": "mitr3:public-rag:v1:h1-hacktivity",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "bb-markdown",
+    "title": "Repositorio comunitario de relatorios bug bounty divulgados",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/bb-markdown.md",
+    "sha256": "a7f0a5934bdd45bd1eac878294097cf7eaa8898477caf9111129258a91e2c218",
+    "origin": "mitr3:public-rag:v1:bb-markdown",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "ctftime-catalog",
+    "title": "CTFtime — indice de write-ups publicos",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/ctftime-catalog.md",
+    "sha256": "a719220ec4a5721413d2427e8814900939813498046ec8e8d787ea3e499596f0",
+    "origin": "mitr3:public-rag:v1:ctftime-catalog",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "owasp-wstg",
+    "title": "OWASP Web Security Testing Guide",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/owasp-wstg.md",
+    "sha256": "a5e819a5adf725547f54afc6d002d8f3c5faf42ddb9c1b56f80ea2d255504ebb",
+    "origin": "mitr3:public-rag:v1:owasp-wstg",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "owasp-cheatsheets",
+    "title": "OWASP Cheat Sheet Series — mitigacoes",
+    "path": "/home/nielz/MITR3/knowledge/public-cases/ready/owasp-cheatsheets.md",
+    "sha256": "481c3ed4a98e64d80c5b63fe249827161b4145cc815fa9da105a1cb20e72cec9",
+    "origin": "mitr3:public-rag:v1:owasp-cheatsheets",
+    "validation": "source_catalog_only"
+  }
+]

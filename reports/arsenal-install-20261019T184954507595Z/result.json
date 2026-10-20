@@ -1,0 +1,173 @@
+{
+  "timestamp": "2026-10-19T18:49:54.507595+00:00",
+  "action": "install",
+  "selector": "all",
+  "tools": [
+    {
+      "name": "impacket",
+      "phase": 2,
+      "command": "/home/nielz/.local/bin/impacket-smbclient",
+      "source": "https://github.com/fortra/impacket",
+      "status": "validated",
+      "version": "0.13.1",
+      "evidence": "Impacket v0.13.1 - Copyright Fortra, LLC and its affiliated companies \n\nusage: smbclient.py [-h] [-inputfile INPUTFILE] [-outputfile OUTPUTFILE]\n                    [-debug] [-ts] [-hashes LMHASH:NTHASH] [-no-pass] [-k]\n                    [-aesKey hex key] [-dc-ip ip address]\n                    [-target-ip ip address] [-port [destination port]]\n                    target\n\nSMB client implementation.\n\npositional arguments:\n  target                [[domain/]username[:password]@]<targetName or address>\n\noptions:\n  -h, --help            show this help message and exit\n  -inputfile INPUTFILE  input file with commands to execute in the mini shell\n  -outputfile OUTPUTFILE\n                        Output file to log smbclient actions in\n  -debug                Turn DEBUG output ON\n  -ts                   Adds timestamp to every logging output\n\nauthentication:\n  -hashes LMHASH:NTHASH\n                        NTLM hashes, format is LMHASH:NTHASH\n  -no-pass              don't ask for password (useful for -k)\n  -k                    Use Kerberos authentication. Grabs credentials from\n                        ccache file (KRB5CCNAME) based on target parameters.\n                        If valid credentials cannot be found, it will use the\n                        ones specified in the command line\n  -aesKey hex key       AES key to use for Kerberos Authentication (128 or 256\n                        bits)\n\nconnection:\n  -dc-ip ip address     IP Address of the domain controller. If omitted it\n                        will use the domain part (FQDN) specified in the\n                        targ",
+      "probe": [
+        "/home/nielz/.local/bin/impacket-smbclient",
+        "-h"
+      ],
+      "exit_code": 0,
+      "install": "already present",
+      "wrappers": [
+        "impacket-smbclient",
+        "impacket-secretsdump",
+        "impacket-wmiexec",
+        "impacket-psexec",
+        "impacket-GetNPUsers",
+        "impacket-ntlmrelayx"
+      ]
+    },
+    {
+      "name": "bloodhound-python",
+      "phase": 2,
+      "command": null,
+      "source": "https://github.com/dirkjanm/BloodHound.py",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: ERROR: Could not find a version that satisfies the requirement bloodhound (from versions: none)\nERROR: No matching distribution found for bloodhound",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/bloodhound-python.log"
+    },
+    {
+      "name": "kerbrute",
+      "phase": 2,
+      "command": null,
+      "source": "https://github.com/ropnop/kerbrute",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: go: github.com/ropnop/kerbrute@latest: module github.com/ropnop/kerbrute: Get \"https://proxy.golang.org/github.com/ropnop/kerbrute/@v/list\": dial tcp: lookup proxy.golang.org on 127.0.0.53:53: dial udp 127.0.0.53:53: socket: operation not permitted",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/kerbrute.log"
+    },
+    {
+      "name": "responder",
+      "phase": 2,
+      "command": null,
+      "source": "https://github.com/lgandx/Responder",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 128: Cloning into '/home/nielz/Tools/responder/src'...\nfatal: unable to access 'https://github.com/lgandx/Responder.git/': Could not resolve host: github.com",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/responder.log"
+    },
+    {
+      "name": "aws",
+      "phase": 3,
+      "command": null,
+      "source": "https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: sudo: /etc/sudo.conf is owned by uid 65534, should be 0\nsudo: The \"no new privileges\" flag is set, which prevents sudo from running as root.\nsudo: If sudo is running in a container, you may need to adjust the container configuration to disable the flag.",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/aws.log"
+    },
+    {
+      "name": "gcloud",
+      "phase": 3,
+      "command": null,
+      "source": "https://docs.cloud.google.com/sdk/docs/install-sdk",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 6: curl: (6) Could not resolve host: dl.google.com",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/gcloud.log"
+    },
+    {
+      "name": "az",
+      "phase": 3,
+      "command": null,
+      "source": "https://learn.microsoft.com/cli/azure/install-azure-cli-linux",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: sudo: /etc/sudo.conf is owned by uid 65534, should be 0\nsudo: The \"no new privileges\" flag is set, which prevents sudo from running as root.\nsudo: If sudo is running in a container, you may need to adjust the container configuration to disable the flag.",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/az.log"
+    },
+    {
+      "name": "prowler",
+      "phase": 3,
+      "command": null,
+      "source": "https://github.com/prowler-cloud/prowler",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: ERROR: Could not find a version that satisfies the requirement prowler (from versions: none)\nERROR: No matching distribution found for prowler",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/prowler.log"
+    },
+    {
+      "name": "scoutsuite",
+      "phase": 3,
+      "command": null,
+      "source": "https://github.com/nccgroup/ScoutSuite",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: ERROR: Could not find a version that satisfies the requirement ScoutSuite (from versions: none)\nERROR: No matching distribution found for ScoutSuite",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/scoutsuite.log"
+    },
+    {
+      "name": "cloudfox",
+      "phase": 3,
+      "command": null,
+      "source": "https://github.com/BishopFox/cloudfox",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: go: github.com/BishopFox/cloudfox@latest: module github.com/BishopFox/cloudfox: Get \"https://proxy.golang.org/github.com/%21bishop%21fox/cloudfox/@v/list\": dial tcp: lookup proxy.golang.org on 127.0.0.53:53: dial udp 127.0.0.53:53: socket: operation not permitted",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/cloudfox.log"
+    },
+    {
+      "name": "pacu",
+      "phase": 3,
+      "command": null,
+      "source": "https://github.com/RhinoSecurityLabs/pacu",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: ERROR: Could not find a version that satisfies the requirement pacu (from versions: none)\nERROR: No matching distribution found for pacu",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/pacu.log"
+    },
+    {
+      "name": "trufflehog",
+      "phase": 3,
+      "command": null,
+      "source": "https://github.com/trufflesecurity/trufflehog",
+      "status": "missing",
+      "version": null,
+      "evidence": "command -v: absent",
+      "install": "failed",
+      "install_error": "exit 1: go: github.com/trufflesecurity/trufflehog/v3@latest: module github.com/trufflesecurity/trufflehog/v3: Get \"https://proxy.golang.org/github.com/trufflesecurity/trufflehog/v3/@v/list\": dial tcp: lookup proxy.golang.org on 127.0.0.53:53: dial udp 127.0.0.53:53: socket: operation not permitted",
+      "wrappers": [],
+      "install_log": "/home/nielz/MITR3/reports/arsenal-install-20261019T184954507595Z/trufflehog.log"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import importlib.util
 import os
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -62,6 +63,27 @@ class ArsenalTests(unittest.TestCase):
                                     text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout.splitlines(), ['<--help>', '<--json>', '<two words>'])
+
+    def test_health_json_includes_cloud_commands_without_network(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            fakebin = home / '.local/bin'
+            fakebin.mkdir(parents=True)
+            for name in ['sudo', 'docker', 'curl', 'systemctl', 'aws']:
+                path = fakebin / name
+                path.write_text('#!/bin/sh\nexit 1\n')
+                path.chmod(0o755)
+            mcp = home / 'MITR3/bin/mitr3-mcp-check.sh'
+            mcp.parent.mkdir(parents=True)
+            mcp.write_text('#!/bin/sh\necho \'{"servers":[]}\'\n')
+            mcp.chmod(0o755)
+            env = dict(os.environ, HOME=tmp)
+            result = subprocess.run(['bash', str(SCRIPT.with_name('mitr3-health.sh')), '--json'],
+                                    env=env, text=True, capture_output=True, timeout=20)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertIn('aws', report['ok'])
+            self.assertEqual(report['mcp'], {'servers': []})
 
 
 if __name__ == '__main__':
