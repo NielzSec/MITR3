@@ -41,6 +41,12 @@ ASSOCIATED_ROLE_RE=re.compile(r"\b(?:partners?|parceir[oa]s?|members?|membros?|a
 ATTRIBUTION_RE=re.compile(r"\b(?:attributions?|atribuicao|atribuicoes)\b")
 CAMPAIGN_RE=re.compile(r"\b(?:campaigns?|campanhas?)\b")
 CAMPAIGN_ROLE_RE=re.compile(r"\b(?:who|whom|quem|behind|por tras|responsavel|responsaveis|involved|involvement|envolvid[oa]s?|envolvimento)\b")
+FAMILY_RE=re.compile(r"\b(?:famil(?:y|ies)|familias?)\b")
+FAMILY_CONTEXT_RE=re.compile(r"\b(?:malware|ransomware|infostealers?|stealers?|trojans?|worms?|cve|cwe)\b")
+ACTOR_IDENTITY_RE=re.compile(r"\b(?:actors?|ator(?:es)?)\b")
+IDENTITY_QUESTION_RE=re.compile(r"\b(?:who|which|what|qual|quais|quem)\b")
+QUERY_IDENTIFIER_RE=re.compile(r"(?<!\w)(?:CVE-\d{4}-\d{4,}|CWE-\d+|ASVS-V?\d+(?:\.\d+){2}|T\d{4}(?:\.\d{3})?)(?!\w)",re.I)
+
 
 def declared_relations(targets,relation,evidence):
  """Accept structured declarations only; no prose extraction or inferred edges."""
@@ -301,6 +307,8 @@ def is_unsupported_intent(query):
  if re.search(r"\b(?:encryptor|decryptor)\b",q):
   return "Encryptor/decryptor capability is not represented in the current source catalog."
  if (ACTOR_ROLE_RE.search(q)
+     or (FAMILY_RE.search(q) and (THREAT_CONTEXT_RE.search(q) or FAMILY_CONTEXT_RE.search(q)))
+     or (ACTOR_IDENTITY_RE.search(q) and IDENTITY_QUESTION_RE.search(q))
      or (THREAT_CONTEXT_RE.search(q) and (ASSOCIATED_ROLE_RE.search(q) or ATTRIBUTION_RE.search(q)))
      or (CAMPAIGN_RE.search(q) and CAMPAIGN_ROLE_RE.search(q))):
   return "Actor/family attribution is not represented in the current source catalog."
@@ -316,6 +324,50 @@ def routed_source(query,source):
   return "public-cases"
  return ""
 
+def ranked_candidates(con,terms,need,max_limit,source,kind,preferred_source,fts_coverage=False):
+ """Keep coverage/BM25/source ranking; fallback coverage uses actual FTS tokens."""
+ expression=" OR ".join('"'+t.replace('"','')+'"' for t in terms)
+ filters=["docs_fts MATCH ?"]
+ params=[expression]
+ if source:filters.append("d.source=?");params.append(source)
+ if kind:filters.append("d.kind=?");params.append(kind)
+ candidates=con.execute(
+  "SELECT d.id,d.kind,d.source,d.title,d.summary,d.lesson,d.tags,"
+  "d.source_url,d.published_at,d.validation,d.digest,bm25(docs_fts,0,3,1.3,0.8,3.0),docs_fts.rowid "
+  "FROM docs_fts JOIN documents d ON d.id=docs_fts.id WHERE "+" AND ".join(filters)
+  +" ORDER BY bm25(docs_fts,0,3,1.3,0.8,3.0) LIMIT ?",params+[max(60,max_limit*12)]).fetchall()
+ coverage={}
+ if fts_coverage:
+  coverage=dict(con.execute(
+   "SELECT doc,count(DISTINCT term) FROM temp.docs_fts_terms WHERE term IN ("
+   +",".join("?" for _ in terms)+") GROUP BY doc",terms))
+ ranked=[]
+ for candidate in candidates:
+  row,bm25,fts_id=candidate[:-2],candidate[-2],candidate[-1]
+  if fts_coverage:cover=coverage.get(fts_id,0)
+  else:
+   words=set(re.findall(r"[\w]+"," ".join(str(x).lower() for x in row[3:7])))
+   cover=sum(1 for t in terms if t in words)
+  score=cover+0.5*(-bm25)/(1+abs(bm25))
+  if row[2]==preferred_source:score+=ROUTED_SOURCE_BOOST
+  if cover>=need:ranked.append((score,row))
+ ranked.sort(key=lambda x:-x[0])
+ return [row for _,row in ranked[:max_limit]]
+
+def vocabulary_terms(con,tokens):
+ """Normalize with the corpus tokenizer and read measured document frequencies.
+
+ TEMP tables work against legacy/read-only indexes without rebuilding them.
+ No subject classification, alias expansion, or term guessing.
+ """
+ con.execute("CREATE VIRTUAL TABLE temp.docs_fts_vocab USING fts5vocab(main, docs_fts, 'row')")
+ con.execute("CREATE VIRTUAL TABLE temp.docs_fts_terms USING fts5vocab(main, docs_fts, 'instance')")
+ con.execute("CREATE VIRTUAL TABLE temp.query_terms USING fts5(body, tokenize='unicode61 remove_diacritics 2')")
+ con.execute("INSERT INTO temp.query_terms VALUES(?)",(" ".join(tokens),))
+ con.execute("CREATE VIRTUAL TABLE temp.query_vocab USING fts5vocab(temp, query_terms, 'row')")
+ return con.execute("SELECT q.term,v.doc,v.cnt FROM temp.query_vocab q "
+                    "JOIN temp.docs_fts_vocab v ON v.term=q.term ORDER BY q.term").fetchall()
+
 def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  raw=[t.lower() for t in re.findall(r"[\w]+",query,flags=re.UNICODE)]
  toks=[t for t in raw if t not in STOPWORDS][:15] or raw[:15]
@@ -328,6 +380,7 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  skip=is_unsupported_intent(query) if not (CVE_RE.fullmatch(qid) or qid.startswith("ASVS-")) else None
  with closing(open_db()) as con:
   rows=[]
+  fallback=None
   if skip:
    rows=[]
   elif CVE_RE.fullmatch(qid) or qid.startswith("ASVS-") or qid.startswith("CASE-"):
@@ -345,33 +398,24 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
    # bm25 e o pequeno vies de fonte ordenam dentro da mesma cobertura.
    uniq=sorted(set(t for t in toks if t not in DOC_TYPES)) or sorted(set(toks))
    need=max(1,-(-len(uniq)*3//5))
-   term=" OR ".join('"'+t.replace('"','')+'"' for t in uniq)
-   filters=["docs_fts MATCH ?"]
-   params=[term]
-   if source: filters.append("d.source=?");params.append(source)
-   if kind: filters.append("d.kind=?");params.append(kind)
-   rows=con.execute(
-    "SELECT d.id,d.kind,d.source,d.title,d.summary,d.lesson,d.tags,"
-    "d.source_url,d.published_at,d.validation,d.digest,bm25(docs_fts,0,3,1.3,0.8,3.0) "
-    "FROM docs_fts JOIN documents d ON d.id=docs_fts.id WHERE "
-    +" AND ".join(filters)
-    +" ORDER BY bm25(docs_fts,0,3,1.3,0.8,3.0) LIMIT ?",
-    params+[max(60,max_limit*12)]).fetchall()
-   ranked=[]
-   for candidate in rows:
-    row,bm25=candidate[:-1],candidate[-1]
-    words=set(re.findall(r"[\w]+"," ".join(str(x).lower() for x in row[3:7])))
-    cover=sum(1 for t in uniq if t in words)
-    # BM25 is negative (lower is better). Its bounded bonus preserves coverage
-    # priority: BM25 (<0.5) + source (0.15) cannot replace a missing query term.
-    score=cover+0.5*(-bm25)/(1+abs(bm25))
-    if row[2]==preferred_source:score+=ROUTED_SOURCE_BOOST
-    if cover>=need: ranked.append((score,row))
-   ranked.sort(key=lambda x:-x[0])
-   rows=[row for _,row in ranked[:max_limit]]
+   rows=ranked_candidates(con,uniq,need,max_limit,source,kind,preferred_source)
+   if not rows and len(raw)>6 and not QUERY_IDENTIFIER_RE.search(query):
+    # Only after the original cutoff fails. Use the entire question, not [:15].
+    full=[t for t in raw if t not in STOPWORDS and t not in DOC_TYPES] or raw
+    vocab=vocabulary_terms(con,full)
+    present=[term for term,_,_ in vocab]
+    if present:
+     rows=ranked_candidates(con,present,max(1,-(-len(present)*3//5)),
+                            max_limit,source,kind,preferred_source,fts_coverage=True)
+     if rows:fallback="vocabulary"
+    if not rows and len(present)>=2:
+     rare=[term for term,_,_ in sorted(vocab,key=lambda item:(item[1],item[2],item[0]))[:3]]
+     rows=ranked_candidates(con,rare,2,max_limit,source,kind,preferred_source,fts_coverage=True)
+     if rows:fallback="vocabulary_rare"
   columns=("id","kind","source","title","summary","lesson","tags","source_url","published_at","validation","sha256")
   matches=[dict(zip(columns,row)) for row in rows]
   for item in matches:
+   if fallback:item["fallback"]=fallback
    item["related"]=[e[0] for e in con.execute(
     "SELECT target_id FROM related WHERE doc_id=?",(item["id"],)).fetchall()]
  if emit:

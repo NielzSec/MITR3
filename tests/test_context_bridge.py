@@ -17,6 +17,16 @@ VALID={
   "evidence":{"source_id":"cisa-kev","sha256":"a"*64}
 }
 class BridgeTests(unittest.TestCase):
+ def test_vocabulary_metadata_is_preserved_without_promoting_edges(self):
+  row={"id":"CVE-2020-1472","source_url":"https://example.org/reference",
+       "fallback":"vocabulary_rare"}
+  with mock.patch.object(bridge,"command_json",side_effect=[[row],{"outbound":[],"inbound":[]}]), \
+       mock.patch.object(bridge,"local_digest_map",return_value={}):
+   result=bridge.read_local("a long analyst question with vocabulary fallback")
+  self.assertEqual(result["matches"][0]["fallback"],"vocabulary_rare")
+  self.assertEqual(result["source_declared_relations"],[])
+  self.assertEqual(result["attack_relations"],[])
+
  def test_only_declared_relation(self):
   record={"outbound":[VALID],"inbound":[]}
   links=bridge.verified_edges(record)
