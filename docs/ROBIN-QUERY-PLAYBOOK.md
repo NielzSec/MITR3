@@ -108,3 +108,33 @@ ts | engine | query | hits (nº) | top3 (título curto) | veredito (vivo/morto/n
 | 6 | PoC supply | GitHub `CVE-2026` + Sploitus |
 
 Saída: `docs/DARKWEB-QUERY-LOG-2026-10.md` (tabela §3) + atualização deste banco com o que funcionou (marcar ✅/❌ por query) + re-selo do playbook se §12 for adicionada.
+
+---
+
+## 12. Primeira rodada — placar m12 (2026-10-20 UTC)
+
+Fonte da verdade: `docs/DARKWEB-QUERY-LOG-2026-10.md` (§2 metodologia, §9 notas por engine).
+
+| # | Query (§2/§4) | OL | T66 | AH | GitHub/Sploitus | Veredito |
+|---|---|---|---|---|---|---|
+| 1 | `"cobalt strike" cracked loader` | 15 | 0 | 9 | 852 | ✅ cruzado 2-fontes (`kzmcudnrse…` fórum "Dead Drop") |
+| 2 | `"malleable c2" profile` | 18 | 0 | 0 | 71 | ❌ só ruído no onion — reformular p/ `… profile github` (clearnet) |
+| 3 | `sliver c2 implant` | 17 | 0 | 0 | 1 | ⏳ onion-só — sinal médio (RAT/C2 dashboards) |
+| 4 | `havoc c2 framework` | 13 | 0 | 0 | — | ⏳ onion-só ("Which C2 in 2026" thread) |
+| 5 | `"mirai source"` | 0 | 0 | 161 | 205/15 | ⏳ AH-só (full-text forte; dedup cliente) |
+| 6 | `"mirai botnet" builder` | 17 | 0 | 0 | — | ⏳ ruído de listing em OL |
+| 7 | `mozi botnet` | 17 | 0 | 0 | — | ❌ sem cruzamento; mozi dorme no onion — vigilância apenas |
+| 8 | `gafgyt botnet source` | 15 | 0 | 0 | 15 | ⏳ sinal fraco (tutoriais de "C# botnet") |
+| 9 | `"redline stealer" builder` | 17 | 0 | 134 | 65 | ✅ cruzado (multi-exploit builder, sinal médio) |
+| 10 | `lumma stealer` | 18 | 0 | 0 | 67 | ⏳ sinal bom no OL (crypto-stealer offers) |
+| 11 | `vidar stealer source` | 17 | 0 | 0 | — | ⏳ sinal fraco (bitcoin/NFT stealer) |
+| 12 | `"quasar rat" source` | 16 | 0 | 0 | 42 | ⏳ sinal bom ("Quasar RAT Golden Edition") |
+| 13 | `asyncrat builder` | 17 | 0 | 306 | 100 | ✅ cruzado ×6, mas 5 hosts = ruído (Debian/wix/etc) — sinal baixo |
+| 14 | `lockbit builder` | 16 | 0 | 0 | — | ⏳ sinal líder no OL (LockBit 5.0 page + RansomLook) |
+| 15 | `"ransomware source"` | 0 | 18 | 172 | ransomware.live vivo | ✅ cruzado via AH+T66 (`darkpb3w7h5…` "for hire" pages) |
+| 16 | `esxi encryptor` | 4 | 0 | 0 | — | ⏳ sinal fraco; reformular p/ `esxi_vmware encryptor` |
+| 17 | `"0day" exploit forum` | 23 | 4 | 62 | awesome-cve-poc(5) | ✅ cruzado (aggregadores + brutalse), sinal médio |
+| 18 | `"cve-2026" exploit` | 20 | 0 | 0 | 5182 | ❌ frase não acende onion — PoC supply p/ Sploitus por-CVE |
+
+**Placar:** 5 ✅ cruzadas · 11 ⏳ onion-só (sinal p/ monitor) · 2 ❌ (nos. 2, 7, 18 — reformulação na rodada 2).
+**Prêmios por engine:** frase-exata+ferramenta (✅1/9/15) e nome-venda ("Golden Edition", "FUD", "5.0 Released") são os padrões de melhor rendimento no onionland; AH full-text é o 2º melhor recurso; tor66 não serve para queries técnicas (0–4 orgânicos em 14/18) — mantê-lo só como 2ª fonte barata de cruzamento.
