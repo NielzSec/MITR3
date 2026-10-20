@@ -90,3 +90,12 @@ Correção aplicada por evidência nova (EV-0004), sem reescrever histórico. QA
 - 12:11 `dynamic/validate_ret2win.py`: variantes direta e ret-sled atingem `win()`;
   flag capturada (EV-0007); UNK-0001 fechado
 - 12:13 dumper Ghidra rodando via PyGhidra (`bin/ghidra-dump.sh`); dossier nativo (EV-0009)
+
+## Encerramento (2026-10-20)
+
+- Contrato v2 (dinâmico) vence em 2026-10-22T15:09Z com o caso já completo — flag capturada
+  (EV-0007), UNK-0001 fechado, report e FIELD-NOTES entregues. NÃO renovar: não há trabalho
+  pendente atrás do contrato.
+- Próximo engagement no Nexus = contrato NOVO, assinado em PTY interativo com confirmação
+  sha256 pelo operador humano (método `interactive_terminal_sha256_confirmation`).
+  Nenhum tool MCP cria ou estende aprovação — por design.
