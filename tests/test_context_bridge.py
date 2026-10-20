@@ -28,6 +28,11 @@ class BridgeTests(unittest.TestCase):
   fake={**VALID,"evidence":{"source_id":"public-cases","sha256":"a"*64}}
   self.assertEqual(bridge.verified_edges({"outbound":[fake]}),[])
 
+ def test_mismatched_source_digest_blocks_edge(self):
+  record={"outbound":[VALID],"inbound":[]}
+  self.assertEqual(bridge.verified_edges(record,{"cisa-kev":"b"*64}),[])
+  self.assertEqual(len(bridge.verified_edges(record,{"cisa-kev":"a"*64})),1)
+
  def test_bad_hash_cannot_approve_edge(self):
   fake={**VALID,"evidence":{"source_id":"cisa-kev","sha256":"not-a-hash"}}
   self.assertEqual(bridge.verified_edges({"outbound":[fake]}),[])
@@ -63,13 +68,15 @@ class BridgeTests(unittest.TestCase):
     return {"outbound":[VALID],"inbound":[]}
    raise AssertionError("Unexpected command")
   with mock.patch.object(bridge,"command_json",side_effect=fake_command):
-   got=bridge.read_local("CVE-2023-23397")
+   with mock.patch.object(bridge,"local_digest_map",return_value={"cisa-kev":"a"*64}):
+    got=bridge.read_local("CVE-2023-23397")
   self.assertEqual(len(got["matches"]),1)
   self.assertEqual(got["relation_count"],1)
 
  def test_unknown_identifier_has_no_invented_edges(self):
   with mock.patch.object(bridge,"command_json",side_effect=lambda args: [] if args[0]=="search" else {"outbound":[],"inbound":[]}):
-   got=bridge.read_local("CVE-2099-999999")
+   with mock.patch.object(bridge,"local_digest_map",return_value={"cisa-kev":"a"*64}):
+    got=bridge.read_local("CVE-2099-999999")
   self.assertEqual(got["matches"],[])
   self.assertEqual(got["source_declared_relations"],[])
 

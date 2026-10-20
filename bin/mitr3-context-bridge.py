@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import hashlib
 import re
 import subprocess
 import sys
@@ -36,7 +37,22 @@ def command_json(args: list[str]) -> object:
     except json.JSONDecodeError:
         raise LocalError("Local intel command did not produce JSON") from None
 
-def verified_edges(payload: object) -> list[dict]:
+def local_digest_map()->dict[str,str]:
+    """Verify digest of each cached source against its manifest before trusting graph links."""
+    catalog=ROOT / "knowledge/public-cases/catalog.json"
+    raw_catalog=catalog.read_bytes()
+    source_hashes={"public-cases":hashlib.sha256(raw_catalog).hexdigest()}
+    cache=ROOT / "knowledge/reference-datasets/cache"
+    manifest=json.loads((cache/"manifest.json").read_text(encoding="utf8"))
+    for source in ("cisa-kev","owasp-asvs-5.0.0"):
+        raw=(cache/(source+".json")).read_bytes()
+        digest=hashlib.sha256(raw).hexdigest()
+        if digest!=manifest[source]["sha256"]:
+            raise LocalError("Integrity check failed for "+source+"; no graph evidence may be promoted")
+        source_hashes[source]=digest
+    return source_hashes
+
+def verified_edges(payload: object,expected_hashes:dict[str,str] | None=None) -> list[dict]:
     """No inferred graph edges. Verify source-id and SHA envelope in existing local graph."""
     if not isinstance(payload, dict):
         return []
@@ -53,6 +69,8 @@ def verified_edges(payload: object) -> list[dict]:
                 continue
             digest=proof.get("sha256")
             if not isinstance(digest,str) or not HEX64.fullmatch(digest):
+                continue
+            if expected_hashes is not None and expected_hashes.get(proof["source_id"])!=digest:
                 continue
             doc=edge.get("doc_id")
             target=edge.get("target_id")
@@ -89,9 +107,10 @@ def read_local(query: str,limit:int=5)->dict:
         if ident not in links:links.insert(0,ident)
     links=list(dict.fromkeys(links))[:limit]
     edges=[]
+    verified_sources=local_digest_map()
     for rid in links:
         got=command_json(["relations",rid,"--json"])
-        edges.extend(verified_edges(got))
+        edges.extend(verified_edges(got,verified_sources))
     # Query can be CWE-named without a matching document.
     return {"status":"matched" if matches else "no_local_document",
       "matches":matches,"source_declared_relations":edges,
