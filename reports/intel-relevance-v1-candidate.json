@@ -4,7 +4,7 @@
   "hit_at_5": 1.0,
   "macro_recall_at_5": 0.975,
   "macro_precision_at_5": 0.24,
-  "macro_precision_of_returned": 0.935,
+  "macro_precision_of_returned": 0.917,
   "negative_abstention_rate": 1.0,
   "by_kind": {
     "concept": {
@@ -12,7 +12,7 @@
       "hit_at_5": 1.0,
       "recall_at_5": 0.95,
       "precision_at_5": 0.28,
-      "precision_of_returned": 0.87
+      "precision_of_returned": 0.833
     },
     "exact": {
       "n": 10,
@@ -214,12 +214,13 @@
       ],
       "returned": [
         "CASE-ps-cache-2024",
-        "CASE-ps-practical-cache-poisoning-2018"
+        "CASE-ps-practical-cache-poisoning-2018",
+        "ASVS-V14.2.5"
       ],
       "hit_at_5": true,
       "recall_at_5": 1.0,
       "precision_at_5": 0.2,
-      "precision_of_returned": 0.5,
+      "precision_of_returned": 0.333,
       "abstained": null
     },
     {
@@ -235,12 +236,13 @@
         "CASE-ps-request-smuggling-research",
         "CASE-ps-false-positive-2025",
         "CASE-ps-http2-2021",
-        "CASE-ps-http1-2025"
+        "CASE-ps-http1-2025",
+        "CVE-2022-22536"
       ],
       "hit_at_5": true,
       "recall_at_5": 1.0,
       "precision_at_5": 0.8,
-      "precision_of_returned": 1.0,
+      "precision_of_returned": 0.8,
       "abstained": null
     },
     {

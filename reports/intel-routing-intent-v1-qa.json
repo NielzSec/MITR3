@@ -1,0 +1,395 @@
+{
+  "base_commit": "f97d6ab",
+  "date": "2026-10-20 America/Sao_Paulo",
+  "scope": "Automatic source routing as a small ranking bias; actor role intent gate; no feed/catalog/delta changes.",
+  "ranking": {
+    "formula": "cover + 0.5*(-bm25)/(1+abs(bm25)) + (0.15 if document.source == preferred_source else 0)",
+    "coverage_threshold": "ceil(0.60 * distinct terms)",
+    "explicit_source_still_filters": true,
+    "candidate_pool": "max(60, limit*12) by BM25 across all sources unless explicitly filtered"
+  },
+  "intent_patterns": {
+    "ACTOR_ROLE_RE": "\\b(?:affiliates?|afiliad[oa]s?|operators?|operador(?:es)?|operadoras?|participants?|participantes?)\\b",
+    "THREAT_CONTEXT_RE": "\\b(?:ransomware|malware|esxi|lockbit|actors?|ator(?:es)?|c2|campaigns?|campanhas?|gangs?|quadrilhas?|criminal|criminos[oa]s?)\\b",
+    "ASSOCIATED_ROLE_RE": "\\b(?:partners?|parceir[oa]s?|members?|membros?|associates?|associad[oa]s?)\\b",
+    "ATTRIBUTION_RE": "\\b(?:attributions?|atribuicao|atribuicoes)\\b",
+    "CAMPAIGN_RE": "\\b(?:campaigns?|campanhas?)\\b",
+    "CAMPAIGN_ROLE_RE": "\\b(?:who|whom|quem|behind|por tras|responsavel|responsaveis|involved|involvement|envolvid[oa]s?|envolvimento)\\b"
+  },
+  "intent_notes": [
+    "Casefold + NFKD removes accent differences.",
+    "Source and builder are not actor triggers; campaign alone is not an actor role.",
+    "An explicit actor role is not overridden by artifact words.",
+    "Legacy encryptor/decryptor capability abstention is preserved separately.",
+    "Regex gates do not provide semantic completeness or authorize operations."
+  ],
+  "input_sha256": {
+    "fixture": "9f9cd7254dbe79bd96dfc2352a89f2c63f43a1145725d33f6ee54651fded809b",
+    "cisa-kev": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d",
+    "owasp-asvs-5.0.0": "bcdbec214d70abcfad9284a31d4f9e5134305831d628aad3aa85d7e26626cb35",
+    "catalog": "23f8b11a2ada42699a1bf58b776f4d75a51808c4cb95009d7a5e33ee8521393f"
+  },
+  "eval": {
+    "fixture_changed": false,
+    "before": {
+      "hit_at_5": 1.0,
+      "macro_recall_at_5": 0.975,
+      "macro_precision_at_5": 0.24,
+      "macro_precision_of_returned": 0.935,
+      "negative_abstention_rate": 1.0
+    },
+    "after": {
+      "hit_at_5": 1.0,
+      "macro_recall_at_5": 0.975,
+      "macro_precision_at_5": 0.24,
+      "macro_precision_of_returned": 0.917,
+      "negative_abstention_rate": 1.0
+    },
+    "changed_queries": [
+      {
+        "query": "web cache deception",
+        "before": [
+          "CASE-ps-cache-2024",
+          "CASE-ps-practical-cache-poisoning-2018"
+        ],
+        "after": [
+          "CASE-ps-cache-2024",
+          "CASE-ps-practical-cache-poisoning-2018",
+          "ASVS-V14.2.5"
+        ]
+      },
+      {
+        "query": "HTTP request smuggling",
+        "before": [
+          "CASE-ps-request-smuggling-research",
+          "CASE-ps-false-positive-2025",
+          "CASE-ps-http2-2021",
+          "CASE-ps-http1-2025"
+        ],
+        "after": [
+          "CASE-ps-request-smuggling-research",
+          "CASE-ps-false-positive-2025",
+          "CASE-ps-http2-2021",
+          "CASE-ps-http1-2025",
+          "CVE-2022-22536"
+        ]
+      }
+    ]
+  },
+  "suite": {
+    "passed": 67,
+    "total": 67,
+    "previous_tests": 58,
+    "new_test_methods": 9,
+    "command": "PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -v"
+  },
+  "acceptance": [
+    {
+      "query": "SAP HTTP request smuggling",
+      "unsupported_intent": null,
+      "returned": [
+        "CVE-2022-22536",
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-http1-2025"
+      ]
+    },
+    {
+      "query": "cache poisoning",
+      "unsupported_intent": null,
+      "returned": [
+        "CASE-ps-practical-cache-poisoning-2018",
+        "CASE-ps-cache-2024"
+      ]
+    },
+    {
+      "query": "esxi encryptor",
+      "unsupported_intent": "Encryptor/decryptor capability is not represented in the current source catalog.",
+      "returned": []
+    },
+    {
+      "query": "LockBit ESXi encryptor",
+      "unsupported_intent": "Encryptor/decryptor capability is not represented in the current source catalog.",
+      "returned": []
+    },
+    {
+      "query": "ransomware campaign participant",
+      "unsupported_intent": "Actor/family attribution is not represented in the current source catalog.",
+      "returned": []
+    },
+    {
+      "query": "ransomware source",
+      "unsupported_intent": null,
+      "returned": []
+    },
+    {
+      "query": "lockbit builder",
+      "unsupported_intent": null,
+      "returned": []
+    },
+    {
+      "query": "ASVS HTTP request smuggling",
+      "unsupported_intent": null,
+      "returned": [
+        "ASVS-V4.2.2",
+        "ASVS-V4.2.1",
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021"
+      ]
+    },
+    {
+      "query": "Starlette HTTP request smuggling",
+      "unsupported_intent": null,
+      "returned": [
+        "CVE-2026-48710",
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-http1-2025"
+      ]
+    },
+    {
+      "query": "HTTP request smuggling CVE-2022-22536",
+      "unsupported_intent": null,
+      "returned": [
+        "CVE-2022-22536",
+        "CVE-2026-48710",
+        "CVE-2022-36804"
+      ]
+    }
+  ],
+  "artifact_evidence_note": "ransomware source and lockbit builder have no matching curated documents today. Temporary synthetic documents in tests prove these intents can retrieve artifacts without adding real catalog entries.",
+  "original_eight_adversarial_methods": {
+    "passed": 2,
+    "total": 8,
+    "errors": 0,
+    "passed_methods": [
+      "original_adversarial.AdversarialTests.test_no_unknown_identifier_or_content_fallback",
+      "original_adversarial.AdversarialTests.test_order_and_20k"
+    ],
+    "failures": {
+      "test_ambiguous_corpus": "All three cross-corpus expected targets are recovered; the last assert assumes strict AND and expects zero results under explicit public-cases filter. With current 60% coverage, four cases pass that explicit filter.",
+      "test_delta_tracks_unpersisted_fields": "KEV delta projection still omits description/CWE/notes; unchanged outside this task.",
+      "test_duplicate_ids_rejected": "Isolated snapshot still collapses duplicate IDs; complete build rejects duplicates. Unchanged outside this task.",
+      "test_query_framing_preserves_target": "Only Faultline writeup still fails; no normalization of writeup/write-up was added.",
+      "test_semantics_after_token_15_are_preserved": "Long ransomware partner query now abstains, but the assert expecting ValueError at 65 tokens still fails; token limits unchanged.",
+      "test_snapshot_schema_migration_rebaselines": "KEV snapshot migration is not implemented; relation table schema 2 is unrelated."
+    },
+    "source": "literal tests string extracted without executing /tmp/opencode/build_proposal.py; modules loaded from current repository; historical asserts unchanged"
+  },
+  "eight_legitimate_queries": {
+    "passed": 7,
+    "total": 8
+  },
+  "adversarial_query_replay": [
+    {
+      "query": "What is CVE-2023-23397",
+      "returned": [
+        "CVE-2023-23397"
+      ],
+      "unsupported_intent": null,
+      "expected": "CVE-2023-23397",
+      "passed": true
+    },
+    {
+      "query": "CVE-2023-23397 Outlook mitigation",
+      "returned": [
+        "CVE-2023-23397",
+        "CVE-2023-35311"
+      ],
+      "unsupported_intent": null,
+      "expected": "CVE-2023-23397",
+      "passed": true
+    },
+    {
+      "query": "Outlook NTLM relay mitigation",
+      "returned": [
+        "CVE-2023-23397"
+      ],
+      "unsupported_intent": null,
+      "expected": "CVE-2023-23397",
+      "passed": true
+    },
+    {
+      "query": "explain Log4Shell",
+      "returned": [],
+      "unsupported_intent": null
+    },
+    {
+      "query": "Log4Shell remediation",
+      "returned": [],
+      "unsupported_intent": null
+    },
+    {
+      "query": "Faultline writeup",
+      "returned": [],
+      "unsupported_intent": null,
+      "expected": "CASE-ctfcit-2026-faultline",
+      "passed": false
+    },
+    {
+      "query": "Faultline reverse engineering walkthrough",
+      "returned": [
+        "CASE-ctfcit-2026-faultline"
+      ],
+      "unsupported_intent": null,
+      "expected": "CASE-ctfcit-2026-faultline",
+      "passed": true
+    },
+    {
+      "query": "JerseyCTF RSA shared prime walkthrough",
+      "returned": [
+        "CASE-jctf-rsa-41140"
+      ],
+      "unsupported_intent": null,
+      "expected": "CASE-jctf-rsa-41140",
+      "passed": true
+    },
+    {
+      "query": "how to recover corrupt images file carving",
+      "returned": [
+        "CASE-jctf-files-41137"
+      ],
+      "unsupported_intent": null,
+      "expected": "CASE-jctf-files-41137",
+      "passed": true
+    },
+    {
+      "query": "Practical Web Cache Poisoning research",
+      "returned": [
+        "CASE-ps-practical-cache-poisoning-2018",
+        "CASE-ps-cache-2024"
+      ],
+      "unsupported_intent": null,
+      "expected": "CASE-ps-practical-cache-poisoning-2018",
+      "passed": true
+    },
+    {
+      "query": "HTTP request smuggling SAP",
+      "returned": [
+        "CVE-2022-22536",
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-http1-2025"
+      ],
+      "unsupported_intent": null
+    },
+    {
+      "query": "SAP cache poisoning",
+      "returned": [
+        "CASE-ps-practical-cache-poisoning-2018",
+        "CASE-ps-cache-2024",
+        "CVE-2022-22536"
+      ],
+      "unsupported_intent": null
+    },
+    {
+      "query": "Starlette HTTP request smuggling",
+      "returned": [
+        "CVE-2026-48710",
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-http1-2025"
+      ],
+      "unsupported_intent": null
+    },
+    {
+      "query": "ASVS HTTP request smuggling",
+      "returned": [
+        "ASVS-V4.2.2",
+        "ASVS-V4.2.1",
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021"
+      ],
+      "unsupported_intent": null
+    },
+    {
+      "query": "request smuggling",
+      "returned": [
+        "CASE-ps-request-smuggling-research",
+        "CASE-ps-false-positive-2025",
+        "CASE-ps-http2-2021",
+        "CASE-ps-http1-2025",
+        "CVE-2022-22536"
+      ],
+      "unsupported_intent": null
+    },
+    {
+      "query": "NTLM relay CTF",
+      "returned": [
+        "CVE-2023-23397",
+        "CASE-jctf-rsa-41140"
+      ],
+      "unsupported_intent": null
+    },
+    {
+      "query": "HTTP request smuggling CVE-2022-22536",
+      "returned": [
+        "CVE-2022-22536",
+        "CVE-2026-48710",
+        "CVE-2022-36804"
+      ],
+      "unsupported_intent": null
+    },
+    {
+      "query": "ESXi encrypter",
+      "returned": [],
+      "unsupported_intent": null
+    },
+    {
+      "query": "ESXi encryptors",
+      "returned": [],
+      "unsupported_intent": null
+    },
+    {
+      "query": "ESXi ransomware payload",
+      "returned": [],
+      "unsupported_intent": null
+    },
+    {
+      "query": "ESXi file encryption malware",
+      "returned": [],
+      "unsupported_intent": null
+    },
+    {
+      "query": "ESXi encryption program",
+      "returned": [],
+      "unsupported_intent": null
+    },
+    {
+      "query": "ransomware affiliates",
+      "returned": [],
+      "unsupported_intent": "Actor/family attribution is not represented in the current source catalog."
+    },
+    {
+      "query": "ransomware partners",
+      "returned": [],
+      "unsupported_intent": "Actor/family attribution is not represented in the current source catalog."
+    },
+    {
+      "query": "ransomware gang member",
+      "returned": [],
+      "unsupported_intent": "Actor/family attribution is not represented in the current source catalog."
+    },
+    {
+      "query": "ransomware campaign participant",
+      "returned": [],
+      "unsupported_intent": "Actor/family attribution is not represented in the current source catalog."
+    },
+    {
+      "query": "ransomware criminal associate",
+      "returned": [],
+      "unsupported_intent": "Actor/family attribution is not represented in the current source catalog."
+    },
+    {
+      "query": "VMware ESXi contains an arbitrary write vulnerability Successful exploitation allows an attacker with privileges within the VMX process acting as a ransomware partner",
+      "returned": [],
+      "unsupported_intent": "Actor/family attribution is not represented in the current source catalog."
+    }
+  ]
+}

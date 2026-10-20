@@ -5,6 +5,7 @@ Uses only Python stdlib; no PoC execution, scanning, untrusted remote commands, 
 from __future__ import annotations
 import argparse, collections, datetime as dt, hashlib, json, os, re, sqlite3, sys, tempfile
 import urllib.request, urllib.parse
+import unicodedata
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -29,6 +30,13 @@ RELATION_SOURCES={"cwe_of":"cisa-kev", "asvs_maps_cwe":"owasp-asvs-5.0.0",
                   "case_references":"public-cases"}
 CWE_RE=re.compile(r"^CWE-\d+$",re.ASCII)
 TARGET_RE=re.compile(r"(?:CVE-\d{4}-\d{4,}|CWE-\d+|ASVS-V?\d+(?:\.\d+){2}|CASE-[a-zA-Z0-9._-]+)",re.ASCII)
+ROUTED_SOURCE_BOOST=0.15
+ACTOR_ROLE_RE=re.compile(r"\b(?:affiliates?|afiliad[oa]s?|operators?|operador(?:es)?|operadoras?|participants?|participantes?)\b")
+THREAT_CONTEXT_RE=re.compile(r"\b(?:ransomware|malware|esxi|lockbit|actors?|ator(?:es)?|c2|campaigns?|campanhas?|gangs?|quadrilhas?|criminal|criminos[oa]s?)\b")
+ASSOCIATED_ROLE_RE=re.compile(r"\b(?:partners?|parceir[oa]s?|members?|membros?|associates?|associad[oa]s?)\b")
+ATTRIBUTION_RE=re.compile(r"\b(?:attributions?|atribuicao|atribuicoes)\b")
+CAMPAIGN_RE=re.compile(r"\b(?:campaigns?|campanhas?)\b")
+CAMPAIGN_ROLE_RE=re.compile(r"\b(?:who|whom|quem|behind|por tras|responsavel|responsaveis|involved|involvement|envolvid[oa]s?|envolvimento)\b")
 
 def declared_relations(targets,relation,evidence):
  """Accept structured declarations only; no prose extraction or inferred edges."""
@@ -288,9 +296,13 @@ def relations(identifier,as_json=False,emit=True):
  return result
 
 def is_unsupported_intent(query):
- """Do not infer actor attribution from a CVE-only catalog."""
- q=query.casefold()
- if re.search(r"\b(?:encryptor|decryptor|affiliate|operator|actor attribution|c2 attribution)\b",q):
+ """Actor roles need actor evidence; source code/builders are artifacts, not roles."""
+ q="".join(c for c in unicodedata.normalize("NFKD",query.casefold()) if not unicodedata.combining(c))
+ if re.search(r"\b(?:encryptor|decryptor)\b",q):
+  return "Encryptor/decryptor capability is not represented in the current source catalog."
+ if (ACTOR_ROLE_RE.search(q)
+     or (THREAT_CONTEXT_RE.search(q) and (ASSOCIATED_ROLE_RE.search(q) or ATTRIBUTION_RE.search(q)))
+     or (CAMPAIGN_RE.search(q) and CAMPAIGN_ROLE_RE.search(q))):
   return "Actor/family attribution is not represented in the current source catalog."
  return None
 
@@ -310,7 +322,9 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  if not toks:raise ValueError("Empty query")
  max_limit=max(1,min(limit,50))
  qid=query.strip().upper()
- source=routed_source(query,source)
+ # Only an explicit --source constrains retrieval. Automatic routing is a small
+ # ranking preference; a product/CVE/standard in another corpus must survive it.
+ preferred_source=routed_source(query,"") if not source else ""
  skip=is_unsupported_intent(query) if not (CVE_RE.fullmatch(qid) or qid.startswith("ASVS-")) else None
  con=open_db()
  try:
@@ -328,8 +342,8 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
   else:
    # Qualquer termo entra como candidato; a cobertura decide o corte. AND estrito
    # quebra consulta real de 4+ termos; OR puro enche de filler. Meio-termo: exige
-   # >=60% dos termos distintos (arredonda para cima) e ordena por cobertura, com
-   # bm25 como desempate dentro da mesma cobertura.
+   # >=60% dos termos distintos (arredonda para cima). Cobertura tem prioridade;
+   # bm25 e o pequeno vies de fonte ordenam dentro da mesma cobertura.
    uniq=sorted(set(toks))
    need=max(1,-(-len(uniq)*3//5))
    term=" OR ".join('"'+t.replace('"','')+'"' for t in uniq)
@@ -339,16 +353,21 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
    if kind: filters.append("d.kind=?");params.append(kind)
    rows=con.execute(
     "SELECT d.id,d.kind,d.source,d.title,d.summary,d.lesson,d.tags,"
-    "d.source_url,d.published_at,d.validation,d.digest "
+    "d.source_url,d.published_at,d.validation,d.digest,bm25(docs_fts,0,3,1.3,0.8,3.0) "
     "FROM docs_fts JOIN documents d ON d.id=docs_fts.id WHERE "
     +" AND ".join(filters)
     +" ORDER BY bm25(docs_fts,0,3,1.3,0.8,3.0) LIMIT ?",
     params+[max(60,max_limit*12)]).fetchall()
    ranked=[]
-   for row in rows:
+   for candidate in rows:
+    row,bm25=candidate[:-1],candidate[-1]
     words=set(re.findall(r"[\w]+"," ".join(str(x).lower() for x in row[3:7])))
     cover=sum(1 for t in uniq if t in words)
-    if cover>=need: ranked.append((cover,row))
+    # BM25 is negative (lower is better). Its bounded bonus preserves coverage
+    # priority: BM25 (<0.5) + source (0.15) cannot replace a missing query term.
+    score=cover+0.5*(-bm25)/(1+abs(bm25))
+    if row[2]==preferred_source:score+=ROUTED_SOURCE_BOOST
+    if cover>=need: ranked.append((score,row))
    ranked.sort(key=lambda x:-x[0])
    rows=[row for _,row in ranked[:max_limit]]
   columns=("id","kind","source","title","summary","lesson","tags","source_url","published_at","validation","sha256")
