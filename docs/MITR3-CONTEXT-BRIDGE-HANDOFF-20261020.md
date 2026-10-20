@@ -49,22 +49,6 @@ nos três itens de abstenção. Veja o relatório
 `reports/intel-vocabulary-fallback-v1-qa.json`; esse conjunto não foi usado para
 ajustar o algoritmo nem os testes.
 
-## Ancoragem por frase: atualização posterior
-
-A ponte também preserva `fallback=phrase_anchor`. A busca verifica bigramas e
-trigramas no FTS, escolhe a frase com menor contagem de documentos e exige sua
-presença em cada resultado. Isso não promove relações nem valida atribuição.
-Os caminhos anteriores continuam quando nenhuma frase existe; guardas de intenção,
-consultas curtas e identificadores não são relaxados.
-
-Medição atual: 143 testes verdes; recall candidate 0.975, abstenção **0.900**
-(queda de 1.000). Na regressão cega, 1/7 alvos aparece, junto com alternativa
-proibida; sem esse erro, 0/7. `phrase_anchor` retorna em 4/10 consultas e apenas
-2/3 abstenções permanecem limpas. Frases narrativas raras também causam retornos
-fora do alvo. Não usar presença de frase como prova de relevância semântica.
-Relatório: `reports/intel-phrase-anchor-v1-qa.json`. Código/testes congelados
-antes da execução cega; nenhum ajuste posterior ou alteração dos fixtures.
-
 ## Limites de evidência
 
 Não confundir capacidade de pesquisar contexto com comprovação de vínculo.

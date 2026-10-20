@@ -324,11 +324,9 @@ def routed_source(query,source):
   return "public-cases"
  return ""
 
-def ranked_candidates(con,terms,need,max_limit,source,kind,preferred_source,fts_coverage=False,anchor=()):
+def ranked_candidates(con,terms,need,max_limit,source,kind,preferred_source,fts_coverage=False):
  """Keep coverage/BM25/source ranking; fallback coverage uses actual FTS tokens."""
  expression=" OR ".join('"'+t.replace('"','')+'"' for t in terms)
- if anchor:
-  expression="("+expression+') AND "'+" ".join(anchor)+'"'
  filters=["docs_fts MATCH ?"]
  params=[expression]
  if source:filters.append("d.source=?");params.append(source)
@@ -370,25 +368,6 @@ def vocabulary_terms(con,tokens):
  return con.execute("SELECT q.term,v.doc,v.cnt FROM temp.query_vocab q "
                     "JOIN temp.docs_fts_vocab v ON v.term=q.term ORDER BY q.term").fetchall()
 
-def phrase_anchor(con,tokens):
- """Only adjacent content n-grams actually present as an FTS phrase qualify.
-
- Corpus document frequency wins; ties prefer longer phrases, then query order.
- Keep out-of-vocabulary words in this sequence: removing them could invent
- adjacency. FTS itself normalizes case/diacritics when checking each phrase.
- """
- candidates=[]
- seen=set()
- for size in (2,3):
-  for offset in range(len(tokens)-size+1):
-   phrase=tuple(tokens[offset:offset+size])
-   if phrase in seen:continue
-   seen.add(phrase)
-   count=con.execute('SELECT count(*) FROM docs_fts WHERE docs_fts MATCH ?',
-                     ('"'+" ".join(phrase)+'"',)).fetchone()[0]
-   if count:candidates.append((count,-size,offset,phrase))
- return min(candidates)[3] if candidates else ()
-
 def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  raw=[t.lower() for t in re.findall(r"[\w]+",query,flags=re.UNICODE)]
  toks=[t for t in raw if t not in STOPWORDS][:15] or raw[:15]
@@ -425,18 +404,11 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
     full=[t for t in raw if t not in STOPWORDS and t not in DOC_TYPES] or raw
     vocab=vocabulary_terms(con,full)
     present=[term for term,_,_ in vocab]
-    anchor=phrase_anchor(con,full)
-    if anchor:
-     # The phrase is mandatory in every candidate, not merely co-occurring
-     # tokens somewhere in the corpus. Remaining terms supply ranking context.
-     rows=ranked_candidates(con,present,0,max_limit,source,kind,preferred_source,
-                            fts_coverage=True,anchor=anchor)
-     if rows:fallback="phrase_anchor"
-    elif present:
+    if present:
      rows=ranked_candidates(con,present,max(1,-(-len(present)*3//5)),
                             max_limit,source,kind,preferred_source,fts_coverage=True)
      if rows:fallback="vocabulary"
-    if not anchor and not rows and len(present)>=2:
+    if not rows and len(present)>=2:
      rare=[term for term,_,_ in sorted(vocab,key=lambda item:(item[1],item[2],item[0]))[:3]]
      rows=ranked_candidates(con,rare,2,max_limit,source,kind,preferred_source,fts_coverage=True)
      if rows:fallback="vocabulary_rare"

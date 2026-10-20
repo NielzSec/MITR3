@@ -14,7 +14,7 @@ class VocabularyTests(unittest.TestCase):
                  "e as atualizações recomendadas pelo fornecedor?")
         rows = intel.search(query, emit=False)
         self.assertTrue({r['id'] for r in rows} & {'CVE-2022-39197', 'CVE-2022-42948'})
-        self.assertTrue(all(r['fallback'] == 'phrase_anchor' for r in rows))
+        self.assertTrue(all(r['fallback'] == 'vocabulary_rare' for r in rows))
 
     def test_new_netlogon_question(self):
         query = ("Você pode explicar a vulnerabilidade Netlogon MS-NRPC secure channel para nossa "
@@ -36,21 +36,21 @@ class VocabularyTests(unittest.TestCase):
                     self.assertEqual(intel.search(query, emit=False), [])
 
     def test_oov_removed_and_fts_normalization_used(self):
-        with index([record('CASE-test', 'Café separated alpha')]):
+        with index([record('CASE-test', 'Café alpha')]):
             rows = intel.search('CAFÉ alpha zzqa zzqb zzqc zzqd zzqe zzqf', emit=False)
             self.assertEqual([r['id'] for r in rows], ['CASE-test'])
             self.assertEqual(rows[0]['fallback'], 'vocabulary')
 
     def test_rare_three_requires_two_not_one(self):
-        records = [record('CASE-pair', 'beta separated alpha'), record('CASE-single', 'gamma')]
+        records = [record('CASE-pair', 'alpha beta'), record('CASE-single', 'gamma')]
         records += [record(f'CASE-common-{i}', 'common delta epsilon zeta') for i in range(3)]
         with index(records):
-            rows = intel.search('alpha gamma delta beta epsilon common zeta', emit=False)
+            rows = intel.search('alpha beta gamma common delta epsilon zeta', emit=False)
             self.assertEqual([r['id'] for r in rows], ['CASE-pair'])
             self.assertEqual(rows[0]['fallback'], 'vocabulary_rare')
 
     def test_present_terms_still_need_sixty_percent(self):
-        with index([record('CASE-pair', 'beta separated alpha'), record('CASE-other', 'delta separated gamma')]):
+        with index([record('CASE-pair', 'alpha beta'), record('CASE-other', 'gamma delta')]):
             rows = intel.search('alpha beta gamma delta zzqa zzqb zzqc', emit=False)
             # Four present terms require three; neither pair satisfies it.
             self.assertEqual([r['id'] for r in rows], ['CASE-pair'])
@@ -87,7 +87,7 @@ class VocabularyTests(unittest.TestCase):
     def test_terms_after_original_fifteen_used(self):
         with index([record('CASE-test', 'alpha beta')]):
             query = ' '.join(['zzqa'] * 16 + ['alpha', 'beta'])
-            self.assertEqual(intel.search(query, emit=False)[0]['fallback'], 'phrase_anchor')
+            self.assertEqual(intel.search(query, emit=False)[0]['fallback'], 'vocabulary')
 
     def test_explicit_filters_respected(self):
         records = [record('CASE-a', 'alpha beta', 'public-cases'),
