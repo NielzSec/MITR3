@@ -1,0 +1,96 @@
+[
+  {
+    "id": "dev-1",
+    "question": "What does the public synthetic lab observation establish?",
+    "documents": [
+      {
+        "id": "CASE-review-public-dev",
+        "title": "Synthetic public lab record",
+        "source": "public-dev",
+        "source_url": "https://example.org/dev-review",
+        "validation": "synthetic_public_dev",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "namespace": "local",
+        "kind": "document",
+        "snippet": "Public synthetic lab: the panel returned HTTP 200. Command channel state was not tested."
+      }
+    ],
+    "plan": {
+      "language": "en",
+      "intent": "artifact",
+      "entities": [],
+      "queries": [
+        "public panel"
+      ]
+    },
+    "extract": {
+      "extracts": [
+        {
+          "id": "CASE-review-public-dev",
+          "quote": "the panel returned HTTP 200"
+        }
+      ]
+    },
+    "composition": {
+      "abstain": false,
+      "claims": [
+        {
+          "text": "The public lab endpoint returned HTTP 200.",
+          "citations": [
+            {
+              "id": "CASE-review-public-dev",
+              "quote": "the panel returned HTTP 200"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "dev-2",
+    "question": "What does the public synthetic lab observation establish?",
+    "documents": [
+      {
+        "id": "CASE-review-public-dev",
+        "title": "Synthetic public lab record",
+        "source": "public-dev",
+        "source_url": "https://example.org/dev-review",
+        "validation": "synthetic_public_dev",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "namespace": "local",
+        "kind": "document",
+        "snippet": "Public synthetic lab: the panel returned HTTP 200. Command channel state was not tested."
+      }
+    ],
+    "plan": {
+      "language": "en",
+      "intent": "artifact",
+      "entities": [],
+      "queries": [
+        "public panel"
+      ]
+    },
+    "extract": {
+      "extracts": [
+        {
+          "id": "CASE-review-public-dev",
+          "quote": "the panel returned HTTP 200"
+        }
+      ]
+    },
+    "composition": {
+      "abstain": false,
+      "claims": [
+        {
+          "text": "The command and control service is alive.",
+          "citations": [
+            {
+              "id": "CASE-review-public-dev",
+              "quote": "the panel returned HTTP 200"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

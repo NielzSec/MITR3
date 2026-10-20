@@ -1,0 +1,182 @@
+{
+  "schema": "review-artifacts-public-dev-v1",
+  "scope": "public_dev_fixture_only",
+  "transport": "fixture_mock_no_network",
+  "at_utc": "2026-10-20T19:08:16.282703+00:00",
+  "rows": [
+    {
+      "arm": "baseline",
+      "id": "dev-1",
+      "abstain": false,
+      "error": null,
+      "status": "evidence_attached_proposal",
+      "claim_count": 1,
+      "citation_ids": [
+        "CASE-review-public-dev"
+      ],
+      "stages": {
+        "query_count": null,
+        "document_count": 1,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          88
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3"
+      },
+      "category": "answered_gate",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "296981f2eea60538836c01fc1845e7a9dc4eab4c65439c471335a39f53f71b00",
+          "evidence_package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": null,
+          "elapsed": 0.016
+        }
+      ],
+      "elapsed": 0.016
+    },
+    {
+      "arm": "baseline",
+      "id": "dev-2",
+      "abstain": false,
+      "error": null,
+      "status": "evidence_attached_proposal",
+      "claim_count": 1,
+      "citation_ids": [
+        "CASE-review-public-dev"
+      ],
+      "stages": {
+        "query_count": null,
+        "document_count": 1,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          88
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3"
+      },
+      "category": "answered_gate",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "12e9d3a5cf1c25cfe5082eee478088e68e8e44b911a46743a622ab8a2e4427c2",
+          "evidence_package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": null,
+          "elapsed": 0.012
+        }
+      ],
+      "elapsed": 0.012
+    },
+    {
+      "arm": "candidate",
+      "id": "dev-1",
+      "abstain": false,
+      "error": null,
+      "status": "evidence_attached_proposal",
+      "claim_count": 1,
+      "citation_ids": [
+        "CASE-review-public-dev"
+      ],
+      "stages": {
+        "query_count": 1,
+        "document_count": 1,
+        "extract_count": 1,
+        "rejected_extract_count": 0,
+        "quote_count": 1,
+        "literal_quote_count": 1,
+        "snippet_lengths": [
+          88
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3"
+      },
+      "category": "answered_gate",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "c189cf563df8e5b2f93cedb4803b0dd67f9c11b2bc11898a0428305269122f20",
+          "evidence_package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": null,
+          "elapsed": 0.014
+        }
+      ],
+      "elapsed": 0.014
+    },
+    {
+      "arm": "candidate",
+      "id": "dev-2",
+      "abstain": false,
+      "error": null,
+      "status": "evidence_attached_proposal",
+      "claim_count": 1,
+      "citation_ids": [
+        "CASE-review-public-dev"
+      ],
+      "stages": {
+        "query_count": 1,
+        "document_count": 1,
+        "extract_count": 1,
+        "rejected_extract_count": 0,
+        "quote_count": 1,
+        "literal_quote_count": 1,
+        "snippet_lengths": [
+          88
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3"
+      },
+      "category": "answered_gate",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "75039666282828ca81db69b1e743cf5b0e76cf462aa6ac1fd548578c1e20f3b4",
+          "evidence_package_sha256": "0d7933ab7239ced55d8a045d8808376340eeaba6428bbc94e163b4a9ffe55be3",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": null,
+          "elapsed": 0.01
+        }
+      ],
+      "elapsed": 0.01
+    }
+  ],
+  "artifacts": {
+    "bin/mitr3-answer.py": "4ba78d9a0b57e6bfaad6524e95cd81d266f2ba071eeaba61ad8551ed114c29ab",
+    "bin/mitr3-blind-run.py": "15a4e823822fd3d67739b2b03d1b7c3fc92739bda43798a2e1c2430288aacd3c",
+    "bin/mitr3-candidate-run.py": "cf2578791e2a11e3d4bc0165b72cd29d60dc841da32fc73e89a9ab8f61d4fac3",
+    "bin/mitr3-context-bridge.py": "e89ed65620fccf1c4eb05fa38e7b1cdb33c201bcdbdfcdb6bf3a142118c1d9f4",
+    "bin/mitr3-rag-intel.py": "57bac3d59f414b16817b3a93e5981638ce9988254bfdcf57dc789897f2deb5d6",
+    "docs/CANDIDATE-FREEZE-SPEC-20261020.md": "ef5ec791003abc6f927ca7389fd19f83ccd1efe1269b3bc76af0ceec555fd402",
+    "bin/mitr3-review-artifacts.py": "f62ce0208151869b96355324484811f55a6e942a9dcf70d045d1c33881e18d54",
+    "tests/fixtures/review-artifacts-dev-v1.json": "86f498ad7dd2f182cc73ca433164e906c7f2b6d629197b862b1d6068d61309ad",
+    "extraction_prompt_source": "1633414e63ceee150bc3be6889a6a5fd2bf9580e0eb37cec2413615588073537",
+    "required_synthesis_prompt": "2f65d7b18a240a0428b17b0df7983b97b2ebdc5ed589bd78d33028b6b457a4b8",
+    "state/mitr3-intel.sqlite3": "1dac5585c70328d864290fcc2b30bd1257fed245c33923ff05cd52cc2a09066a",
+    "state/mitr3-attack.sqlite3": "60827b12fdbc09923ec1f4a3ec9c6bd0f88c6bba8ba3c8694fcc317f3d92c866",
+    "knowledge/reference-datasets/cache/manifest.json": "3a5d108d10d678fbe5542cffe38a673177fb2f0af476694468e905ab35b3d23a",
+    "knowledge/reference-datasets/cache/enterprise-attack-manifest.json": "92160406053997f9bc1ed269e3628b6d56e393e8aa7ed7ae78d603047b79de67"
+  },
+  "fixture_sha256": "86f498ad7dd2f182cc73ca433164e906c7f2b6d629197b862b1d6068d61309ad",
+  "private_manifest_sha256": "16a9a17da565ef5471bdc645791c7ad96256ad88ae85c7b65bc137df8884c9c3"
+}

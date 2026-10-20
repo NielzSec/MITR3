@@ -59,13 +59,18 @@ class CandidateRunTests(unittest.TestCase):
         self.assertIn('UNTRUSTED DATA',cc[-1][0])
         self.assertEqual(cs['extract_count'],1)
         self.assertEqual(cs['quote_count'],1)
-        self.assertEqual(bs['evidence_state'],'unobserved_baseline')
+        self.assertEqual(bs['evidence_state'],'nonempty')
 
-    def test_baseline_exact_transport_delegation(self):
-        with mock.patch.object(R.BLIND,'call_answer',return_value=R.BLIND.failed('MODEL_ABSTAIN')) as call:
-            result=R.call_arm('public','provider/model',90,'baseline')
-        call.assert_called_once_with('public','provider/model',90)
-        self.assertEqual(result['error'],'MODEL_ABSTAIN')
+    def test_baseline_worker_uses_production_answer_without_mutating_source(self):
+        baseline=R.load_module('reference_answer',ROOT/'bin/mitr3-answer.py')
+        before=(ROOT/'bin/mitr3-answer.py').read_bytes()
+        outputs=iter([self.plan,self.composition])
+        baseline.model_call=lambda *args:next(outputs)
+        baseline.evidence_package=lambda *args:[self.doc]
+        expected=baseline.answer('What response did the public lab endpoint return?',R.DEFAULT_MODEL)
+        result,_,_,_=self.pipeline('baseline',[self.plan,self.composition])
+        self.assertEqual(result,expected)
+        self.assertEqual((ROOT/'bin/mitr3-answer.py').read_bytes(),before)
 
     def test_loader_decodes_no_gold_values(self):
         decode=json.loads
@@ -91,7 +96,7 @@ class CandidateRunTests(unittest.TestCase):
             seen.append(q)
             return R.BLIND.failed('MODEL_ABSTAIN')
         with tempfile.TemporaryDirectory() as td:
-            report=R.run_set(self.fixture(td),'candidate',call_fn=call)
+            report=R.run_set(self.fixture(td),'candidate',call_fn=call,private_dir=Path(td)/'private')
         self.assertEqual(seen,['PUBLIC_QUESTION_CANARY']*10)
         for marker in ['GOLD_','PUBLIC_QUESTION_CANARY','expected_answer','forbidden_ids']:
             self.assertNotIn(marker,json.dumps(report))
@@ -184,7 +189,7 @@ class CandidateRunTests(unittest.TestCase):
             with lock:active-=1
             return R.BLIND.failed('MODEL_ABSTAIN')
         with tempfile.TemporaryDirectory() as td:
-            report=R.run_set(self.fixture(td),'candidate',workers=3,call_fn=call)
+            report=R.run_set(self.fixture(td),'candidate',workers=3,call_fn=call,private_dir=Path(td)/'private')
         self.assertEqual(peak,3)
         self.assertEqual([r['id'] for r in report['rows']],[f'dev-{i}' for i in range(10)])
         self.assertEqual(report['totals']['abstained'],10)
