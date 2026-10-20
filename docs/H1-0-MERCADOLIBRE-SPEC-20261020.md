@@ -1,9 +1,9 @@
-# H1-0 — Especificação v3: MercadoLibre (bug bounty)
+# H1-0 — Especificação v4: MercadoLibre (bug bounty)
 
 **Data:** 2026-10-20 · **Operador:** Kai (`nielzsec`) · **Maestro:** OpenCode
 **Programa:** `mercadolibre` (33462) · `open` · triage ativo · bounty ativo
 **Escopo:** API HackerOne, 4 páginas, **88 ativos** (sha `146d115e8b0ad9f3da81efa7a3c284c042c1b3a3660f4f4d8ae3f6241f155d62`); política sha `74df70a9d27ffc20f5bd450365a9f2a07d6ac50c17e15f48f9b3bdcc3cc1c007`. Cópias privadas 0600 em `~/.local/share/mitr3/h1/mercadolibre/`.
-**Histórico:** v1 leu só a página 1 (25 ativos, incompleta); v2 corrigiu para 88 e reconciliou 100% com o export Burp; **v3 adiciona o tier do campo `instruction`**, que a v2 não extraía. Nenhum teste ativo foi executado em nenhuma versão.
+**Histórico:** v4 fecha as pendências do Portão A (Point Smart adiado, Crypto sem tier, limites operacionais, registro QA+JEV). v1 leu só a página 1 (25 ativos, incompleta); v2 corrigiu para 88 e reconciliou 100% com o export Burp; **v3 adiciona o tier do campo `instruction`**, que a v2 não extraía. Nenhum teste ativo foi executado em nenhuma versão.
 **Regra de gates:** Portão A (QA+JEV) em `FAIL` conforme `docs/H1-MELI-GATE-A-QA-20261020.md`; execução ativa = STOP até novo parecer.
 
 ## 1. Distribuição de tiers (campo `instruction`)
@@ -167,9 +167,29 @@ Ativo exato + endpoint/método; passos numerados com conta rótulo; request/resp
 
 Especificação → **Portão A (QA+JEV)** → Plano → Tarefa → **Portão B (QA+JEV)** → Implementação. Mudança de requisito volta à especificação.
 
-## 6. Pendências do Portão A
+## 6. Fechamento das pendências do Portão A
 
-1. `Crypto` sem tier e caminhos `/crypto/*`; `Point Smart` Tier 1 (AR/BR) — método físico a esclarecer.
-2. `Wonder` sem tier e sem instrução.
-3. Elegibilidade de `nielzsec`: Signal 1.0 / trial reports / verificação de identidade.
-4. Limite qualitativo entre teste criativo e varredura massiva.
+| Pendência (QA) | Disposição |
+|---|---|
+| Métodos para Point Smart | **ADIADO** desta fase operacional. Teste de hardware/firmware exige método e ambiente que o programa não detalha; nenhum teste físico será feito até esclarecimento. Ativo permanece elegível, fora do plano ativo. |
+| Crypto sem tier | Registrado como **tier desconhecido**. Análise permitida apenas nos três caminhos expressos: `www.mercadopago.com.mx/crypto/*`, `www.mercadopago.cl/crypto/*`, `www.mercadopago.com.br/crypto/*`. |
+| Validação QA+JEV das evidências | Concluída: JEV com evidência vinculada ao ativo — Tier 1 `api.mercadolibre.com` **0.85**, Point Smart **0.81**, Crypto **0.88**, Leaked Credentials **0.91**, regras de escopo **0.81–0.92**. Nenhum flag remanescente. |
+| Limites operacionais e critérios de parada | Documentados na §7. |
+| Signal 1.0 / trial reports / identidade | **Condição de submissão**, não do Portão A: confirmar com o operador antes de qualquer submit; até 3 trial reports, sujeitos a elegibilidade. |
+
+## 7. Limites operacionais e critérios de parada
+
+**Método:** navegação/teste manual e criativo; uma sessão por vez; sem scanner, crawler, fuzzer, brute force, enumeração em massa ou automação de descoberta. Requisições espaçadas e específicas, com test user quando aplicável.
+
+**Tetos internos conservadores (não são regra do programa; são disciplina nossa):**
+- máximo 60 requisições por host por hora, sem concorrência;
+- nenhuma palavra-chave/payload em massa; um caso por hipótese;
+- sem coleta de dados de terceiros; sem escrita/alteração de estado além do mínimo necessário.
+
+**Parada imediata se:** 429/403 repetidos, 5xx em sequência, WAF/rate-limit agressivo, qualquer exposição de PII/dado de cliente, degradação perceptível, ou mudança de escopo/política. Registrar horário, ativo e motivo; não contornar bloqueio.
+
+## 8. Registro do Portão A
+
+- **QA (GPT-6):** escopo e tiers `APROVADOS`; Portão A global `FAIL` limitado às pendências acima — todas fechadas nesta v4, pendente o parecer final.
+- **JEV:** decisões `jev_dec_4f61b887020f4f8a` (0.85), `jev_dec_3d9ed7cc1d984d7a` (0.81), `jev_dec_8d9548db42334fda` (0.88), `jev_dec_3518194254b54f1d` (0.91), `jev_dec_4016a4aa9e7043a9` (0.87); sinais anteriores 0.62/0.74 resolvidos por reempacotamento e fonte.
+- **Execução ativa:** permanece `STOP` até `PASS` final do QA e aprovação do plano no Portão B.
