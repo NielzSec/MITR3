@@ -19,11 +19,11 @@ VALID={
 class BridgeTests(unittest.TestCase):
  def test_vocabulary_metadata_is_preserved_without_promoting_edges(self):
   row={"id":"CVE-2020-1472","source_url":"https://example.org/reference",
-       "fallback":"vocabulary_rare"}
+       "fallback":"phrase_anchor"}
   with mock.patch.object(bridge,"command_json",side_effect=[[row],{"outbound":[],"inbound":[]}]), \
        mock.patch.object(bridge,"local_digest_map",return_value={}):
    result=bridge.read_local("a long analyst question with vocabulary fallback")
-  self.assertEqual(result["matches"][0]["fallback"],"vocabulary_rare")
+  self.assertEqual(result["matches"][0]["fallback"],"phrase_anchor")
   self.assertEqual(result["source_declared_relations"],[])
   self.assertEqual(result["attack_relations"],[])
 

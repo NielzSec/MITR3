@@ -204,7 +204,7 @@ def read_local(query: str,limit:int=5)->dict:
              "source":row.get("source",""),"validation":row.get("validation",""),
              "source_url":url, "published_at":row.get("published_at",""),
              "note":"reported_by_source_not_independently_reproduced"})
-        if row.get("fallback") in {"vocabulary","vocabulary_rare"}:
+        if row.get("fallback") in {"vocabulary","vocabulary_rare","phrase_anchor"}:
             matches[-1]["fallback"]=row["fallback"]
         if ID_RE.fullmatch(rid):
             links.append(rid)
