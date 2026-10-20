@@ -285,7 +285,7 @@ class AnswerPipelineTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {}, clear=True), mock.patch.object(answer.subprocess, 'run',
                 return_value=subprocess.CompletedProcess([], 0, json.dumps(PLAN))) as run:
             self.assertEqual(answer.model_call(prompt, 'provider/model'), PLAN)
-            self.assertEqual(run.call_args.args[0], ['opencode', 'run', '--model', 'provider/model', '--', prompt])
+            self.assertEqual(run.call_args.args[0], ['opencode', 'run', '--agent', 'plan', '--model', 'provider/model', '--', prompt])
             self.assertEqual(run.call_args.kwargs['timeout'], 120)
             self.assertEqual(run.call_args.kwargs['stderr'], subprocess.DEVNULL)
             self.assertNotIn('shell', run.call_args.kwargs)

@@ -30,3 +30,4 @@ state/mitr3-kev-delta-history.jsonl
 
 # Separate ATT&CK graph (derived from its own cached STIX bundle)
 state/mitr3-attack.sqlite3
+response.json

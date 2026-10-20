@@ -120,7 +120,9 @@ def strict_json(text):
 def model_call(prompt, model):
     template = os.environ.get('MITR3_MODEL_CMD')
     if template is None:
-        argv = ['opencode', 'run', '--model', model, '--', prompt]
+        # --agent plan: sem tools. Um snippet malicioso nao pode virar escrita
+        # em disco ou comando antes do gate ver a resposta.
+        argv = ['opencode', 'run', '--agent', 'plan', '--model', model, '--', prompt]
     else:
         argv = shlex.split(template)
         if not argv:
