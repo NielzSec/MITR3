@@ -192,4 +192,4 @@ Especificação → **Portão A (QA+JEV)** → Plano → Tarefa → **Portão B 
 
 - **QA (GPT-6):** escopo e tiers `APROVADOS`; Portão A global `FAIL` limitado às pendências acima — todas fechadas nesta v4, pendente o parecer final.
 - **JEV:** decisões `jev_dec_4f61b887020f4f8a` (0.85), `jev_dec_3d9ed7cc1d984d7a` (0.81), `jev_dec_8d9548db42334fda` (0.88), `jev_dec_3518194254b54f1d` (0.91), `jev_dec_4016a4aa9e7043a9` (0.87); sinais anteriores 0.62/0.74 resolvidos por reempacotamento e fonte.
-- **Execução ativa:** permanece `STOP` até `PASS` final do QA e aprovação do plano no Portão B.
+- **Execução ativa:** `AUTORIZADA` — Portão B `PASS` (QA, 2026-10-20), plano `7f38d8d`, limites da §7.
