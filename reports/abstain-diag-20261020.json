@@ -1,0 +1,725 @@
+{
+  "purpose": "Diagnosis only; no new blind score or pipeline tuning. Future fixes: medicao somente em v2 cego.",
+  "baseline_commit": "f8d06ccdfa5ce77574f52b73ea38f096b0105458",
+  "historical_measurement": "reports/blind-answers-robin-v1-run1.json",
+  "historical_report_sha256": "7242403fce1fc82a3d02f0bb1f1398ed99d499b895e5f16476fe6bbebe1ce263",
+  "historical_model": "opencode/nemotron-3.5-lightning-free",
+  "diagnostic_model": "google/gemini-3.5-flash-lite",
+  "historical_replay_limit": "Original provider now refuses calls from current network/IP. Current CLI remains on safe plan agent; historical build-agent sessions were only read, not re-executed.",
+  "controls": [
+    {
+      "id": "04",
+      "query": "TP-Link Archer",
+      "index_ids": [
+        "CVE-2023-1389",
+        "CVE-2015-3035",
+        "CVE-2025-9377",
+        "CVE-2023-33538",
+        "CVE-2023-50224"
+      ],
+      "bridge_ids": [
+        "CVE-2023-1389",
+        "CVE-2015-3035",
+        "CVE-2025-9377",
+        "CVE-2023-33538",
+        "CVE-2023-50224"
+      ]
+    },
+    {
+      "id": "05",
+      "query": "Netlogon",
+      "index_ids": [
+        "CVE-2020-1472"
+      ],
+      "bridge_ids": [
+        "CVE-2020-1472"
+      ]
+    },
+    {
+      "id": "06",
+      "query": "Outlook NTLM",
+      "index_ids": [
+        "CVE-2023-23397"
+      ],
+      "bridge_ids": [
+        "CVE-2023-23397"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "blind-robin-04",
+      "historical": {
+        "plan_session": "ses_ea85f2f26ffeI7cElrpbXKC75G",
+        "composer_session": "ses_ea85efb35ffeW52pjvDoFhPHGw",
+        "plan_at_utc": "2026-10-20T04:45:19.479000+00:00",
+        "composer_at_utc": "2026-10-20T04:45:32.777000+00:00",
+        "agent": "build",
+        "model": {
+          "id": "nemotron-3.5-lightning-free",
+          "providerID": "opencode",
+          "variant": "default"
+        },
+        "plan": {
+          "language": "pt",
+          "intent": "vulnerability",
+          "entities": [
+            "Mirai",
+            "TP-Link",
+            "router"
+          ],
+          "queries": [
+            "Mirai KEV router",
+            "TP-Link Botnet Ready setup",
+            "Mirai home router exploitation"
+          ]
+        },
+        "direct_query_replay": [
+          {
+            "query": "Mirai KEV router",
+            "index_ids": [
+              "CVE-2016-10174",
+              "CVE-2020-10987",
+              "CVE-2011-4723",
+              "CVE-2015-2051",
+              "CVE-2021-35395"
+            ],
+            "bridge_ids": [
+              "CVE-2016-10174",
+              "CVE-2020-10987",
+              "CVE-2011-4723",
+              "CVE-2015-2051",
+              "CVE-2021-35395"
+            ]
+          },
+          {
+            "query": "TP-Link Botnet Ready setup",
+            "index_ids": [],
+            "bridge_ids": []
+          },
+          {
+            "query": "Mirai home router exploitation",
+            "index_ids": [],
+            "bridge_ids": []
+          }
+        ],
+        "package": [
+          {
+            "id": "CVE-2016-10174",
+            "title": "CVE-2016-10174 NETGEAR WNR2000v5 Router Buffer Overflow Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "d15ca44c0a1fc76149f2041a9f6a3f9c73f90d4b44968f2bea8feb7d45fb2ec2",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "The NETGEAR WNR2000v5 router contains a buffer overflow which can be exploited to achieve remote code execution."
+          },
+          {
+            "id": "CVE-2020-10987",
+            "title": "CVE-2020-10987 Tenda AC1900 Router AC15 Model Remote Code Execution Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "6f77137a25d27655b2fe6ea722c4f53f875bd6b4b16fdb1bab560ff22bece0d8",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "Tenda AC1900 Router AC15 Model contains an unspecified vulnerability that allows remote attackers to execute system commands via the deviceName POST parameter."
+          },
+          {
+            "id": "CVE-2011-4723",
+            "title": "CVE-2011-4723 D-Link DIR-300 Router Cleartext Storage of a Password Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "7c968f86c722684b7251fee63f7d73cb6217c987f8d421ad1970b4beb7c5c9d4",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "The D-Link DIR-300 router stores cleartext passwords, which allows context-dependent attackers to obtain sensitive information."
+          },
+          {
+            "id": "CVE-2015-2051",
+            "title": "CVE-2015-2051 D-Link DIR-645 Router Remote Code Execution Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "41aa8757b3541467fd3e49c07eedaf40545df42acaa209b4768eb004fc11ea6e",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "D-Link DIR-645 Wired/Wireless Router allows remote attackers to execute arbitrary commands via a GetDeviceSettings action to the HNAP interface."
+          },
+          {
+            "id": "CVE-2021-35395",
+            "title": "CVE-2021-35395 Realtek AP-Router SDK Buffer Overflow Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "dbb508de924eabe839785e2b30f5f89f118b51e07bca0963cdf92609cbeefaef",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "Realtek AP-Router SDK HTTP web server boa contains a buffer overflow vulnerability due to unsafe copies of some overly long parameters submitted in the form that lead to denial-of-service (DoS)."
+          }
+        ],
+        "composition": {
+          "abstain": true,
+          "claims": []
+        },
+        "prompt_sha256": "f05a0e9d1542a8c19bc31b8b4fa77f27d5473a92f3e70120cee38ba3538646dd",
+        "stdout_sha256": "667ec630c40e343f92f40388b4a8ae1cf6d4e381f5f012f0de5c32c28083b21d",
+        "log_encoding_note": "Read-only session log contained escaped quotes; one quote-escape layer was removed only for forensic package parsing."
+      },
+      "current_gemini": {
+        "plan": {
+          "language": "Portuguese",
+          "intent": "vulnerability",
+          "entities": [
+            "Mirai",
+            "KEV",
+            "TP-Link"
+          ],
+          "queries": [
+            "Mirai Botnet Ready setup TP-Link",
+            "KEV CVE roteador TP-Link Mirai",
+            "Mirai rotas domésticas TP-Link"
+          ]
+        },
+        "direct_queries": [
+          {
+            "query": "Mirai Botnet Ready setup TP-Link",
+            "index_ids": [],
+            "bridge_ids": []
+          },
+          {
+            "query": "KEV CVE roteador TP-Link Mirai",
+            "index_ids": [
+              "CVE-2023-1389",
+              "CVE-2015-3035",
+              "CVE-2023-33538",
+              "CVE-2025-9377",
+              "CVE-2023-50224"
+            ],
+            "bridge_ids": [
+              "CVE-2023-1389",
+              "CVE-2015-3035",
+              "CVE-2023-33538",
+              "CVE-2025-9377",
+              "CVE-2023-50224"
+            ]
+          },
+          {
+            "query": "Mirai rotas domésticas TP-Link",
+            "index_ids": [],
+            "bridge_ids": []
+          }
+        ],
+        "package_ids": [
+          "CVE-2023-1389",
+          "CVE-2015-3035",
+          "CVE-2023-33538",
+          "CVE-2025-9377",
+          "CVE-2023-50224"
+        ],
+        "final": {
+          "abstain": false,
+          "claims": [
+            {
+              "text": "O TP-Link Archer AX-21 contém uma vulnerabilidade de injeção de comando que permite a execução remota de código.",
+              "citations": [
+                {
+                  "id": "CVE-2023-1389",
+                  "quote": "TP-Link Archer AX-21 contains a command injection vulnerability that allows for remote code execution.",
+                  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+                  "sha256": "f2b8d41cb7a1abb9e02891c427af807e72a4682df5c881c019c8c0145d3be67f",
+                  "namespace": "local"
+                }
+              ]
+            },
+            {
+              "text": "Múltiplos roteadores TP-Link (como TL-WR940N V2/V4, TL-WR841N V8/V10 e TL-WR740N V1/V2) contêm uma vulnerabilidade de injeção de comando através do componente /userRpm/WlanNetworkRpm.",
+              "citations": [
+                {
+                  "id": "CVE-2023-33538",
+                  "quote": "TP-Link TL-WR940N V2/V4, TL-WR841N V8/V10, and TL-WR740N V1/V2 contain a command injection vulnerability via the component /userRpm/WlanNetworkRpm.",
+                  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+                  "sha256": "d49ca0f73555384d206b84ca666fcdb84e2a3407f14fdf515dd44a60fe026014",
+                  "namespace": "local"
+                }
+              ]
+            },
+            {
+              "text": "O TP-Link Archer C7(EU) e o TL-WR841N/ND(MS) contêm uma vulnerabilidade de injeção de comando no sistema operacional presente na página de Controle Parental.",
+              "citations": [
+                {
+                  "id": "CVE-2025-9377",
+                  "quote": "TP-Link Archer C7(EU) and TL-WR841N/ND(MS) contain an OS command injection vulnerability that exists in the Parental Control page.",
+                  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+                  "sha256": "b04350dfbfd38a92ca780321ca0b6cbc62d89725f9dcb3b2237698056125e5a5",
+                  "namespace": "local"
+                }
+              ]
+            }
+          ],
+          "error_code": null,
+          "status": "evidence_attached_proposal"
+        }
+      },
+      "forced_prefix300": {
+        "package": [
+          {
+            "id": "CVE-2023-1389",
+            "title": "CVE-2023-1389 TP-Link Archer AX-21 Command Injection Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "f2b8d41cb7a1abb9e02891c427af807e72a4682df5c881c019c8c0145d3be67f",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "TP-Link Archer AX-21 contains a command injection vulnerability that allows for remote code execution."
+          },
+          {
+            "id": "local-edge:CVE-2023-1389:cwe_of:CWE-77",
+            "title": "cwe_of",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "source_declared_only",
+            "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d",
+            "namespace": "local",
+            "kind": "edge",
+            "snippet": "{\"source_node\": \"CVE-2023-1389\", \"predicate\": \"cwe_of\", \"target_node\": \"CWE-77\"}",
+            "evidence": {
+              "source_node": "CVE-2023-1389",
+              "predicate": "cwe_of",
+              "target_node": "CWE-77",
+              "source_id": "cisa-kev",
+              "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d"
+            }
+          }
+        ],
+        "final": {
+          "abstain": false,
+          "claims": [
+            {
+              "text": "A entrada conhecida no KEV para o roteador TP-Link afetado por vulnerabilidade de injeção de comando é o CVE-2023-1389 (TP-Link Archer AX-21).",
+              "citations": [
+                {
+                  "id": "CVE-2023-1389",
+                  "quote": "TP-Link Archer AX-21 contains a command injection vulnerability that allows for remote code execution.",
+                  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+                  "sha256": "f2b8d41cb7a1abb9e02891c427af807e72a4682df5c881c019c8c0145d3be67f",
+                  "namespace": "local"
+                }
+              ]
+            }
+          ],
+          "error_code": null,
+          "status": "evidence_attached_proposal"
+        }
+      }
+    },
+    {
+      "id": "blind-robin-05",
+      "historical": {
+        "plan_session": "ses_ea85eec8affeazMlF8IrtvcDc6",
+        "composer_session": "ses_ea85eb547ffeK3I1WP8mn7ZxrB",
+        "plan_at_utc": "2026-10-20T04:45:36.553000+00:00",
+        "composer_at_utc": "2026-10-20T04:45:50.693000+00:00",
+        "agent": "build",
+        "model": {
+          "id": "nemotron-3.5-lightning-free",
+          "providerID": "opencode",
+          "variant": "default"
+        },
+        "plan": {
+          "language": "pt",
+          "intent": "vulnerability",
+          "entities": [
+            "CVE do Netlogon de 2020"
+          ],
+          "queries": [
+            "CVE do Netlogon 2020",
+            "efeito do CVE Netlogon"
+          ]
+        },
+        "direct_query_replay": [
+          {
+            "query": "CVE do Netlogon 2020",
+            "index_ids": [
+              "CVE-2020-1472"
+            ],
+            "bridge_ids": [
+              "CVE-2020-1472"
+            ]
+          },
+          {
+            "query": "efeito do CVE Netlogon",
+            "index_ids": [],
+            "bridge_ids": []
+          }
+        ],
+        "package": [
+          {
+            "id": "CVE-2020-1472",
+            "title": "CVE-2020-1472 Microsoft Netlogon Privilege Escalation Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "29e5540c90994d1a53399d62161fe6bcf06dfe111727ba2f5e0c4ba1a33b91e0",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "Microsoft's Netlogon Remote Protocol (MS-NRPC) contains a privilege escalation vulnerability when an attacker establishes a vulnerable Netlogon secure channel connection to a domain controller. An attacker who successfully exploits the vulnerability could run a specially crafted application on a dev"
+          },
+          {
+            "id": "local-edge:CVE-2020-1472:cwe_of:CWE-330",
+            "title": "cwe_of",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "source_declared_only",
+            "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d",
+            "namespace": "local",
+            "kind": "edge",
+            "snippet": "{\"source_node\": \"CVE-2020-1472\", \"predicate\": \"cwe_of\", \"target_node\": \"CWE-330\"}",
+            "evidence": {
+              "source_node": "CVE-2020-1472",
+              "predicate": "cwe_of",
+              "target_node": "CWE-330",
+              "source_id": "cisa-kev",
+              "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d"
+            }
+          }
+        ],
+        "composition": {
+          "abstain": true,
+          "claims": []
+        },
+        "prompt_sha256": "a9018810d5d52e3cd3879c386764c35eb71878bbd56fbd8517568ebef08f84a8",
+        "stdout_sha256": "667ec630c40e343f92f40388b4a8ae1cf6d4e381f5f012f0de5c32c28083b21d",
+        "log_encoding_note": "Read-only session log contained escaped quotes; one quote-escape layer was removed only for forensic package parsing."
+      },
+      "current_gemini": {
+        "plan": {
+          "language": "pt",
+          "intent": "vulnerability",
+          "entities": [
+            "Netlogon",
+            "2020",
+            "ransomware"
+          ],
+          "queries": [
+            "Netlogon 2020 ransomware",
+            "Netlogon apelido"
+          ]
+        },
+        "direct_queries": [
+          {
+            "query": "Netlogon 2020 ransomware",
+            "index_ids": [
+              "CVE-2020-1472"
+            ],
+            "bridge_ids": [
+              "CVE-2020-1472"
+            ]
+          },
+          {
+            "query": "Netlogon apelido",
+            "index_ids": [],
+            "bridge_ids": []
+          }
+        ],
+        "package_ids": [
+          "CVE-2020-1472",
+          "local-edge:CVE-2020-1472:cwe_of:CWE-330"
+        ],
+        "final": {
+          "abstain": true,
+          "claims": [],
+          "error_code": "MODEL_JSON",
+          "status": "abstained"
+        }
+      },
+      "forced_prefix300": {
+        "package": [
+          {
+            "id": "CVE-2020-1472",
+            "title": "CVE-2020-1472 Microsoft Netlogon Privilege Escalation Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "29e5540c90994d1a53399d62161fe6bcf06dfe111727ba2f5e0c4ba1a33b91e0",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "Microsoft's Netlogon Remote Protocol (MS-NRPC) contains a privilege escalation vulnerability when an attacker establishes a vulnerable Netlogon secure channel connection to a domain controller. An attacker who successfully exploits the vulnerability could run a specially crafted application on a dev"
+          },
+          {
+            "id": "local-edge:CVE-2020-1472:cwe_of:CWE-330",
+            "title": "cwe_of",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "source_declared_only",
+            "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d",
+            "namespace": "local",
+            "kind": "edge",
+            "snippet": "{\"source_node\": \"CVE-2020-1472\", \"predicate\": \"cwe_of\", \"target_node\": \"CWE-330\"}",
+            "evidence": {
+              "source_node": "CVE-2020-1472",
+              "predicate": "cwe_of",
+              "target_node": "CWE-330",
+              "source_id": "cisa-kev",
+              "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d"
+            }
+          }
+        ],
+        "final": {
+          "abstain": true,
+          "claims": [],
+          "error_code": "MODEL_JSON",
+          "status": "abstained"
+        }
+      }
+    },
+    {
+      "id": "blind-robin-06",
+      "historical": {
+        "plan_session": "ses_ea85e70e8ffevqp3ouj3XWHMPC",
+        "composer_session": "ses_ea85e5436ffeq7qa1fT8qxVmRI",
+        "plan_at_utc": "2026-10-20T04:46:08.195000+00:00",
+        "composer_at_utc": "2026-10-20T04:46:15.539000+00:00",
+        "agent": "build",
+        "model": {
+          "id": "nemotron-3.5-lightning-free",
+          "providerID": "opencode",
+          "variant": "default"
+        },
+        "plan": {
+          "language": "pt",
+          "intent": "vulnerability",
+          "entities": [
+            "stealers",
+            "NTLM hash",
+            "Outlook",
+            "UNC"
+          ],
+          "queries": [
+            "NTLM hash Outlook UNC",
+            "stealers NTLM Outlook"
+          ]
+        },
+        "direct_query_replay": [
+          {
+            "query": "NTLM hash Outlook UNC",
+            "index_ids": [],
+            "bridge_ids": []
+          },
+          {
+            "query": "stealers NTLM Outlook",
+            "index_ids": [
+              "CVE-2023-23397"
+            ],
+            "bridge_ids": [
+              "CVE-2023-23397"
+            ]
+          }
+        ],
+        "package": [
+          {
+            "id": "CVE-2023-23397",
+            "title": "CVE-2023-23397 Microsoft Office Outlook Privilege Escalation Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "c0773e2f867a2327a1e309e48236ec8c5f48b20f9a8fda285086ca66934f4831",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "Microsoft Office Outlook contains a privilege escalation vulnerability that allows for a NTLM Relay attack against another service to authenticate as the user."
+          },
+          {
+            "id": "local-edge:CVE-2023-23397:cwe_of:CWE-294",
+            "title": "cwe_of",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "source_declared_only",
+            "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d",
+            "namespace": "local",
+            "kind": "edge",
+            "snippet": "{\"source_node\": \"CVE-2023-23397\", \"predicate\": \"cwe_of\", \"target_node\": \"CWE-294\"}",
+            "evidence": {
+              "source_node": "CVE-2023-23397",
+              "predicate": "cwe_of",
+              "target_node": "CWE-294",
+              "source_id": "cisa-kev",
+              "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d"
+            }
+          }
+        ],
+        "composition": {
+          "abstain": true,
+          "claims": []
+        },
+        "prompt_sha256": "4195aa30e9000160dc7eb805042d1c95b38f179f32937bde3b4d8c8a514e2a17",
+        "stdout_sha256": "667ec630c40e343f92f40388b4a8ae1cf6d4e381f5f012f0de5c32c28083b21d",
+        "log_encoding_note": "Read-only session log contained escaped quotes; one quote-escape layer was removed only for forensic package parsing."
+      },
+      "current_gemini": {
+        "plan": {
+          "language": "pt",
+          "intent": "vulnerability",
+          "entities": [
+            "Outlook",
+            "NTLM",
+            "UNC",
+            "lembrete"
+          ],
+          "queries": [
+            "roubo de hash NTLM Outlook caminho UNC",
+            "lembrete Outlook caminho UNC NTLM"
+          ]
+        },
+        "direct_queries": [
+          {
+            "query": "roubo de hash NTLM Outlook caminho UNC",
+            "index_ids": [],
+            "bridge_ids": []
+          },
+          {
+            "query": "lembrete Outlook caminho UNC NTLM",
+            "index_ids": [],
+            "bridge_ids": []
+          }
+        ],
+        "package_ids": [],
+        "final": {
+          "abstain": true,
+          "claims": [],
+          "error_code": "NO_EVIDENCE",
+          "status": "abstained"
+        }
+      },
+      "forced_prefix300": {
+        "package": [
+          {
+            "id": "CVE-2023-23397",
+            "title": "CVE-2023-23397 Microsoft Office Outlook Privilege Escalation Vulnerability",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "official_catalog_not_locally_tested",
+            "sha256": "c0773e2f867a2327a1e309e48236ec8c5f48b20f9a8fda285086ca66934f4831",
+            "namespace": "local",
+            "kind": "document",
+            "snippet": "Microsoft Office Outlook contains a privilege escalation vulnerability that allows for a NTLM Relay attack against another service to authenticate as the user."
+          },
+          {
+            "id": "local-edge:CVE-2023-23397:cwe_of:CWE-294",
+            "title": "cwe_of",
+            "source": "cisa-kev",
+            "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+            "validation": "source_declared_only",
+            "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d",
+            "namespace": "local",
+            "kind": "edge",
+            "snippet": "{\"source_node\": \"CVE-2023-23397\", \"predicate\": \"cwe_of\", \"target_node\": \"CWE-294\"}",
+            "evidence": {
+              "source_node": "CVE-2023-23397",
+              "predicate": "cwe_of",
+              "target_node": "CWE-294",
+              "source_id": "cisa-kev",
+              "sha256": "b6e27975f6635ecfc546fbd4fd6e444ba63a07ab2abc8876229d77fe083d357d"
+            }
+          }
+        ],
+        "final": {
+          "abstain": false,
+          "claims": [
+            {
+              "text": "A CVE que cobre a vulnerabilidade de privilégio no Microsoft Office Outlook permitindo ataque NTLM Relay é a CVE-2023-23397.",
+              "citations": [
+                {
+                  "id": "CVE-2023-23397",
+                  "quote": "Microsoft Office Outlook contains a privilege escalation vulnerability that allows for a NTLM Relay attack against another service to authenticate as the user.",
+                  "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+                  "sha256": "c0773e2f867a2327a1e309e48236ec8c5f48b20f9a8fda285086ca66934f4831",
+                  "namespace": "local"
+                }
+              ]
+            }
+          ],
+          "error_code": null,
+          "status": "evidence_attached_proposal"
+        }
+      }
+    }
+  ],
+  "netlogon_tail300_controls": {
+    "tail300": {
+      "abstain": true,
+      "claims": [],
+      "error_code": "MODEL_JSON",
+      "status": "abstained"
+    },
+    "tail300_noedges": {
+      "abstain": false,
+      "claims": [
+        {
+          "text": "O CVE do Netlogon de 2020 é identificado pelo ID CVE-2020-1472 e possui o apelido Zerologon.",
+          "citations": [
+            {
+              "id": "CVE-2020-1472",
+              "quote": "The vulnerability is also known under the moniker of Zerologon.",
+              "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+              "sha256": "29e5540c90994d1a53399d62161fe6bcf06dfe111727ba2f5e0c4ba1a33b91e0",
+              "namespace": "local"
+            }
+          ]
+        },
+        {
+          "text": "O efeito real ocorre quando um atacante estabelece uma conexão de canal seguro Netlogon vulnerável com um controlador de domínio e pode executar uma aplicação especialmente criada em um dispositivo na rede.",
+          "citations": [
+            {
+              "id": "CVE-2020-1472",
+              "quote": "erability when an attacker establishes a vulnerable Netlogon secure channel connection to a domain controller. An attacker who successfully exploits the vulnerability could run a specially crafted application on a device on the network.",
+              "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+              "sha256": "29e5540c90994d1a53399d62161fe6bcf06dfe111727ba2f5e0c4ba1a33b91e0",
+              "namespace": "local"
+            }
+          ]
+        }
+      ],
+      "error_code": null,
+      "status": "evidence_attached_proposal"
+    }
+  },
+  "netlogon_summary": {
+    "characters": 383,
+    "Zerologon_zero_based_offset": 373,
+    "production_snippet_characters": 300
+  },
+  "suite": {
+    "tests": 164,
+    "passed": true,
+    "command": "python3 -W error::ResourceWarning -m unittest discover -s tests",
+    "baseline_tests": 160
+  },
+  "pipeline_unchanged": true,
+  "expected_answers_in_model_prompts": false,
+  "limits": [
+    "Model/agent differences prevent attributing current Gemini effects to historical Nemotron.",
+    "Exact target presence is not entailment: KEV summaries here do not document Mirai attribution or the UNC/reminder/zero-click details.",
+    "Tail-only control changes snippet and removes an edge; it is confounded and not proof of a snippet-only fix.",
+    "Holding the edge fixed, the tail300 control still returns MODEL_JSON with the current plan-agent adapter."
+  ],
+  "concurrent_unrelated_commits": [
+    "2d73b75",
+    "8a5992a"
+  ],
+  "protected_files_sha256": {
+    "bin/mitr3-answer.py": "62013b1fd50d4fb0ab5f908eaed6dd0423e968ddedd6a3586da63c7ee855fb70",
+    "bin/mitr3-context-bridge.py": "e89ed65620fccf1c4eb05fa38e7b1cdb33c201bcdbdfcdb6bf3a142118c1d9f4",
+    "bin/mitr3-rag-intel.py": "f39b29bed20ae27ab8f4072c924287e1ef323a95bf96233d0921395493eb88a5",
+    "bin/mitr3-rag-eval.py": "8dc7ee0f509f6396a602773ac28f1408770e9166dc43df8eed1b030d0cc1e8d8",
+    "evals/blind/blind-answers-robin-v1.json": "61bf0b511faa00d98b89635b2c807dcbe675b6a070cafa5b51eef63bb2a40693",
+    "evals/blind/blind-answers-robin-v1.sha256": "2c67f77363a45228bc17366ae2d2e357559c6f4af0754c9744b44da150785125",
+    "evals/blind/ERRATA-robin-v1.md": "828ed9649ef3d5291416c8ec4b9b1b4b68669e0c3e74c16fce6f962e13520a8f"
+  },
+  "historical_forced_decoded_packages_equal": {
+    "blind-robin-05": true,
+    "blind-robin-06": true
+  }
+}
