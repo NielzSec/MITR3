@@ -1,0 +1,140 @@
+{
+  "at_utc": "2026-10-20T04:47:51.068437+00:00",
+  "set": "blind-answers-robin-v1",
+  "sha256": "61bf0b511faa00d98b89635b2c807dcbe675b6a070cafa5b51eef63bb2a40693",
+  "model": "opencode/nemotron-3.5-lightning-free",
+  "rows": [
+    {
+      "id": "blind-robin-01",
+      "abstain_expected": false,
+      "abstain": false,
+      "error": null,
+      "claims": [
+        "CVE-2022-39197 is a cross-site scripting vulnerability in the Teamserver of Fortra Cobalt Strike that allows an attacker to set a malformed username in the Beacon configuration, enabling remote code execution and potential data theft from beacons."
+      ],
+      "citation_ids": [
+        "CVE-2022-39197"
+      ],
+      "expected_hit": [
+        "CVE-2022-39197"
+      ],
+      "forbidden_hit": [],
+      "status": "evidence_attached_proposal"
+    },
+    {
+      "id": "blind-robin-02",
+      "abstain_expected": false,
+      "abstain": false,
+      "error": null,
+      "claims": [
+        "Fortra Cobalt Strike User Interface contains an unspecified vulnerability rooted in Java Swing that may allow remote code execution."
+      ],
+      "citation_ids": [
+        "CVE-2022-42948"
+      ],
+      "expected_hit": [
+        "CVE-2022-42948"
+      ],
+      "forbidden_hit": [],
+      "status": "evidence_attached_proposal"
+    },
+    {
+      "id": "blind-robin-03",
+      "abstain_expected": false,
+      "abstain": false,
+      "error": null,
+      "claims": [
+        "The Deadbolt ransomware campaign exploited CVE-2022-27593"
+      ],
+      "citation_ids": [
+        "CVE-2022-27593"
+      ],
+      "expected_hit": [
+        "CVE-2022-27593"
+      ],
+      "forbidden_hit": [],
+      "status": "evidence_attached_proposal"
+    },
+    {
+      "id": "blind-robin-04",
+      "abstain_expected": false,
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "claims": [],
+      "citation_ids": [],
+      "expected_hit": [],
+      "forbidden_hit": [],
+      "status": "abstained"
+    },
+    {
+      "id": "blind-robin-05",
+      "abstain_expected": false,
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "claims": [],
+      "citation_ids": [],
+      "expected_hit": [],
+      "forbidden_hit": [],
+      "status": "abstained"
+    },
+    {
+      "id": "blind-robin-06",
+      "abstain_expected": false,
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "claims": [],
+      "citation_ids": [],
+      "expected_hit": [],
+      "forbidden_hit": [],
+      "status": "abstained"
+    },
+    {
+      "id": "blind-robin-07",
+      "abstain_expected": false,
+      "abstain": false,
+      "error": null,
+      "claims": [
+        "CVE-2021-21972 is the cataloged CVE of vCenter that serves as the public anchor of the ESXiArgs ransomware campaign"
+      ],
+      "citation_ids": [
+        "CVE-2021-21972"
+      ],
+      "expected_hit": [],
+      "forbidden_hit": [],
+      "status": "evidence_attached_proposal"
+    },
+    {
+      "id": "blind-robin-08",
+      "abstain_expected": true,
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "claims": [],
+      "citation_ids": [],
+      "expected_hit": [],
+      "forbidden_hit": [],
+      "status": "abstained"
+    },
+    {
+      "id": "blind-robin-09",
+      "abstain_expected": true,
+      "abstain": true,
+      "error": "NO_EVIDENCE",
+      "claims": [],
+      "citation_ids": [],
+      "expected_hit": [],
+      "forbidden_hit": [],
+      "status": "abstained"
+    },
+    {
+      "id": "blind-robin-10",
+      "abstain_expected": true,
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "claims": [],
+      "citation_ids": [],
+      "expected_hit": [],
+      "forbidden_hit": [],
+      "status": "abstained"
+    }
+  ]
+}
