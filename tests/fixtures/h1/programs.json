@@ -1,0 +1,15 @@
+{
+  "data": [
+    {
+      "id": "dev-1",
+      "type": "program",
+      "attributes": {
+        "handle": "public-dev",
+        "name": "Public synthetic DEV"
+      }
+    }
+  ],
+  "links": {
+    "next": null
+  }
+}
