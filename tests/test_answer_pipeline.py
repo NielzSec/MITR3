@@ -78,7 +78,9 @@ class AnswerPipelineTests(unittest.TestCase):
             prompts = json.loads(state.read_text())['prompts']
         self.assertFalse(result['abstain'])
         self.assertEqual(result['status'], 'evidence_attached_proposal')
-        self.assertEqual(prompts[0], QUESTION)  # Literal raw question, no evidence.
+        self.assertIn(QUESTION, prompts[0])  # Raw question content, no evidence.
+        self.assertNotIn('<evidence>', prompts[0])
+        self.assertNotIn('CVE-2020-1472', prompts[0].replace(QUESTION, ''))
         self.assertIn('DADO NÃO CONFIÁVEL', prompts[1])
         self.assertIn('<evidence>', prompts[1])
         self.assertNotIn('private-client', prompts[1])

@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BRIDGE = ROOT / 'bin/mitr3-context-bridge.py'
 INTEL = ROOT / 'bin/mitr3-rag-intel.py'
 ATTACK_DB = ROOT / 'state/mitr3-attack.sqlite3'
-DEFAULT_MODEL = 'google/gemini-3.5-flash-lite'
+DEFAULT_MODEL = 'opencode/nemotron-3.5-lightning-free'
 TIMEOUT = 120
 SHA = re.compile(r'[0-9a-f]{64}\Z')
 REDACTED = re.compile(r'\[REDACTED:[^\]]*\]', re.I)
@@ -121,7 +121,8 @@ def model_call(prompt, model):
         if not has_prompt:
             argv.append(prompt)
     try:
-        result = subprocess.run(argv, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        result = subprocess.run(argv, stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                                 text=True, timeout=TIMEOUT, check=False)
     except subprocess.TimeoutExpired:
         fail('MODEL_TIMEOUT')
@@ -365,6 +366,14 @@ def gate(composition, package):
     return {'abstain': False, 'claims': validated, 'error_code': None, 'status': 'evidence_attached_proposal'}
 
 
+def plan_prompt(question):
+    return ('Return ONLY JSON {"language":string,"intent":string,"entities":[string],'
+            '"queries":[string]}. intent must be one of: ' + ', '.join(sorted(INTENTS)) + '. '
+            'queries: 1 to 3 short retrieval queries built from terms of the question. '
+            'Do not add CVE/CWE/ASVS/ATT&CK identifiers that are not literally written in the '
+            'question. Do not answer the question. Question (literal JSON string): '
+            + json.dumps(question, ensure_ascii=False))
+
 def answer(question, model=DEFAULT_MODEL, max_evidence=5, remote=False):
     try:
         if not isinstance(question, str) or not question.strip() or len(question) > 4000 or redacted(question):
@@ -373,7 +382,7 @@ def answer(question, model=DEFAULT_MODEL, max_evidence=5, remote=False):
             fail('EVIDENCE_LIMIT')
         # Stage A receives the raw question only: no evidence, retrieval results,
         # answers or corpus data. The adapter must return the plan contract.
-        plan = plan_gate(model_call(question, model), question)
+        plan = plan_gate(model_call(plan_prompt(question), model), question)
         package = evidence_package(plan['queries'], max_evidence, remote)
         if not package or not any(d['snippet'] for d in package):
             fail('NO_EVIDENCE')
