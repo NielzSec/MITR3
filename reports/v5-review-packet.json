@@ -1,0 +1,104 @@
+[
+ {
+  "item": "blind-robin-46",
+  "claim": "A classe de vulnerabilidade que permitiu o acesso inicial no cenário ProxyLogon foi Server-Side Request Forgery (CWE-918, SSRF), conforme a aresta CVE-2021-26855 cwe_of CWE-918.",
+  "citations": [
+   {
+    "id": "local-edge:CVE-2021-26855:cwe_of:CWE-918",
+    "quote": "\"target_node\": \"CWE-918\"",
+    "snippet": "{\"source_node\": \"CVE-2021-26855\", \"predicate\": \"cwe_of\", \"target_node\": \"CWE-918\"}",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "cwe_of"
+   },
+   {
+    "id": "local-edge:CVE-2021-26855:cwe_of:CWE-918",
+    "quote": "\"predicate\": \"cwe_of\"",
+    "snippet": "{\"source_node\": \"CVE-2021-26855\", \"predicate\": \"cwe_of\", \"target_node\": \"CWE-918\"}",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "cwe_of"
+   }
+  ]
+ },
+ {
+  "item": "blind-robin-46",
+  "claim": "O impacto documentado no KEV (CISA) é execução remota de código (remote code execution).",
+  "citations": [
+   {
+    "id": "CVE-2021-26855",
+    "quote": "allows for remote code execution",
+    "snippet": "Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "CVE-2021-26855 Microsoft Exchange Server Remote Code Execution Vulnerability"
+   }
+  ]
+ },
+ {
+  "item": "blind-robin-46",
+  "claim": "CVE-2021-26855, CVE-2021-26858, CVE-2021-26857 e CVE-2021-27065 fazem parte da cadeia de exploração ProxyLogon documentada no KEV.",
+  "citations": [
+   {
+    "id": "CVE-2021-26855",
+    "quote": "part of the ProxyLogon exploit chain",
+    "snippet": "Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "CVE-2021-26855 Microsoft Exchange Server Remote Code Execution Vulnerability"
+   },
+   {
+    "id": "CVE-2021-26858",
+    "quote": "part of the ProxyLogon exploit chain",
+    "snippet": "Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "CVE-2021-26858 Microsoft Exchange Server Remote Code Execution Vulnerability"
+   },
+   {
+    "id": "CVE-2021-26857",
+    "quote": "part of the ProxyLogon exploit chain",
+    "snippet": "Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "CVE-2021-26857 Microsoft Exchange Server Remote Code Execution Vulnerability"
+   },
+   {
+    "id": "CVE-2021-27065",
+    "quote": "part of the ProxyLogon exploit chain",
+    "snippet": "Microsoft Exchange Server contains an unspecified vulnerability that allows for remote code execution. This vulnerability is part of the ProxyLogon exploit chain.",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "CVE-2021-27065 Microsoft Exchange Server Remote Code Execution Vulnerability"
+   }
+  ]
+ },
+ {
+  "item": "blind-robin-47",
+  "claim": "O KEV cataloga o CVE-2020-1472 (Zerologon) como uma vulnerabilidade de escalonamento de privilégio no protocolo Netlogon Remote (MS-NRPC) da Microsoft, explorável quando um atacante estabelece uma conexão de canal seguro Netlogon vulnerável a um controlador de domínio.",
+  "citations": [
+   {
+    "id": "CVE-2020-1472",
+    "quote": "contains a privilege escalation vulnerability when an attacker establishes a vulnerable Netlogon secure channel connection to a domain controller",
+    "snippet": "Microsoft's Netlogon Remote Protocol (MS-NRPC) contains a privilege escalation vulnerability when an attacker establishes a vulnerable Netlogon secure channel connection to a domain controller. An attacker who successfully exploits the vulnerability could run a specially crafted application on a dev",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "CVE-2020-1472 Microsoft Netlogon Privilege Escalation Vulnerability"
+   }
+  ]
+ },
+ {
+  "item": "blind-robin-47",
+  "claim": "O impacto documentado é que um atacante que explora a vulnerabilidade com sucesso poderia executar um aplicativo especialmente projetado em um dispositivo (dev) do domínio.",
+  "citations": [
+   {
+    "id": "CVE-2020-1472",
+    "quote": "An attacker who successfully exploits the vulnerability could run a specially crafted application on a dev",
+    "snippet": "Microsoft's Netlogon Remote Protocol (MS-NRPC) contains a privilege escalation vulnerability when an attacker establishes a vulnerable Netlogon secure channel connection to a domain controller. An attacker who successfully exploits the vulnerability could run a specially crafted application on a dev",
+    "source": "cisa-kev",
+    "source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    "title": "CVE-2020-1472 Microsoft Netlogon Privilege Escalation Vulnerability"
+   }
+  ]
+ }
+]

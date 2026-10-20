@@ -1,0 +1,469 @@
+{
+  "at_utc": "2026-10-20T19:43:35.886218+00:00",
+  "set": "blind-answers-robin-v5",
+  "sha256": "550793412774fb1daadba220290c1ba5f56797b5748797c4ba135526a4c67c84",
+  "model": "dahl/deepseek-ai/DeepSeek-V4-Flash-0731",
+  "pass": 1,
+  "arm": "baseline",
+  "rows": [
+    {
+      "id": "blind-robin-41",
+      "abstain": true,
+      "error": "QUOTE_NOT_LITERAL",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 4,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          194,
+          82,
+          300,
+          81
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "aa378cae22f3fbf4513905b9821d700875bf2e0888ee0e6e9356b159a6fa24e9"
+      },
+      "category": "blocked",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "02bfc62261ed63fd0e66c296212affc4280c90d79b742b1294b198d0ea4fb91a",
+          "evidence_package_sha256": "aa378cae22f3fbf4513905b9821d700875bf2e0888ee0e6e9356b159a6fa24e9",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "QUOTE_NOT_LITERAL",
+          "elapsed": 59.58
+        }
+      ],
+      "elapsed": 59.58
+    },
+    {
+      "id": "blind-robin-42",
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 5,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          194,
+          192,
+          300,
+          300,
+          219
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "f20775c20020c3160dd9f9c9482a755f15faca80a526853654a24dc9515ec801"
+      },
+      "category": "abstained",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "67efd9e9fc59349480dfa426b9954806694740959a2dc14bdf220cba92352bbc",
+          "evidence_package_sha256": "555c20195f93d9da7fe8e162901592f4f344a51059de2f0bb1314379fe4d19e7",
+          "redacted": false
+        },
+        {
+          "artifact_sha256": "d858bb6e5c358d836b005ef78e32ecbd578002f1b727c4fa0739d49b04530d12",
+          "evidence_package_sha256": "f20775c20020c3160dd9f9c9482a755f15faca80a526853654a24dc9515ec801",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "MODEL_TIMEOUT",
+          "elapsed": 90.066
+        },
+        {
+          "error": "MODEL_ABSTAIN",
+          "elapsed": 75.957
+        }
+      ],
+      "elapsed": 166.023
+    },
+    {
+      "id": "blind-robin-43",
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 5,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          106,
+          188,
+          144,
+          174,
+          175
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "26bb87a2a1b667b127712e6e9a6a6cfa5c2083a44072d27b4c7e6eaf05cabf64"
+      },
+      "category": "abstained",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "518a14b33ee56aad95cd2e0896fe00d24484f2b1d553b5422001296598904506",
+          "evidence_package_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+          "redacted": false
+        },
+        {
+          "artifact_sha256": "7b8defffc66e69bf511961a17b94db6f6f4c69e7e0ebd4834222c21da873b7cf",
+          "evidence_package_sha256": "26bb87a2a1b667b127712e6e9a6a6cfa5c2083a44072d27b4c7e6eaf05cabf64",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "MODEL_TIMEOUT",
+          "elapsed": 90.151
+        },
+        {
+          "error": "MODEL_ABSTAIN",
+          "elapsed": 86.83
+        }
+      ],
+      "elapsed": 176.981
+    },
+    {
+      "id": "blind-robin-44",
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 5,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          300,
+          102,
+          300,
+          82,
+          80
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "e1b8c507a251f1724426a3707c11118f617fd8cc548e251021b609053f0d64ae"
+      },
+      "category": "abstained",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "23a90673e44e367b41fc5961f6e486f65b20a7a881382c30395dbe6cd2769c5a",
+          "evidence_package_sha256": "e1b8c507a251f1724426a3707c11118f617fd8cc548e251021b609053f0d64ae",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "MODEL_ABSTAIN",
+          "elapsed": 44.236
+        }
+      ],
+      "elapsed": 44.236
+    },
+    {
+      "id": "blind-robin-45",
+      "abstain": true,
+      "error": "PLAN_NEW_IDENTIFIER",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 0,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [],
+        "evidence_state": "empty",
+        "package_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      "category": "blocked",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "3b8f16468203e249448b9dada552ce27c73b2f1d77e31c94fcdfe98f10d628e6",
+          "evidence_package_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "PLAN_NEW_IDENTIFIER",
+          "elapsed": 46.762
+        }
+      ],
+      "elapsed": 46.762
+    },
+    {
+      "id": "blind-robin-46",
+      "abstain": false,
+      "error": null,
+      "status": "evidence_attached_proposal",
+      "claim_count": 3,
+      "citation_ids": [
+        "CVE-2021-26855",
+        "CVE-2021-26857",
+        "CVE-2021-26858",
+        "CVE-2021-27065",
+        "local-edge:CVE-2021-26855:cwe_of:CWE-918"
+      ],
+      "stages": {
+        "query_count": null,
+        "document_count": 5,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          162,
+          162,
+          162,
+          162,
+          82
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "6e9a81c553f3b9de72b4a4ed87d25b8741b84dd786867dd3d842f42ff1d99b31"
+      },
+      "category": "answered_gate",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "8c90253d7c3ad36fa06b15a078d0dbfb7c1b2f4b0a53f21c189647dbe09219d7",
+          "evidence_package_sha256": "6e9a81c553f3b9de72b4a4ed87d25b8741b84dd786867dd3d842f42ff1d99b31",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": null,
+          "elapsed": 69.519
+        }
+      ],
+      "elapsed": 69.519
+    },
+    {
+      "id": "blind-robin-47",
+      "abstain": false,
+      "error": null,
+      "status": "evidence_attached_proposal",
+      "claim_count": 2,
+      "citation_ids": [
+        "CVE-2020-1472"
+      ],
+      "stages": {
+        "query_count": null,
+        "document_count": 5,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          300,
+          81,
+          177,
+          244,
+          82
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "ed7d55e8989db674e517e9d1b7043e905596d21320dabd1d663d102348e6bbec"
+      },
+      "category": "answered_gate",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "4c5ed54596b425c8f3aae7948aa0b38b10918dedb3ae14d70dfa02cce3d776f9",
+          "evidence_package_sha256": "ed7d55e8989db674e517e9d1b7043e905596d21320dabd1d663d102348e6bbec",
+          "redacted": false
+        },
+        {
+          "artifact_sha256": "7d19010eeae0360b7502628e6eed0fe99f3d2e1317307243072f21e41cc0f4cd",
+          "evidence_package_sha256": "ed7d55e8989db674e517e9d1b7043e905596d21320dabd1d663d102348e6bbec",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "MODEL_TIMEOUT",
+          "elapsed": 90.095
+        },
+        {
+          "error": null,
+          "elapsed": 89.487
+        }
+      ],
+      "elapsed": 179.583
+    },
+    {
+      "id": "blind-robin-48",
+      "abstain": true,
+      "error": "PLAN_SCHEMA",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 0,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [],
+        "evidence_state": "empty",
+        "package_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      "category": "blocked",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "b01b1811aebaf0ae228640f0e7132ebd697fd292c787ac027afa98707e19c683",
+          "evidence_package_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "PLAN_SCHEMA",
+          "elapsed": 6.022
+        }
+      ],
+      "elapsed": 6.022
+    },
+    {
+      "id": "blind-robin-49",
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 5,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          65,
+          92,
+          92,
+          75,
+          75
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "534fed28da121153e958b7b06f1e17ad1742bc86310da282ef0f6633788c0546"
+      },
+      "category": "abstained",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "ede02462006625faed35287584213678c44898f300b4819641f5f123524e6ecc",
+          "evidence_package_sha256": "534fed28da121153e958b7b06f1e17ad1742bc86310da282ef0f6633788c0546",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "MODEL_ABSTAIN",
+          "elapsed": 53.868
+        }
+      ],
+      "elapsed": 53.868
+    },
+    {
+      "id": "blind-robin-50",
+      "abstain": true,
+      "error": "MODEL_ABSTAIN",
+      "status": "abstained",
+      "claim_count": 0,
+      "citation_ids": [],
+      "stages": {
+        "query_count": null,
+        "document_count": 5,
+        "extract_count": 0,
+        "rejected_extract_count": 0,
+        "quote_count": null,
+        "literal_quote_count": null,
+        "snippet_lengths": [
+          102,
+          271,
+          300,
+          80,
+          81
+        ],
+        "evidence_state": "nonempty",
+        "package_sha256": "f0c6c2100ff751089ac472d965b4a127ceef369e73b4d684d3de62f6284dcf7c"
+      },
+      "category": "abstained",
+      "private_artifacts": [
+        {
+          "artifact_sha256": "1147cbd88f42f7abe73ff4d9fdecdb4bf8c68bff2a21c1bc5e5ee313b01bc356",
+          "evidence_package_sha256": "f0c6c2100ff751089ac472d965b4a127ceef369e73b4d684d3de62f6284dcf7c",
+          "redacted": false
+        }
+      ],
+      "attempts": [
+        {
+          "error": "MODEL_ABSTAIN",
+          "elapsed": 34.123
+        }
+      ],
+      "elapsed": 34.123
+    }
+  ],
+  "commit": "362fe5db242238dc333ffd7f62a7e97c74c95ef4",
+  "artifacts": {
+    "bin/mitr3-answer.py": "4ba78d9a0b57e6bfaad6524e95cd81d266f2ba071eeaba61ad8551ed114c29ab",
+    "bin/mitr3-blind-run.py": "15a4e823822fd3d67739b2b03d1b7c3fc92739bda43798a2e1c2430288aacd3c",
+    "bin/mitr3-candidate-run.py": "a49e0c64040107350a009a6babad1004db38882359b2aafff2cc8a43fbba1b40",
+    "bin/mitr3-context-bridge.py": "e89ed65620fccf1c4eb05fa38e7b1cdb33c201bcdbdfcdb6bf3a142118c1d9f4",
+    "bin/mitr3-rag-intel.py": "57bac3d59f414b16817b3a93e5981638ce9988254bfdcf57dc789897f2deb5d6",
+    "docs/CANDIDATE-FREEZE-SPEC-20261020.md": "ef5ec791003abc6f927ca7389fd19f83ccd1efe1269b3bc76af0ceec555fd402",
+    "bin/mitr3-review-artifacts.py": "f62ce0208151869b96355324484811f55a6e942a9dcf70d045d1c33881e18d54",
+    "tests/fixtures/review-artifacts-dev-v1.json": "86f498ad7dd2f182cc73ca433164e906c7f2b6d629197b862b1d6068d61309ad",
+    "extraction_prompt_source": "1633414e63ceee150bc3be6889a6a5fd2bf9580e0eb37cec2413615588073537",
+    "required_synthesis_prompt": "2f65d7b18a240a0428b17b0df7983b97b2ebdc5ed589bd78d33028b6b457a4b8",
+    "state/mitr3-intel.sqlite3": "1dac5585c70328d864290fcc2b30bd1257fed245c33923ff05cd52cc2a09066a",
+    "state/mitr3-attack.sqlite3": "60827b12fdbc09923ec1f4a3ec9c6bd0f88c6bba8ba3c8694fcc317f3d92c866",
+    "knowledge/reference-datasets/cache/manifest.json": "3a5d108d10d678fbe5542cffe38a673177fb2f0af476694468e905ab35b3d23a",
+    "knowledge/reference-datasets/cache/enterprise-attack-manifest.json": "92160406053997f9bc1ed269e3628b6d56e393e8aa7ed7ae78d603047b79de67"
+  },
+  "config": {
+    "workers": 4,
+    "timeout": 90.0,
+    "retry": 1,
+    "max_evidence": 5,
+    "remote": false,
+    "transport": "unchanged answer.model_call",
+    "model_call_timeout": 120,
+    "temperature": "inherited; no override",
+    "model_cmd_override": false,
+    "model_cmd_sha256": null
+  },
+  "totals": {
+    "answered_gate": 2,
+    "abstained": 5,
+    "failed": 0,
+    "blocked": 3
+  },
+  "private_manifest_sha256": "4ebe2592a3f7f7bb4194dc4cb22b8f5e2bcb1a478ce086040487e281085de31e",
+  "scoring": "metadata_only; gold/semantic/negative-control adjudication external"
+}
