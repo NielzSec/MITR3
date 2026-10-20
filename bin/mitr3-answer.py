@@ -384,7 +384,10 @@ def gate(composition, package):
 def plan_prompt(question):
     return ('Return ONLY JSON {"language":string,"intent":string,"entities":[string],'
             '"queries":[string]}. intent must be one of: ' + ', '.join(sorted(INTENTS)) + '. '
-            'queries: 1 to 3 short retrieval queries built from terms of the question. '
+            'queries: 1 to 3 SHORT keyword-style retrieval queries, 2-5 words each, written in '
+            'ENGLISH technical vocabulary (translate terms if the question is in another '
+            'language; product and feature names stay literal, e.g. "MOVEit SQL injection", '
+            '"Ivanti Connect Secure auth bypass"). No full sentences, no question text reuse. '
             'Do not add CVE/CWE/ASVS/ATT&CK identifiers that are not literally written in the '
             'question. Do not answer the question. Question (literal JSON string): '
             + json.dumps(question, ensure_ascii=False))
