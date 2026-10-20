@@ -4,7 +4,7 @@
   "hit_at_5": 1.0,
   "macro_recall_at_5": 0.975,
   "macro_precision_at_5": 0.24,
-  "macro_precision_of_returned": 0.975,
+  "macro_precision_of_returned": 0.935,
   "negative_abstention_rate": 1.0,
   "by_kind": {
     "concept": {
@@ -12,7 +12,7 @@
       "hit_at_5": 1.0,
       "recall_at_5": 0.95,
       "precision_at_5": 0.28,
-      "precision_of_returned": 0.95
+      "precision_of_returned": 0.87
     },
     "exact": {
       "n": 10,
@@ -280,12 +280,16 @@
         "CASE-jctf-pcap-41139"
       ],
       "returned": [
-        "CASE-jctf-pcap-41139"
+        "CASE-jctf-pcap-41139",
+        "CASE-ctfcit-2026-click",
+        "CASE-jctf-files-41137",
+        "CASE-ctftime-catalog",
+        "CASE-jctf-signal-41138"
       ],
       "hit_at_5": true,
       "recall_at_5": 1.0,
       "precision_at_5": 0.2,
-      "precision_of_returned": 1.0,
+      "precision_of_returned": 0.2,
       "abstained": null
     },
     {

@@ -64,8 +64,10 @@ Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada down
 | hit@5 | 1.000 | 1.000 |
 | macro recall@5 | 1.000 | 0.975 |
 | precision@5 (denominador 5) | 0.250 | 0.240 |
-| precision dos retornados | 0.650 | 0.975 |
+| precision dos retornados | 0.650 | 0.935 |
 | abstenção em negativas | 0.200 | 1.000 |
+
+  O corte é por cobertura: qualquer termo entra como candidato, mas só fica o documento que cobre ≥60% dos termos distintos (arredondado para cima), ordenado por cobertura com bm25 de desempate. AND estrito quebrava consulta real de 4+ termos ("cobalt strike cracked loader" voltava vazio); OR puro enchia de filler.
 
   O ganho real é a abstenção: o baseline respondia a "esxi encryptor" e a "CVE-2099-999999"; o candidato cala. `precision dos retornados` sobe em parte por calar — não use como prova de acerto semântico. O recall perdeu 0.025: o AND derruba um documento esperado de uma das consultas de conceito. Fixture é curada, não cega; nenhum desses números é nota de LLM.
 - O catálogo não conhece papéis ("encryptor" é função de ransomware, não atributo de CVE). Query de comportamento só acerta quando existe ficha de caso que fale disso; para o resto o resultado honesto é abster.

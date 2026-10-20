@@ -15,6 +15,10 @@ SPEC = importlib.util.spec_from_file_location("mitr3_rag_refresh", ROOT / "bin/m
 refresh = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(refresh)
 
+SPEC_INTEL = importlib.util.spec_from_file_location("mitr3_rag_intel_cov", ROOT / "bin/mitr3-rag-intel.py")
+intel = importlib.util.module_from_spec(SPEC_INTEL)
+SPEC_INTEL.loader.exec_module(intel)
+
 
 def entry(date_added="2026-10-01"):
     return {"dateAdded": date_added, "vendorProject": "Vendor", "product": "Product",
@@ -38,6 +42,19 @@ class RecentWindowTests(unittest.TestCase):
                    "CVE-2026-0002": entry((today - datetime.timedelta(days=1)).isoformat())}
         recent = refresh.recent_by_added(current, days=7)
         self.assertEqual([x["cve"] for x in recent], ["CVE-2026-0002", "CVE-2026-0001"])
+
+
+class CoverageRankingTests(unittest.TestCase):
+    def test_long_query_keeps_recall(self):
+        ids = [r["id"] for r in intel.search("HTTP desync smuggling research", 5, emit=False)]
+        self.assertIn("CASE-ps-request-smuggling-research", ids)
+
+    def test_substring_words_do_not_fake_coverage(self):
+        # "rat" nao pode casar dentro de "operation"/"integration": sem ficha de Quasar, abstem.
+        self.assertEqual(intel.search("quasar rat source", 5, emit=False), [])
+
+    def test_unknown_identifier_still_abstains(self):
+        self.assertEqual(intel.search("CVE-2099-999999", 5, emit=False), [])
 
 
 class FixtureInvariantTests(unittest.TestCase):

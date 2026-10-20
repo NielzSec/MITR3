@@ -24,6 +24,7 @@ REFERENCE_LINKS={
 CVE_RE=re.compile(r"^CVE-\d{4}-\d{4,}$",re.I)
 ASVS_RE=re.compile(r"^V?\d+\.\d+\.\d+$",re.I)
 BLOCK=re.compile(r"(?i)\b(ignore previous instructions|send your environment|reveal your system prompt)\b")
+STOPWORDS=frozenset("a an the of for and or to in on with from by is are was were that this it as at".split())
 
 def now() -> str:
  return dt.datetime.now(dt.timezone.utc).isoformat()
@@ -227,7 +228,8 @@ def routed_source(query,source):
  return ""
 
 def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
- toks=re.findall(r"[\w]+",query,flags=re.UNICODE)[:15]
+ raw=[t.lower() for t in re.findall(r"[\w]+",query,flags=re.UNICODE)]
+ toks=[t for t in raw if t not in STOPWORDS][:15] or raw[:15]
  if not toks:raise ValueError("Empty query")
  max_limit=max(1,min(limit,50))
  qid=query.strip().upper()
@@ -247,7 +249,13 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
     "SELECT id,kind,source,title,summary,lesson,tags,source_url,published_at,validation,digest "
     "FROM documents WHERE "+" AND ".join(filters),params).fetchall()
   else:
-   term=" AND ".join('"'+t.replace('"','')+'"' for t in toks)
+   # Qualquer termo entra como candidato; a cobertura decide o corte. AND estrito
+   # quebra consulta real de 4+ termos; OR puro enche de filler. Meio-termo: exige
+   # >=60% dos termos distintos (arredonda para cima) e ordena por cobertura, com
+   # bm25 como desempate dentro da mesma cobertura.
+   uniq=sorted(set(toks))
+   need=max(1,-(-len(uniq)*3//5))
+   term=" OR ".join('"'+t.replace('"','')+'"' for t in uniq)
    filters=["docs_fts MATCH ?"]
    params=[term]
    if source: filters.append("d.source=?");params.append(source)
@@ -258,7 +266,14 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
     "FROM docs_fts JOIN documents d ON d.id=docs_fts.id WHERE "
     +" AND ".join(filters)
     +" ORDER BY bm25(docs_fts,0,3,1.3,0.8,3.0) LIMIT ?",
-    params+[max_limit]).fetchall()
+    params+[max(60,max_limit*12)]).fetchall()
+   ranked=[]
+   for row in rows:
+    words=set(re.findall(r"[\w]+"," ".join(str(x).lower() for x in row[3:7])))
+    cover=sum(1 for t in uniq if t in words)
+    if cover>=need: ranked.append((cover,row))
+   ranked.sort(key=lambda x:-x[0])
+   rows=[row for _,row in ranked[:max_limit]]
   columns=("id","kind","source","title","summary","lesson","tags","source_url","published_at","validation","sha256")
   matches=[dict(zip(columns,row)) for row in rows]
   for item in matches:
