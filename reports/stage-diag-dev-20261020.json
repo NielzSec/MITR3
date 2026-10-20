@@ -1,0 +1,767 @@
+{
+  "at_utc": "2026-10-20T12:17:53.991107+00:00",
+  "fixture": "answer-stage-dev-v1.json",
+  "fixture_sha256": "2e88e7bb8639b4afb7981578b113fca7737b47c07f3ad3850e9b3ebf0b2f65b1",
+  "model": "google/gemini-3.5-flash-lite",
+  "transport": "stateless_google_generateContent_store_false_no_tools",
+  "note": "DEV only, not v4 score or semantic validation; metadata only.",
+  "aggregate": {
+    "retrieved": {
+      "calls": 3,
+      "model_abstain": 0,
+      "valid_compositions": 3,
+      "codes": {
+        "PROPOSAL": 3
+      }
+    },
+    "empty": {
+      "calls": 3,
+      "model_abstain": 3,
+      "valid_compositions": 3,
+      "codes": {
+        "MODEL_ABSTAIN": 3
+      }
+    },
+    "reference": {
+      "calls": 3,
+      "model_abstain": 0,
+      "valid_compositions": 3,
+      "codes": {
+        "PROPOSAL": 3
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "dev-hsts",
+      "A": {
+        "query_count": 2,
+        "unique_query_count": 2,
+        "error": null
+      },
+      "B": {
+        "queries": [
+          {
+            "index_ids": [
+              "ASVS-V3.4.1",
+              "ASVS-V3.7.4",
+              "ASVS-V3.1.1",
+              "ASVS-V6.5.6",
+              "ASVS-V6.5.7"
+            ],
+            "bridge_ids": [
+              "ASVS-V3.4.1",
+              "ASVS-V3.7.4",
+              "ASVS-V3.1.1",
+              "ASVS-V6.5.6",
+              "ASVS-V6.5.7"
+            ]
+          },
+          {
+            "index_ids": [
+              "ASVS-V3.1.1",
+              "ASVS-V3.4.1",
+              "ASVS-V3.7.4",
+              "ASVS-V12.2.2",
+              "ASVS-V12.2.1"
+            ],
+            "bridge_ids": [
+              "ASVS-V3.1.1",
+              "ASVS-V3.4.1",
+              "ASVS-V3.7.4",
+              "ASVS-V12.2.2",
+              "ASVS-V12.2.1"
+            ]
+          }
+        ],
+        "transmitted": {
+          "sha256": "a6df336562c9efaad3cfc03be236ce04c72af5e5d55fa1444d366f40e5cbefd9",
+          "documents": [
+            {
+              "id": "ASVS-V3.4.1",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 259,
+              "snippet_utf8_bytes": 259
+            },
+            {
+              "id": "ASVS-V3.7.4",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            },
+            {
+              "id": "ASVS-V3.1.1",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            },
+            {
+              "id": "ASVS-V6.5.6",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 113,
+              "snippet_utf8_bytes": 113
+            },
+            {
+              "id": "ASVS-V6.5.7",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 145,
+              "snippet_utf8_bytes": 145
+            }
+          ]
+        }
+      },
+      "C": {
+        "retrieved": {
+          "packet": {
+            "sha256": "a6df336562c9efaad3cfc03be236ce04c72af5e5d55fa1444d366f40e5cbefd9",
+            "documents": [
+              {
+                "id": "ASVS-V3.4.1",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 259,
+                "snippet_utf8_bytes": 259
+              },
+              {
+                "id": "ASVS-V3.7.4",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              },
+              {
+                "id": "ASVS-V3.1.1",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              },
+              {
+                "id": "ASVS-V6.5.6",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 113,
+                "snippet_utf8_bytes": 113
+              },
+              {
+                "id": "ASVS-V6.5.7",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 145,
+                "snippet_utf8_bytes": 145
+              }
+            ]
+          },
+          "model_abstain": false,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": [
+              {
+                "id": "ASVS-V3.4.1",
+                "quote_chars": 259,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              }
+            ]
+          },
+          "error": null,
+          "abstain": false,
+          "claim_count": 1
+        },
+        "empty": {
+          "packet": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "documents": []
+          },
+          "model_abstain": true,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": []
+          },
+          "error": "MODEL_ABSTAIN",
+          "abstain": true,
+          "claim_count": 0
+        },
+        "reference": {
+          "packet": {
+            "sha256": "15f1be0926361a506fec628424543a7cb85e2d0892a426284cf9d443abf34677",
+            "documents": [
+              {
+                "id": "ASVS-V3.4.1",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 259,
+                "snippet_utf8_bytes": 259
+              }
+            ]
+          },
+          "model_abstain": false,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": [
+              {
+                "id": "ASVS-V3.4.1",
+                "quote_chars": 141,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              },
+              {
+                "id": "ASVS-V3.4.1",
+                "quote_chars": 48,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              },
+              {
+                "id": "ASVS-V3.4.1",
+                "quote_chars": 67,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              }
+            ]
+          },
+          "error": null,
+          "abstain": false,
+          "claim_count": 3
+        }
+      },
+      "D_controls": [
+        {
+          "control": "nonliteral",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": true,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.1",
+              "quote_chars": 32,
+              "in_transmitted": false,
+              "in_gate": false,
+              "in_full_public_document": false,
+              "classification": "nonliteral_or_paraphrase"
+            }
+          ]
+        },
+        {
+          "control": "window",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": true,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.1",
+              "quote_chars": 40,
+              "in_transmitted": false,
+              "in_gate": false,
+              "in_full_public_document": true,
+              "classification": "outside_window"
+            }
+          ]
+        },
+        {
+          "control": "changed_package",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": false,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.1",
+              "quote_chars": 40,
+              "in_transmitted": true,
+              "in_gate": false,
+              "in_full_public_document": true,
+              "classification": "different_package"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dev-csp",
+      "A": {
+        "query_count": 2,
+        "unique_query_count": 2,
+        "error": null
+      },
+      "B": {
+        "queries": [
+          {
+            "index_ids": [
+              "ASVS-V3.4.3",
+              "ASVS-V3.4.7",
+              "ASVS-V3.2.1",
+              "ASVS-V3.4.8",
+              "ASVS-V3.1.1"
+            ],
+            "bridge_ids": [
+              "ASVS-V3.4.3",
+              "ASVS-V3.4.7",
+              "ASVS-V3.2.1",
+              "ASVS-V3.4.8",
+              "ASVS-V3.1.1"
+            ]
+          },
+          {
+            "index_ids": [],
+            "bridge_ids": []
+          }
+        ],
+        "transmitted": {
+          "sha256": "050e985a37089417c38725d05cae21ab235a2a737b239e8d04f15ee73a118858",
+          "documents": [
+            {
+              "id": "ASVS-V3.4.3",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            },
+            {
+              "id": "ASVS-V3.4.7",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 95,
+              "snippet_utf8_bytes": 95
+            },
+            {
+              "id": "ASVS-V3.2.1",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            },
+            {
+              "id": "ASVS-V3.4.8",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 306
+            },
+            {
+              "id": "ASVS-V3.1.1",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            }
+          ]
+        }
+      },
+      "C": {
+        "retrieved": {
+          "packet": {
+            "sha256": "050e985a37089417c38725d05cae21ab235a2a737b239e8d04f15ee73a118858",
+            "documents": [
+              {
+                "id": "ASVS-V3.4.3",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              },
+              {
+                "id": "ASVS-V3.4.7",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 95,
+                "snippet_utf8_bytes": 95
+              },
+              {
+                "id": "ASVS-V3.2.1",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              },
+              {
+                "id": "ASVS-V3.4.8",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 306
+              },
+              {
+                "id": "ASVS-V3.1.1",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              }
+            ]
+          },
+          "model_abstain": false,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": [
+              {
+                "id": "ASVS-V3.4.3",
+                "quote_chars": 236,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              },
+              {
+                "id": "ASVS-V3.4.3",
+                "quote_chars": 63,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              },
+              {
+                "id": "ASVS-V3.4.7",
+                "quote_chars": 95,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              }
+            ]
+          },
+          "error": null,
+          "abstain": false,
+          "claim_count": 3
+        },
+        "empty": {
+          "packet": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "documents": []
+          },
+          "model_abstain": true,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": []
+          },
+          "error": "MODEL_ABSTAIN",
+          "abstain": true,
+          "claim_count": 0
+        },
+        "reference": {
+          "packet": {
+            "sha256": "a7382efb17ae86228fc9164d0212084bfd55a4b9f874c31119166aab034daffe",
+            "documents": [
+              {
+                "id": "ASVS-V3.4.3",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              }
+            ]
+          },
+          "model_abstain": false,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": [
+              {
+                "id": "ASVS-V3.4.3",
+                "quote_chars": 300,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              }
+            ]
+          },
+          "error": null,
+          "abstain": false,
+          "claim_count": 1
+        }
+      },
+      "D_controls": [
+        {
+          "control": "nonliteral",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": true,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.3",
+              "quote_chars": 32,
+              "in_transmitted": false,
+              "in_gate": false,
+              "in_full_public_document": false,
+              "classification": "nonliteral_or_paraphrase"
+            }
+          ]
+        },
+        {
+          "control": "window",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": true,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.3",
+              "quote_chars": 40,
+              "in_transmitted": false,
+              "in_gate": false,
+              "in_full_public_document": true,
+              "classification": "outside_window"
+            }
+          ]
+        },
+        {
+          "control": "changed_package",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": false,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.3",
+              "quote_chars": 40,
+              "in_transmitted": true,
+              "in_gate": false,
+              "in_full_public_document": true,
+              "classification": "different_package"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dev-content-type",
+      "A": {
+        "query_count": 2,
+        "unique_query_count": 2,
+        "error": null
+      },
+      "B": {
+        "queries": [
+          {
+            "index_ids": [
+              "ASVS-V6.2.5",
+              "ASVS-V3.4.4",
+              "ASVS-V3.2.3",
+              "ASVS-V9.2.2",
+              "ASVS-V3.2.1"
+            ],
+            "bridge_ids": [
+              "ASVS-V6.2.5",
+              "ASVS-V3.4.4",
+              "ASVS-V3.2.3",
+              "ASVS-V9.2.2",
+              "ASVS-V3.2.1"
+            ]
+          },
+          {
+            "index_ids": [
+              "ASVS-V3.4.4",
+              "ASVS-V4.1.1",
+              "ASVS-V3.2.1",
+              "ASVS-V3.5.8",
+              "ASVS-V3.4.3"
+            ],
+            "bridge_ids": [
+              "ASVS-V3.4.4",
+              "ASVS-V4.1.1",
+              "ASVS-V3.2.1",
+              "ASVS-V3.5.8",
+              "ASVS-V3.4.3"
+            ]
+          }
+        ],
+        "transmitted": {
+          "sha256": "66013012a111b6def6a952e8b032601fa79f84487a5b13f31b1dc2206d732732",
+          "documents": [
+            {
+              "id": "ASVS-V6.2.5",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 227,
+              "snippet_utf8_bytes": 227
+            },
+            {
+              "id": "ASVS-V3.4.4",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            },
+            {
+              "id": "ASVS-V3.2.3",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 257,
+              "snippet_utf8_bytes": 257
+            },
+            {
+              "id": "ASVS-V9.2.2",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            },
+            {
+              "id": "ASVS-V3.2.1",
+              "namespace": "local",
+              "kind": "document",
+              "snippet_chars": 300,
+              "snippet_utf8_bytes": 300
+            }
+          ]
+        }
+      },
+      "C": {
+        "retrieved": {
+          "packet": {
+            "sha256": "66013012a111b6def6a952e8b032601fa79f84487a5b13f31b1dc2206d732732",
+            "documents": [
+              {
+                "id": "ASVS-V6.2.5",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 227,
+                "snippet_utf8_bytes": 227
+              },
+              {
+                "id": "ASVS-V3.4.4",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              },
+              {
+                "id": "ASVS-V3.2.3",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 257,
+                "snippet_utf8_bytes": 257
+              },
+              {
+                "id": "ASVS-V9.2.2",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              },
+              {
+                "id": "ASVS-V3.2.1",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              }
+            ]
+          },
+          "model_abstain": false,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": [
+              {
+                "id": "ASVS-V3.4.4",
+                "quote_chars": 300,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              }
+            ]
+          },
+          "error": null,
+          "abstain": false,
+          "claim_count": 1
+        },
+        "empty": {
+          "packet": {
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "documents": []
+          },
+          "model_abstain": true,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": []
+          },
+          "error": "MODEL_ABSTAIN",
+          "abstain": true,
+          "claim_count": 0
+        },
+        "reference": {
+          "packet": {
+            "sha256": "43e17e61d4d259d44f5b25b1f963c84bc8141d11d797834de75834a79ca7e3b3",
+            "documents": [
+              {
+                "id": "ASVS-V3.4.4",
+                "namespace": "local",
+                "kind": "document",
+                "snippet_chars": 300,
+                "snippet_utf8_bytes": 300
+              }
+            ]
+          },
+          "model_abstain": false,
+          "gate_quotes": {
+            "same_package": true,
+            "citations": [
+              {
+                "id": "ASVS-V3.4.4",
+                "quote_chars": 285,
+                "in_transmitted": true,
+                "in_gate": true,
+                "in_full_public_document": true,
+                "classification": "literal"
+              }
+            ]
+          },
+          "error": null,
+          "abstain": false,
+          "claim_count": 1
+        }
+      },
+      "D_controls": [
+        {
+          "control": "nonliteral",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": true,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.4",
+              "quote_chars": 32,
+              "in_transmitted": false,
+              "in_gate": false,
+              "in_full_public_document": false,
+              "classification": "nonliteral_or_paraphrase"
+            }
+          ]
+        },
+        {
+          "control": "window",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": true,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.4",
+              "quote_chars": 40,
+              "in_transmitted": false,
+              "in_gate": false,
+              "in_full_public_document": true,
+              "classification": "outside_window"
+            }
+          ]
+        },
+        {
+          "control": "changed_package",
+          "error": "QUOTE_NOT_LITERAL",
+          "same_package": false,
+          "citations": [
+            {
+              "id": "ASVS-V3.4.4",
+              "quote_chars": 40,
+              "in_transmitted": true,
+              "in_gate": false,
+              "in_full_public_document": true,
+              "classification": "different_package"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

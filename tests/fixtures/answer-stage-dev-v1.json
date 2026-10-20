@@ -1,0 +1,5 @@
+[
+  {"id":"dev-hsts","question":"What does ASVS require for Strict-Transport-Security on HTTPS responses?","reference_document":"ASVS-V3.4.1"},
+  {"id":"dev-csp","question":"What restriction does ASVS describe for the Content-Security-Policy header?","reference_document":"ASVS-V3.4.3"},
+  {"id":"dev-content-type","question":"What does ASVS require about Content-Type when returning an HTTP response?","reference_document":"ASVS-V3.4.4"}
+]
