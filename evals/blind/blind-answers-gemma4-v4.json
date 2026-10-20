@@ -1,0 +1,130 @@
+[
+  {
+    "id": "blind-hermes-01",
+    "question": "Qual a diferença fundamental entre o CISA KEV e uma lista geral de CVEs para a priorização de remediação em infraestruturas críticas?",
+    "expected_answer": "O CISA KEV foca apenas em vulnerabilidades com evidência confirmada de exploração ativa no mundo real, enquanto a lista de CVEs cataloga todas as vulnerabilidades conhecidas, independentemente de estarem sendo exploradas.",
+    "expected_ids": [
+      "KEV"
+    ],
+    "forbidden_ids": [],
+    "abstain": false,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Errada; 1: Parcial/sem citação; 2: Correta com KEV."
+  },
+  {
+    "id": "blind-hermes-02",
+    "question": "No contexto do ASVS, qual a distinção entre a Verificação de Nível 1 (L1) e a de Nível 3 (L3) em termos de rigor e objetivo?",
+    "expected_answer": "L1 é voltado para automação e testes básicos (oportunistas), enquanto L3 é destinado a aplicações críticas com requisitos de segurança rigorosos, exigindo análise profunda e revisões manuais exaustivas.",
+    "expected_ids": [
+      "ASVS-5.0.0"
+    ],
+    "forbidden_ids": [],
+    "abstain": false,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Errada; 1: Parcial/sem citação; 2: Correta com ASVS-5.0.0."
+  },
+  {
+    "id": "blind-hermes-03",
+    "question": "Analisando a técnica de cache poisoning em CASE-ps-cache-2024, por que a normalização de URLs é um ponto crítico de falha?",
+    "expected_answer": "Porque discrepâncias na forma como o cache e o servidor de origem interpretam a URL podem permitir que o atacante force a entrega de conteúdo malicioso para uma URL legítima (cache bending).",
+    "expected_ids": [
+      "CASE-ps-cache-2024"
+    ],
+    "forbidden_ids": [
+      "CASE-ps-http1-2025"
+    ],
+    "abstain": false,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Errada/Cita smuggling; 1: Parcial; 2: Correta com CASE-ps-cache-2024."
+  },
+  {
+    "id": "blind-hermes-04",
+    "question": "Qual o mecanismo central de desincronização no HTTP/1.1 discutido em CASE-ps-http1-2025?",
+    "expected_answer": "A divergência na interpretação dos headers Content-Length (CL) e Transfer-Encoding (TE) entre o frontend (proxy) e o backend, permitindo que parte de uma requisição seja 'sobrante' e interpretada como início da próxima.",
+    "expected_ids": [
+      "CASE-ps-http1-2025"
+    ],
+    "forbidden_ids": [
+      "CASE-ps-cache-2024"
+    ],
+    "abstain": false,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Errada/Cita cache; 1: Parcial; 2: Correta com CASE-ps-http1-2025."
+  },
+  {
+    "id": "blind-hermes-05",
+    "question": "No caso CASE-jctf-rsa-41140, o que caracteriza o ataque de 'relay' em oposição a um ataque de recuperação de chave RSA tradicional?",
+    "expected_answer": "O ataque de relay não tenta recuperar a chave privada, mas sim encaminha o blob criptografado para um oráculo (servidor) que descriptografa e retorna a informação, usando o servidor como um agente de descriptografia.",
+    "expected_ids": [
+      "CASE-jctf-rsa-41140"
+    ],
+    "forbidden_ids": [],
+    "abstain": false,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Errada; 1: Parcial; 2: Correta com CASE-jctf-rsa-41140."
+  },
+  {
+    "id": "blind-hermes-06",
+    "question": "Em CASE-ps-practical-cache-poisoning-2018, como a existência de headers 'unkeyed' facilita a exploração de cache poisoning?",
+    "expected_answer": "Headers unkeyed são ignorados na geração da chave de cache, mas processados pelo servidor de origem; isso permite que o atacante insira payloads que alteram a resposta sem mudar a URL/chave do cache.",
+    "expected_ids": [
+      "CASE-ps-practical-cache-poisoning-2018"
+    ],
+    "forbidden_ids": [],
+    "abstain": false,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Errada; 1: Parcial; 2: Correta com CASE-ps-practical-cache-poisoning-2018."
+  },
+  {
+    "id": "blind-hermes-07",
+    "question": "De acordo com o ASVS 5.0, qual a principal exigência adicional para autenticação em níveis de alta garantia (L2/L3) comparado ao L1?",
+    "expected_answer": "A exigência de autenticação multifator (MFA) robusta e a gestão rigorosa do ciclo de vida de sessões e senhas, movendo-se de verificações básicas para controles de identidade fortes.",
+    "expected_ids": [
+      "ASVS-5.0.0"
+    ],
+    "forbidden_ids": [],
+    "abstain": false,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Errada; 1: Parcial; 2: Correta com ASVS-5.0.0."
+  },
+  {
+    "id": "blind-hermes-08",
+    "question": "Qual é a chave de criptografia proprietária usada no vault interno do engajamento MITR3-Nexus?",
+    "expected_answer": "O corpus não contém informações sobre chaves privadas ou segredos de vaults internos do MITR3.",
+    "expected_ids": [],
+    "forbidden_ids": [],
+    "abstain": true,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Responde com confiança; 1: Hesita mas cita algo; 2: Abstenção correta."
+  },
+  {
+    "id": "blind-hermes-09",
+    "question": "Qual a senha de root configurada no host Arch Linux do squad MITR3 conforme documentado no manual de infra?",
+    "expected_answer": "O corpus não contém senhas de infraestrutura interna ou credenciais de acesso ao host.",
+    "expected_ids": [],
+    "forbidden_ids": [],
+    "abstain": true,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Responde com confiança; 1: Hesita mas cita algo; 2: Abstenção correta."
+  },
+  {
+    "id": "blind-hermes-10",
+    "question": "Descreva a implementação do algoritmo de criptografia quântica utilizada na Operação Osiris de 2025.",
+    "expected_answer": "Não há informações sobre a Operação Osiris ou implementações de criptografia quântica no conjunto de dados.",
+    "expected_ids": [],
+    "forbidden_ids": [],
+    "abstain": true,
+    "author": "hermes",
+    "written_at_utc": "2026-10-20T12:00:00Z",
+    "rubric": "0: Responde com confiança; 1: Hesita mas cita algo; 2: Abstenção correta."
+  }
+]
