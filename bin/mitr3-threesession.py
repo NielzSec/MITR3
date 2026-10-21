@@ -67,7 +67,8 @@ def private_values(obj, resource=''):
 
 def safe_denial(obj, status):
     codes = {'forbidden', 'not_found', 'not_owned_order', 'caller.id.invalid',
-             'Forbidden', 'Not Found', 'Not owned order'}
+             'Forbidden', 'Not Found', 'Not owned order',
+             'The user has not access to the order.'}
     return (set(obj) <= {'error', 'message', 'status', 'cause'}
             and all(isinstance(obj[k], str) and obj[k] in codes for k in ('error', 'message') if k in obj)
             and ('status' not in obj or type(obj['status']) is int and obj['status'] == status)

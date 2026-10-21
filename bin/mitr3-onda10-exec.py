@@ -258,7 +258,14 @@ def execute(requests, identities, suite, output=OUTPUT, transport=send, sleep=ti
         run = output / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
         private_dir(run)
         summary = {'started': utc(), 'suite': suite, 'swap_bc': swap_bc, 'state': 'STOPPED', 'cases': []}
-        resources = ('',) if suite == 'base' else ('', 'shipments', 'billing_info')
+        if suite == 'base':
+            resources = ('',)
+        elif suite == 'shipments':
+            resources = ('shipments',)
+        elif suite == 'billing_info':
+            resources = ('billing_info',)
+        else:
+            resources = ('', 'shipments', 'billing_info')
         try:
             for resource in resources:
                 baseline = {}
@@ -299,7 +306,7 @@ def main(argv=None):
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--dry-run', action='store_true')
     mode.add_argument('--live', action='store_true')
-    parser.add_argument('--suite', choices=('base', 'all'), default='base')
+    parser.add_argument('--suite', choices=('base', 'shipments', 'billing_info', 'all'), default='base')
     parser.add_argument('--order-id', default=ORDER_ID)
     parser.add_argument('--swap-bc', action='store_true',
                         help='C2 uses seller B; X1 uses third-party C (default: C2=C, X1=B)')
