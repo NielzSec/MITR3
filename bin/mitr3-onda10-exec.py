@@ -80,7 +80,7 @@ def write_new(path, raw):
         os.fsync(stream.fileno())
 
 
-def prepare(lane=G.LANE, token_dir=TOKENS, *, order_id=ORDER_ID):
+def prepare(lane=G.LANE, token_dir=TOKENS, *, order_id=ORDER_ID, swap_bc=False):
     if not isinstance(order_id, str) or not re.fullmatch(r'[0-9]{8,}', order_id):
         raise Stop('INVALID_ORDER_ID')
     checked = G.evaluate(lane)
@@ -105,8 +105,9 @@ def prepare(lane=G.LANE, token_dir=TOKENS, *, order_id=ORDER_ID):
         raw = (lane / 'templates' / filename).read_bytes()
         if digest(raw) != checked['files'][case]['sha256']:
             raise Stop('TEMPLATE_CHANGED')
+        token_actor = {'A': 'A', 'B': 'C', 'C': 'B'}[actor] if swap_bc else actor
         raw = raw.replace(b'$ORDER_ID', order_id.encode()).replace(
-            ('$AUTH_TOKEN_' + actor).encode(), tokens[actor].encode())
+            ('$AUTH_TOKEN_' + actor).encode(), tokens[token_actor].encode())
         route = '/orders/' + order_id + ('/' + resource if resource else '')
         lines = raw.split(b'\r\n')
         if (len(raw) > G.MAX_BYTES or len(lines) != 7 or lines[-2:] != [b'', b'']
@@ -215,7 +216,7 @@ def send(raw):
         conn.close()
 
 
-def classify(case, resource, status, headers, raw, identities, baseline, *, order_id=ORDER_ID):
+def classify(case, resource, status, headers, raw, identities, baseline, *, order_id=ORDER_ID, swap_bc=False):
     scan = raw.lower() + json.dumps(headers).lower().encode()
     if status == 429 or status >= 500 or 300 <= status < 400:
         raise Stop('HTTP_SAFETY_STOP')
@@ -229,7 +230,7 @@ def classify(case, resource, status, headers, raw, identities, baseline, *, orde
         return str(value) if type(value) in (int, str) else ''
     buyer, seller = obj.get('buyer'), obj.get('seller')
     owned = (ident(obj.get(key)) == order_id and isinstance(buyer, dict) and isinstance(seller, dict)
-             and ident(buyer.get('id')) == identities['A'] and ident(seller.get('id')) == identities['C'])
+             and ident(buyer.get('id')) == identities['A'] and ident(seller.get('id')) == identities['B' if swap_bc else 'C'])
     values = H.private_values(obj, resource)
     if case != 'X1':
         if status != 200 or not owned or not values:
@@ -251,12 +252,12 @@ def classify(case, resource, status, headers, raw, identities, baseline, *, orde
     raise Stop('INCONCLUSIVE_RESPONSE')
 
 
-def execute(requests, identities, suite, output=OUTPUT, transport=send, sleep=time.sleep, *, order_id=ORDER_ID):
+def execute(requests, identities, suite, output=OUTPUT, transport=send, sleep=time.sleep, *, order_id=ORDER_ID, swap_bc=False):
     with session_lock(output):
         budget = Budget(output)
         run = output / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
         private_dir(run)
-        summary = {'started': utc(), 'suite': suite, 'state': 'STOPPED', 'cases': []}
+        summary = {'started': utc(), 'suite': suite, 'swap_bc': swap_bc, 'state': 'STOPPED', 'cases': []}
         resources = ('',) if suite == 'base' else ('', 'shipments', 'billing_info')
         try:
             for resource in resources:
@@ -273,7 +274,7 @@ def execute(requests, identities, suite, output=OUTPUT, transport=send, sleep=ti
                     budget.observe(label, status)
                     row = {'case': label, 'status': status, 'verdict': 'INCONCLUSIVE'}
                     summary['cases'].append(row)
-                    verdict = classify(case, resource, status, headers, raw, identities, baseline, order_id=order_id)
+                    verdict = classify(case, resource, status, headers, raw, identities, baseline, order_id=order_id, swap_bc=swap_bc)
                     row['verdict'] = verdict
                     budget.finish(status, verdict == 'BOLA_CANDIDATE')
                     if verdict == 'BOLA_CANDIDATE':
@@ -300,13 +301,15 @@ def main(argv=None):
     mode.add_argument('--live', action='store_true')
     parser.add_argument('--suite', choices=('base', 'all'), default='base')
     parser.add_argument('--order-id', default=ORDER_ID)
+    parser.add_argument('--swap-bc', action='store_true',
+                        help='C2 uses seller B; X1 uses third-party C (default: C2=C, X1=B)')
     args = parser.parse_args(argv)
     try:
-        requests, identities = prepare(order_id=args.order_id)
+        requests, identities = prepare(order_id=args.order_id, swap_bc=args.swap_bc)
         if not args.live:
             print('DRY_RUN_PASS templates=9 network_calls=0 suite=' + args.suite)
             return 0
-        result = execute(requests, identities, args.suite, order_id=args.order_id)
+        result = execute(requests, identities, args.suite, order_id=args.order_id, swap_bc=args.swap_bc)
         print('ONDA10', result['state'], result.get('reason', 'COMPLETE'))
         return 0 if result['state'] == 'COMPLETE' else 2
     except Stop as exc:

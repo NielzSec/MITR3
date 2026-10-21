@@ -110,7 +110,7 @@ class Onda10Tests(unittest.TestCase):
         prepare = E.prepare
         for order_id in ('12345678', '9000015638831799'):
             with self.subTest(order_id=order_id):
-                def fixture_prepare(*, order_id):
+                def fixture_prepare(*, order_id, swap_bc=False):
                     requests, identities = prepare(self.lane, self.tokens, order_id=order_id)
                     for case, raw in requests.items():
                         resource = E.G.FILES[case][2]
@@ -158,12 +158,88 @@ class Onda10Tests(unittest.TestCase):
                 E.classify('X1', resource, *self.response(obj), identities, baseline, order_id=order_id)
         transport = Mock(side_effect=replies)
         execute = E.execute
-        def fake_execute(requests, identities, suite, *, order_id):
+        def fake_execute(requests, identities, suite, *, order_id, swap_bc=False):
             self.assertEqual(order_id, '9000015638831799')
             return execute(requests, identities, suite, self.output, transport, self.sleep, order_id=order_id)
         with patch.object(E, 'prepare', return_value=(requests, identities)), patch.object(E, 'execute', side_effect=fake_execute), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(E.main(['--live', '--suite', 'all', '--order-id', order_id]), 0)
         self.assertEqual(transport.call_count, 9)
+
+    def test_swap_bc_tokens_and_framing_in_all_nine_templates(self):
+        for swap in (False, True):
+            with self.subTest(swap=swap):
+                requests, identities = E.prepare(self.lane, self.tokens, swap_bc=swap)
+                self.assertEqual(identities, self.ids)
+                for label, raw in requests.items():
+                    case = label.split('_')[0]
+                    actor = {'C1': 'A', 'C2': 'B' if swap else 'C', 'X1': 'C' if swap else 'B'}[case]
+                    self.assertIn(('Authorization: Bearer SYNTHETIC_SECRET_' + actor + '\r\n').encode(), raw)
+                    self.assertEqual(raw.count(b'SYNTHETIC_SECRET_'), 1)
+                    self.assertEqual(len(raw.split(b'\r\n')), 7)
+                    self.assertTrue(raw.endswith(b'\r\n\r\n'))
+                self.assertEqual(requests['C1'], self.requests['C1'])
+        self.assertEqual(E.prepare(self.lane, self.tokens)[0], self.requests)
+
+    def test_swap_bc_ownership_candidates_denials_and_wrong_seller(self):
+        for swap in (False, True):
+            for resource in ('', 'shipments', 'billing_info'):
+                with self.subTest(swap=swap, resource=resource):
+                    obj = self.order(resource)
+                    obj['seller']['id'] = self.ids['B' if swap else 'C']
+                    baseline = {}
+                    for case in ('C1', 'C2'):
+                        self.assertEqual(E.classify(case, resource, *self.response(obj), self.ids,
+                                                   baseline, swap_bc=swap), 'POSITIVE_CONTROL')
+                    for status in (200, 403, 404):
+                        self.assertEqual(E.classify('X1', resource, *self.response(obj, status), self.ids,
+                                                   baseline, swap_bc=swap), 'BOLA_CANDIDATE')
+                    for status in (403, 404):
+                        self.assertEqual(E.classify('X1', resource, *self.response({}, status), self.ids,
+                                                   baseline, swap_bc=swap), 'NEGATIVE')
+                    obj['seller']['id'] = self.ids['C' if swap else 'B']
+                    for case in ('C1', 'C2', 'X1'):
+                        with self.assertRaises(E.Stop):
+                            E.classify(case, resource, *self.response(obj), self.ids, baseline, swap_bc=swap)
+
+    def test_swap_bc_cli_all_serial_and_dry_run(self):
+        order_id = '2000019100583370'
+        self.ids['C'] = '3780429720'
+        (self.tokens / 'token_C.json').write_text(json.dumps({
+            'access_token': 'SYNTHETIC_SECRET_C', 'user_id': self.ids['C']}))
+        prepare, execute = E.prepare, E.execute
+        replies = []
+        for resource in ('', 'shipments', 'billing_info'):
+            obj = self.order(resource)
+            obj['order_id' if resource else 'id'] = order_id
+            obj['seller']['id'] = self.ids['B']
+            replies.extend([self.response(obj), self.response(obj), self.response({}, 403)])
+        transport = Mock(side_effect=replies)
+        def fixture_prepare(**kwargs):
+            self.assertTrue(kwargs['swap_bc'])
+            return prepare(self.lane, self.tokens, **kwargs)
+        def fake_execute(requests, identities, suite, **kwargs):
+            self.assertTrue(kwargs['swap_bc'])
+            result = execute(requests, identities, suite, self.output, transport, self.sleep, **kwargs)
+            self.assertTrue(result['swap_bc'])
+            return result
+        with patch.object(E, 'prepare', side_effect=fixture_prepare), patch.object(E, 'execute', side_effect=fake_execute) as dispatcher, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(E.main(['--dry-run', '--order-id', order_id, '--swap-bc']), 0)
+            dispatcher.assert_not_called()
+            self.assertEqual(E.main(['--live', '--suite', 'all', '--order-id', order_id, '--swap-bc']), 0)
+        self.assertEqual(transport.call_count, 9)
+        self.assertEqual(self.sleep.call_count, 8)
+        for index, call in enumerate(transport.call_args_list):
+            actor = ('A', 'B', 'C')[index % 3]
+            self.assertIn(('Bearer SYNTHETIC_SECRET_' + actor + '\r\n').encode(), call.args[0])
+            self.assertIn(order_id.encode(), call.args[0])
+
+    def test_swap_bc_keeps_identity_isolation(self):
+        for duplicate in ('A', 'B'):
+            with self.subTest(duplicate=duplicate):
+                (self.tokens / 'token_C.json').write_text(json.dumps({
+                    'access_token': 'SYNTHETIC_SECRET_C', 'user_id': self.ids[duplicate]}))
+                with self.assertRaisesRegex(E.Stop, 'IDENTITIES_NOT_ISOLATED'):
+                    E.prepare(self.lane, self.tokens, swap_bc=True)
 
     def test_bad_tokens_fail_without_values(self):
         for value in ('secret\r\nInjected: yes', '', '$AUTH_TOKEN_A', None):
