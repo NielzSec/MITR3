@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+fixtures/build/
+fixtures/dist/
+vendor/
+workspaces/

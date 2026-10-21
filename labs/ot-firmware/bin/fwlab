@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# fwlab launcher — runs the package from its source tree, no install required.
+set -euo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec env PYTHONPATH="$HERE${PYTHONPATH:+:$PYTHONPATH}" python3 -m fwlab "$@"
