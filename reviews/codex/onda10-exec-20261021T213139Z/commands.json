@@ -1,0 +1,63 @@
+{
+  "prefix": [
+    "bwrap",
+    "--unshare-net",
+    "--die-with-parent",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--chdir",
+    "/home/nielz/MITR3",
+    "--setenv",
+    "PYTHONDONTWRITEBYTECODE",
+    "1"
+  ],
+  "commands": {
+    "runner-tests": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_onda10_exec.py",
+      "-v"
+    ],
+    "harness-tests": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_threesession.py",
+      "-v"
+    ],
+    "gate-tests": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "reviews/gpt6/h1_meli_onda10/tests",
+      "-p",
+      "test_staging_gate.py",
+      "-v"
+    ],
+    "structural": [
+      "python3",
+      "reviews/gpt6/h1_meli_onda10/staging_gate.py",
+      "--report",
+      "/tmp/staging-qa.json"
+    ]
+  },
+  "python": "3.14.8 (main, Oct  2 2026, 10:23:31) [GCC 16.2.1 20260810]"
+}

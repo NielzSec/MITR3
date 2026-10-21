@@ -1,0 +1,20 @@
+{
+  "bin/mitr3-onda10-exec.py": "92997a1a9d73a57e3e7e594f76e613111e0f27bc4e16367c683650efadcf2dbe",
+  "tests/test_onda10_exec.py": "432f946cc13cc17bb95946748116599e1b7e54ad2a7a7b746f94ef60aecb4856",
+  "bin/mitr3-threesession.py": "85689aec99c759b911c3dee5a92e8f0309b6649cbf0c6eee8b799f3a518ee8ab",
+  "tests/test_threesession.py": "9759b8d9497e605563e6d0e1914d581cef24c94439e89686962f70d28eca7ce9",
+  "tools/h1_rate_ledger.py": "d8c78898dbd78a7305d775c5e95f78b18450ff862b6817e3886cc75b35e4b4e4",
+  "reviews/gpt6/h1_meli_onda10/staging_gate.py": "d3b25a24d4d28fa83688594cd8cad136481619ffeb343bf7c76042fc6e7e484c",
+  "reviews/gpt6/h1_meli_onda10/tests/test_staging_gate.py": "18efd6e9487825525ed572c722ed02a7565e6690884899acac21bfa9785ff5e1",
+  "docs/H1-MELI-SPEC-V10.md": "437ede737cdeadc500f506b67cd8bdcc2d26c82dbd2613b83eb42fddc567e07c",
+  ".gitignore": "0f9357dc1ebdd06b47e0d1e2f318e167973884dc94dea39a521c2b685db15e4b",
+  "engagements/burp_lane/h1_meli_onda10/templates/C1_billing_info_comprador-A.req": "8880f28496a9eb50ced7fe65dca3bcd3dd75a6368a924d46f144293d7065bf0f",
+  "engagements/burp_lane/h1_meli_onda10/templates/C1_comprador-A-le-pedido.req": "2aadaee593c9c0b46ccd8b955c80fd8451036403e6adcdf482e2286d56bc3586",
+  "engagements/burp_lane/h1_meli_onda10/templates/C1_shipments_comprador-A.req": "51dd01c62f1d0f257907f9f67700b33cf29254ceffeccd800f465961c45f59e3",
+  "engagements/burp_lane/h1_meli_onda10/templates/C2_billing_info_vendedor-C.req": "e4444b5ba12edb2d1e2a0dc2de8e52c069a63cb784a11c7136fda94e1003fe70",
+  "engagements/burp_lane/h1_meli_onda10/templates/C2_shipments_vendedor-C.req": "01486dfc44d321ccd05a8c3dea9578444536587c8fc7eb7b684e6cb6b8162e0a",
+  "engagements/burp_lane/h1_meli_onda10/templates/C2_vendedor-C-le-venda.req": "893b2f82620cd573cdcd77e958bd4379fb3701f004284464a6ad1ccab45b6e6d",
+  "engagements/burp_lane/h1_meli_onda10/templates/X1_billing_info_terceiro-B-pedido-A.req": "2ae41e79f3d7e7a55ccc87df4170e9dc2f93de13c1f247d9ea3a6ebe27d9375a",
+  "engagements/burp_lane/h1_meli_onda10/templates/X1_shipments_terceiro-B-pedido-A.req": "97f06c57653eee93656ae6f1b9b7cd0393585881eb971da61a90359cef343e91",
+  "engagements/burp_lane/h1_meli_onda10/templates/X1_terceiro-B-le-pedido-de-A.req": "b6044998b42ea624f89de00985ed30172ad267dc2610f63f96d5eb4f89368537"
+}

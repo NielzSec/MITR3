@@ -1,0 +1,40 @@
+test_all_suite_serial_nine (test_onda10_exec.Onda10Tests.test_all_suite_serial_nine) ... ok
+test_bad_crlf_in_any_template_rejected (test_onda10_exec.Onda10Tests.test_bad_crlf_in_any_template_rejected) ... ok
+test_bad_tokens_fail_without_values (test_onda10_exec.Onda10Tests.test_bad_tokens_fail_without_values) ... ok
+test_base_sequence_delays_and_hashes (test_onda10_exec.Onda10Tests.test_base_sequence_delays_and_hashes) ... ok
+test_c2_failure_does_not_send_x1 (test_onda10_exec.Onda10Tests.test_c2_failure_does_not_send_x1) ... ok
+test_candidate_stops_all_suite_and_seals (test_onda10_exec.Onda10Tests.test_candidate_stops_all_suite_and_seals) ... ok
+test_cli_live_dispatch_and_failure_code (test_onda10_exec.Onda10Tests.test_cli_live_dispatch_and_failure_code) ... ok
+test_cli_modes_are_exclusive (test_onda10_exec.Onda10Tests.test_cli_modes_are_exclusive) ... ok
+test_concurrent_runner_blocked (test_onda10_exec.Onda10Tests.test_concurrent_runner_blocked) ... ok
+test_controls_must_agree (test_onda10_exec.Onda10Tests.test_controls_must_agree) ... ok
+test_corrupt_rate_ledger_blocks (test_onda10_exec.Onda10Tests.test_corrupt_rate_ledger_blocks) ... ok
+test_default_and_explicit_dry_run_never_dispatch (test_onda10_exec.Onda10Tests.test_default_and_explicit_dry_run_never_dispatch) ... ok
+test_denial_with_private_data_never_negative (test_onda10_exec.Onda10Tests.test_denial_with_private_data_never_negative) ... ok
+test_duplicate_identity_rejected (test_onda10_exec.Onda10Tests.test_duplicate_identity_rejected) ... ok
+test_duplicate_token_rejected (test_onda10_exec.Onda10Tests.test_duplicate_token_rejected) ... ok
+test_empty_shell_is_negative (test_onda10_exec.Onda10Tests.test_empty_shell_is_negative) ... ok
+test_fail_closed_controls_waf_and_server_errors (test_onda10_exec.Onda10Tests.test_fail_closed_controls_waf_and_server_errors) ... ok
+test_failed_control_keeps_status_and_sealed_body (test_onda10_exec.Onda10Tests.test_failed_control_keeps_status_and_sealed_body) ... ok
+test_host_budget_blocks_before_socket (test_onda10_exec.Onda10Tests.test_host_budget_blocks_before_socket) ... ok
+test_host_budget_rechecked_before_each_request (test_onda10_exec.Onda10Tests.test_host_budget_rechecked_before_each_request) ... ok
+test_ledger_append_failure_prevents_send (test_onda10_exec.Onda10Tests.test_ledger_append_failure_prevents_send) ... ok
+test_malformed_session_and_symlink_output_rejected (test_onda10_exec.Onda10Tests.test_malformed_session_and_symlink_output_rejected) ... ok
+test_oversized_response_and_duplicate_json_stop (test_onda10_exec.Onda10Tests.test_oversized_response_and_duplicate_json_stop) ... ok
+test_prepare_all_nine_exact_bytes (test_onda10_exec.Onda10Tests.test_prepare_all_nine_exact_bytes) ... ok
+test_rate_other_hosts_and_old_window (test_onda10_exec.Onda10Tests.test_rate_other_hosts_and_old_window) ... ok
+test_recent_rate_stop_blocks (test_onda10_exec.Onda10Tests.test_recent_rate_stop_blocks) ... ok
+test_session_budget_includes_seeded_setup_and_persists (test_onda10_exec.Onda10Tests.test_session_budget_includes_seeded_setup_and_persists) ... ok
+test_socket_guard_active (test_onda10_exec.Onda10Tests.test_socket_guard_active) ... ok
+test_symlink_token_rejected (test_onda10_exec.Onda10Tests.test_symlink_token_rejected) ... ok
+test_tls_transport_exact_request_no_retry (test_onda10_exec.Onda10Tests.test_tls_transport_exact_request_no_retry) ... ok
+test_transport_failure_counts_and_blocks_replay (test_onda10_exec.Onda10Tests.test_transport_failure_counts_and_blocks_replay) ... ok
+test_unknown_or_wrong_order_never_negative_or_candidate (test_onda10_exec.Onda10Tests.test_unknown_or_wrong_order_never_negative_or_candidate) ... ok
+test_wave_ten_blocks (test_onda10_exec.Onda10Tests.test_wave_ten_blocks) ... ok
+test_world_readable_token_rejected (test_onda10_exec.Onda10Tests.test_world_readable_token_rejected) ... ok
+test_wrong_a_identity_rejected (test_onda10_exec.Onda10Tests.test_wrong_a_identity_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 0.148s
+
+OK

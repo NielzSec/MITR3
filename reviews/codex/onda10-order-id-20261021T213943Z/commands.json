@@ -1,0 +1,39 @@
+{
+  "prefix": [
+    "bwrap",
+    "--unshare-net",
+    "--die-with-parent",
+    "--ro-bind",
+    "/",
+    "/",
+    "--tmpfs",
+    "/tmp",
+    "--dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--chdir",
+    "/home/nielz/MITR3",
+    "--setenv",
+    "PYTHONDONTWRITEBYTECODE",
+    "1"
+  ],
+  "commands": {
+    "tests": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_onda10_exec.py",
+      "-v"
+    ],
+    "dry-run": [
+      "python3",
+      "-c",
+      "from pathlib import Path\nimport json, subprocess\nfolder=Path('/tmp/opencode'); folder.mkdir(mode=0o700)\nfor actor, identity in [('A','3780339606'),('B','3780339608'),('C','99112233')]:\n    path=folder / ('token_'+actor+'.json')\n    path.write_text(json.dumps({'access_token':'SYNTHETIC_SECRET_'+actor,'user_id':identity}))\n    path.chmod(0o600)\nfor flags in [[], ['--dry-run','--order-id','12345678'], ['--dry-run','--suite','all','--order-id','9000015638831799']]:\n    result=subprocess.run(['python3','bin/mitr3-onda10-exec.py',*flags],check=True,capture_output=True,text=True)\n    print(result.stdout,end='')\n"
+    ]
+  }
+}

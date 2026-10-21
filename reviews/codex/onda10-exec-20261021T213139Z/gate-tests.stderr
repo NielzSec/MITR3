@@ -1,0 +1,22 @@
+test_bad_identity_mapping (test_staging_gate.OfflineGateTests.test_bad_identity_mapping) ... ok
+test_bad_newlines_denied (test_staging_gate.OfflineGateTests.test_bad_newlines_denied) ... ok
+test_clean_synthetic_pass (test_staging_gate.OfflineGateTests.test_clean_synthetic_pass) ... ok
+test_code_does_not_construct_network (test_staging_gate.OfflineGateTests.test_code_does_not_construct_network) ... ok
+test_each_cell_rejects_wire_and_identity_mutations (test_staging_gate.OfflineGateTests.test_each_cell_rejects_wire_and_identity_mutations) ... ok
+test_each_missing_or_symlink_template_blocks (test_staging_gate.OfflineGateTests.test_each_missing_or_symlink_template_blocks) ... ok
+test_every_cell_requires_its_own_route_and_actor (test_staging_gate.OfflineGateTests.test_every_cell_requires_its_own_route_and_actor) ... ok
+test_existing_lanes_now_pass (test_staging_gate.OfflineGateTests.test_existing_lanes_now_pass) ... ok
+test_extra_template_rejected (test_staging_gate.OfflineGateTests.test_extra_template_rejected) ... ok
+test_header_injection_denied (test_staging_gate.OfflineGateTests.test_header_injection_denied) ... ok
+test_method_or_route_change_denied (test_staging_gate.OfflineGateTests.test_method_or_route_change_denied) ... ok
+test_missing_terminator (test_staging_gate.OfflineGateTests.test_missing_terminator) ... ok
+test_no_actual_token_ever_allowed (test_staging_gate.OfflineGateTests.test_no_actual_token_ever_allowed) ... ok
+test_reject_leading_comments (test_staging_gate.OfflineGateTests.test_reject_leading_comments) ... ok
+test_target_change_requires_review (test_staging_gate.OfflineGateTests.test_target_change_requires_review) ... ok
+test_ua_drift_denied (test_staging_gate.OfflineGateTests.test_ua_drift_denied) ... ok
+test_unclosed_readme_fence (test_staging_gate.OfflineGateTests.test_unclosed_readme_fence) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.155s
+
+OK
