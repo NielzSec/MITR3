@@ -1,0 +1,15 @@
+{
+  "bin/mitr3-threesession.py": "85689aec99c759b911c3dee5a92e8f0309b6649cbf0c6eee8b799f3a518ee8ab",
+  "tests/test_threesession.py": "9759b8d9497e605563e6d0e1914d581cef24c94439e89686962f70d28eca7ce9",
+  "docs/H1-MELI-SPEC-V10.md": "437ede737cdeadc500f506b67cd8bdcc2d26c82dbd2613b83eb42fddc567e07c",
+  "docs/H1-MELI-THREAT-MODEL-CODEX-WEB-20261021.md": "889c6524bccce3fe4635308481aa880cd745ad6ecb7b40b1e12b11e1bc2d7870",
+  "engagements/burp_lane/h1_meli_onda10/templates/C1_billing_info_comprador-A.req": "595a197c7638ae9492b1bb87320194a5a753b9da98bfabf59a5702f6dbe1d43b",
+  "engagements/burp_lane/h1_meli_onda10/templates/C1_comprador-A-le-pedido.req": "2aadaee593c9c0b46ccd8b955c80fd8451036403e6adcdf482e2286d56bc3586",
+  "engagements/burp_lane/h1_meli_onda10/templates/C1_shipments_comprador-A.req": "2f54291e118b6eda76f17d07092275f08dda0635099e3beb338f62d3cfd351e3",
+  "engagements/burp_lane/h1_meli_onda10/templates/C2_billing_info_vendedor-C.req": "b501b2213afe39509daed51b886fec64d8aaed8a59575cbc878fb790db69c948",
+  "engagements/burp_lane/h1_meli_onda10/templates/C2_shipments_vendedor-C.req": "4ec107dc97b824ad74ab170dfe1f25a0b322e9ca996747a30b8d23eaa4d2d7c2",
+  "engagements/burp_lane/h1_meli_onda10/templates/C2_vendedor-C-le-venda.req": "893b2f82620cd573cdcd77e958bd4379fb3701f004284464a6ad1ccab45b6e6d",
+  "engagements/burp_lane/h1_meli_onda10/templates/X1_billing_info_terceiro-B-pedido-A.req": "d692f8cfb8c1871ee6e09189dabe13298464a639c592845c2b45769df315c735",
+  "engagements/burp_lane/h1_meli_onda10/templates/X1_shipments_terceiro-B-pedido-A.req": "ef68bf7fb0bac0bfb8b4700d842ffaefc79ea31a240e8d5605582759659b3093",
+  "engagements/burp_lane/h1_meli_onda10/templates/X1_terceiro-B-le-pedido-de-A.req": "b6044998b42ea624f89de00985ed30172ad267dc2610f63f96d5eb4f89368537"
+}

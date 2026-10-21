@@ -1,0 +1,10 @@
+{
+  "bin/mitr3-threesession.py": "9b848364cbd21255a7806805b07f03c79a704f14a5434f1da38ce138ab90cd4c",
+  "tests/test_threesession.py": "1576a7886d4752151c11a7abca5fb7a19d1c9a31633c2238f43dcf7de4a5174a",
+  "docs/H1-MELI-SPEC-V10.md": "437ede737cdeadc500f506b67cd8bdcc2d26c82dbd2613b83eb42fddc567e07c",
+  "docs/H1-MELI-BOLA-WRITEUP-SYNTHESIS.md": "8a55537926df6ec460bf26fd64d1cff315b76c31b154df5959b13cef3005a1a2",
+  "engagements/burp_lane/h1_meli_onda10/README.md": "e55dc6e3f13b1d558e4628b2a46546d280edd19a5276f0d0c394c681e6332929",
+  "engagements/burp_lane/h1_meli_onda10/templates/C1_comprador-A-le-pedido.req": "9d4b7c82d29fa638291ba2291d6ceb6f981bfd1bab24dd524b62216ca43bbffb",
+  "engagements/burp_lane/h1_meli_onda10/templates/C2_vendedor-C-le-venda.req": "cdbf41f8f911ede48eb0b406d1b2814b71ad08b159b8ac01a6e9f27680a16e65",
+  "engagements/burp_lane/h1_meli_onda10/templates/X1_terceiro-B-le-pedido-de-A.req": "81346607a8431519ad8d9ac7bcaac5496b32c44ed7fd026166777d41ca68358e"
+}

@@ -1,0 +1,83 @@
+{
+  "timestamp": "2026-10-21T20:08:30.020412+00:00",
+  "run_id": "226d3956-a027-450f-8675-cd1234130bb6",
+  "mode": "DRY_RUN",
+  "evidence_sha256": null,
+  "g_security": {
+    "gate": "G-SECURITY",
+    "overall": "BLOCK",
+    "checks": {
+      "SEC-01": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "SEC-02": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "SEC-03": {
+        "status": "BLOCK",
+        "reason": "PermissionError"
+      },
+      "SEC-04": {
+        "status": "PASS"
+      },
+      "SEC-05": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "SEC-06": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "SEC-07": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "SEC-08": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      }
+    }
+  },
+  "g_rollback": {
+    "gate": "G-ROLLBACK",
+    "overall": "BLOCK",
+    "checks": {
+      "RB-01": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "RB-03": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "RB-04": {
+        "status": "BLOCK",
+        "reason": "KeyError"
+      },
+      "RB-02": {
+        "status": "BLOCK",
+        "reason": "PREREQUISITE_FAILED"
+      },
+      "RB-05": {
+        "status": "BLOCK",
+        "reason": "PREREQUISITE_FAILED"
+      },
+      "RB-06": {
+        "status": "BLOCK",
+        "reason": "PREREQUISITE_FAILED"
+      },
+      "RB-07": {
+        "status": "BLOCK",
+        "reason": "PREREQUISITE_FAILED"
+      },
+      "RB-08": {
+        "status": "BLOCK",
+        "reason": "PREREQUISITE_FAILED"
+      }
+    }
+  },
+  "verdict": "BLOCK",
+  "evidence_error": "APPROVED_EVIDENCE_REQUIRED"
+}

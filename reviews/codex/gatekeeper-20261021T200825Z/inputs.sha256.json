@@ -1,0 +1,8 @@
+{
+  "labs/security-enforcement/scripts/validate_gates.py": "d4658de34289d93ed919887344d843a38c1e9ab334a6f996aa5f4d8dcab30d6f",
+  "labs/security-enforcement/tests/test_validate_gates.py": "3de43748327779d57c2b83b1fc607ae159802c51f73b7367d760a57be629ede8",
+  "labs/security-enforcement/README.md": "5a6886c5a4205d522a6ffc511d1891e7b2cb4a08df0c532a62f8b75c9ad902e9",
+  "bin/mitr3-secrets-audit.py": "66742d7e4e10213932a1ec8eb2f615cf9490644983e2a7fa364023d66b284d6e",
+  "docs/REVERSE-NEXT-GATES-G-SECURITY-ROLLBACK-v01.md": "7151423a810a14550671caf00dac3fbabc935a42d6c9c9ea6148486f6a59e825",
+  "docs/MITR3-REVERSE-NEXT-MASTERPLAN-20261021.md": "8665af4e14862a6c641caa2e7b663dd2547b5501160a93382e74a36bdb629a82"
+}

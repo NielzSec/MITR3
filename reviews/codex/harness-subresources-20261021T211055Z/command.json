@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/usr/bin/bwrap",
+    "--unshare-net",
+    "--die-with-parent",
+    "--ro-bind",
+    "/",
+    "/",
+    "--dev",
+    "/dev",
+    "--proc",
+    "/proc",
+    "--tmpfs",
+    "/tmp",
+    "--chdir",
+    "/home/nielz/MITR3",
+    "--",
+    "/usr/bin/python3",
+    "-m",
+    "pytest",
+    "tests/test_threesession.py",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "environment": {
+    "PYTHONPATH": "/home/nielz/archmigration-restored/projects/profile/Documents/ChatGPT/MegaBrain/09-ai-agents-llm/megabrain-mcp-server/.venv/Lib/site-packages",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}

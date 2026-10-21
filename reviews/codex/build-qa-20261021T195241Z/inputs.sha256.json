@@ -1,0 +1,16 @@
+{
+  "labs/ot-firmware/fwlab/__init__.py": "e7c3dae40bd6d9a8b9cf03496b7d483be673d304bf7361ce8d6f2a16993d8583",
+  "labs/ot-firmware/fwlab/__main__.py": "307299fda7b77d22c64cb51430ec75e5f59d78e9c948786afb3b2544fe45e4b7",
+  "labs/ot-firmware/fwlab/cli.py": "81c12cd048e9981478ca206faeaee68cbedd9fbe44f227ae7ac860f6434d82b2",
+  "labs/ot-firmware/fwlab/diff.py": "c98b706a0dd0549651e98ed25f303d46025b42520acffb94d7cc76ab2b3dda95",
+  "labs/ot-firmware/fwlab/extract.py": "02688602477be26c9a03ecc0496fc23ba3be357a7bd77da56d623841de652429",
+  "labs/ot-firmware/fwlab/formats.py": "544cf52c7fd4e2d2e3eec9b2ce1a69719bab30d2bfab0977eb860ad251df0061",
+  "labs/ot-firmware/fwlab/ghidra.py": "20efc9885c6e67d7a8406fb57a962a0bb80a9e59ab651586d5cfcd7c0e7f4cd4",
+  "labs/ot-firmware/fwlab/inventory.py": "81cd824603b9b7e1e89ec32bb69e1df9da35966e86d5eb4d0669e5317e0b0b74",
+  "labs/ot-firmware/fwlab/report.py": "b7b037e268fdf489fad8add1b35997438bb3e7e22a61fe1cf9b41701299d26d6",
+  "labs/ot-firmware/tests/test_fwlab.py": "f6986ecd900cb1a1b8a18332106e921c9df96173de51179aaf92386297eae6ef",
+  "labs/ot-firmware/tests/test_hardening.py": "c83c68e6e9ee506c264397a6391527426a3583dc35cb609aabc9a550daccffd6",
+  "labs/security-enforcement/scripts/validate_gates.py": "314584289777269df9558933f083dd6d00a908e3e408094532a9a01095f43b41",
+  "skills/ponytail/SKILL.md": "9badd22a32e19cb884e46dfa8d3aae82bb81dfa5484105b8b4f0262df823a509",
+  "skills/ponytail-review/SKILL.md": "33fe4ebe22a460924e5d4a261e223df22e409cc94ab76182bee9fb91a3ef022e"
+}
