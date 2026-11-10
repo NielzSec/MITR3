@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "E01",
+      "kind": "positive",
+      "step_ids": [
+        "M01",
+        "M02",
+        "M03",
+        "M04"
+      ],
+      "input": {
+        "path": "hackbots/skill-builder/examples/evaluator/literal.js",
+        "sha256": "babb43efe7b8055b899916de4450d51db8b91d0fc9bcf50d6fe6bd9db056eac1"
+      },
+      "expected": {
+        "path": "hackbots/skill-builder/examples/evaluator/E01.expected.json",
+        "sha256": "51a9684eebe16327c3d3904be0b4e52532c96e21cc1e72158f8c526cacdf459f"
+      }
+    },
+    {
+      "id": "E02",
+      "kind": "negative",
+      "step_ids": [
+        "M01",
+        "M04"
+      ],
+      "input": {
+        "path": "hackbots/skill-builder/examples/evaluator/mismatched-hash.input.json",
+        "sha256": "5ca4f03f518a4b5dc04a7935d253fcec2f53fb8844b1d2ae3e09af8e3bafbb5e"
+      },
+      "expected": {
+        "path": "hackbots/skill-builder/examples/evaluator/E02.expected.json",
+        "sha256": "7407a9f7f962dc7de5e1a5e0751455ed9198268e064f4c7dd8a72f15d540f28c"
+      }
+    },
+    {
+      "id": "E03",
+      "kind": "negative",
+      "step_ids": [
+        "M01",
+        "M04"
+      ],
+      "input": {
+        "path": "hackbots/skill-builder/examples/evaluator/untrusted-comment.js",
+        "sha256": "d9498a19f2b5ebcf06ced46433813d9f278cb057136f16fb224bde84f68330c5"
+      },
+      "expected": {
+        "path": "hackbots/skill-builder/examples/evaluator/E03.expected.json",
+        "sha256": "4dfbfde676653cc219765b69287cd3a256f6ace5c6326bae09e5b006d691f08c"
+      }
+    }
+  ]
+}

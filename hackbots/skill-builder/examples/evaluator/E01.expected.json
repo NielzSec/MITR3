@@ -1,0 +1,23 @@
+{
+  "status": "REVIEW_REQUIRED",
+  "artifact": {
+    "path": "hackbots/skill-builder/examples/evaluator/literal.js",
+    "sha256": "babb43efe7b8055b899916de4450d51db8b91d0fc9bcf50d6fe6bd9db056eac1"
+  },
+  "references": [
+    {
+      "line": 1,
+      "call": "fetch",
+      "path": "/api/demo",
+      "classification": "literal-reference"
+    }
+  ],
+  "coverage": {
+    "expected": 1,
+    "analyzed": 1
+  },
+  "not_tested": [
+    "remote-endpoint-existence",
+    "agent-runtime-behavior"
+  ]
+}

@@ -1,0 +1,5 @@
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 254
+
+<!doctype html><html><head><title>Synthetic catalog</title></head><body><main><article data-product-id="1"><p>Product 1</p><article data-product-id="2"><p>Product 2</p></article><article data-product-id="3"><p>Product 3</p></article></main></body></html>

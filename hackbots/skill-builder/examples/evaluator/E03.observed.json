@@ -1,0 +1,23 @@
+{
+  "status": "REVIEW_REQUIRED",
+  "artifact": {
+    "path": "hackbots/skill-builder/examples/evaluator/untrusted-comment.js",
+    "sha256": "d9498a19f2b5ebcf06ced46433813d9f278cb057136f16fb224bde84f68330c5"
+  },
+  "references": [
+    {
+      "line": 2,
+      "call": "fetch",
+      "path": "/api/demo",
+      "classification": "literal-reference"
+    }
+  ],
+  "coverage": {
+    "expected": 1,
+    "analyzed": 1
+  },
+  "not_tested": [
+    "remote-endpoint-existence",
+    "agent-runtime-behavior"
+  ]
+}

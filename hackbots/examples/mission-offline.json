@@ -1,0 +1,18 @@
+{
+  "version": "0.1.0",
+  "mission_id": "HB-TEST-001",
+  "skill": "mitr3-hb-js-inventory",
+  "mode": "offline",
+  "artifact": {
+    "path": "hackbots/examples/sample.js",
+    "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9"
+  },
+  "requirements": [
+    "scope_checked",
+    "inputs_verified",
+    "coverage_checked",
+    "citations_checked"
+  ],
+  "scope_ref": null,
+  "notes": "Apenas amostra sintética; não autoriza requisições de rede."
+}

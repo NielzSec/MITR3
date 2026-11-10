@@ -1,0 +1,523 @@
+[
+  {
+    "id": "ps-cache-2024",
+    "kind": "research",
+    "title": "Gotta cache 'em all: discrepancias em URL e cache",
+    "author": "Martin Doyhenard / PortSwigger Research",
+    "source_url": "https://portswigger.net/research/gotta-cache-em-all",
+    "published_at": "2024-08-08",
+    "category": "web/cache",
+    "tags": [
+      "bugbounty",
+      "web-cache-deception",
+      "cache-poisoning",
+      "cdn",
+      "url-parsing"
+    ],
+    "summary": "Pesquisa publicada sobre diferencas de interpretacao de caminhos e regras de cache entre CDN e servidor de origem. Essas divergencias podem expor conteudos dinamicos ou armazenar respostas inadequadas. O estudo reune casos e discute condicoes e mitigacoes.",
+    "lesson": "Conferir se regras de cache e parsing de caminhos sao coerentes entre camadas. Respostas sensiveis nao devem ser armazenadas em cache compartilhado.",
+    "license": "Texto original pertence ao autor; armazenar apenas resumo proprio e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-http1-2025",
+    "kind": "research",
+    "title": "HTTP/1.1 must die: o problema do desync",
+    "author": "James Kettle / PortSwigger Research",
+    "source_url": "https://portswigger.net/research/http1-must-die",
+    "published_at": "2025",
+    "category": "web/http",
+    "tags": [
+      "bugbounty",
+      "request-smuggling",
+      "http1",
+      "http2",
+      "proxy",
+      "desync"
+    ],
+    "summary": "Pesquisa sobre o risco persistente da dessincornizacao de mensagens HTTP em stacks com intermediarios e conversao de protocolo, inclusive quando a borda oferece HTTP/2 mas fala HTTP/1.1 com o backend.",
+    "lesson": "Avaliar semantica de framing, normalizacao e downgrade na cadeia de proxies em ambiente de testes isolado, evitando falso senso de seguranca causado pelo suporte superficial a HTTP/2.",
+    "license": "Texto original pertence ao autor; armazenar apenas resumo proprio e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-false-positive-2025",
+    "kind": "research",
+    "title": "Separar pipelining de HTTP request smuggling",
+    "author": "James Kettle / PortSwigger Research",
+    "source_url": "https://portswigger.net/research/how-to-distinguish-http-pipelining-from-request-smuggling",
+    "published_at": "2025-08-19",
+    "category": "web/validation",
+    "tags": [
+      "bugbounty",
+      "false-positive",
+      "request-smuggling",
+      "http",
+      "qa"
+    ],
+    "summary": "Discussao de um erro recorrente na analise de request smuggling: interpretar comportamento normal de conexoes persistentes como vulnerabilidade. Defende diferenciar observacao de efeito de seguranca comprovado.",
+    "lesson": "Exigir experimento reprodutivel, explicacao alternativa e evidencia de desincronizacao real antes de classificar um alerta como vulnerabilidade.",
+    "license": "Texto original pertence ao autor; armazenar apenas resumo proprio e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-http2-2021",
+    "kind": "research",
+    "title": "HTTP/2: The Sequel is Always Worse",
+    "author": "James Kettle / PortSwigger Research",
+    "source_url": "https://portswigger.net/research/http2",
+    "published_at": "2021-08-05",
+    "category": "web/http",
+    "tags": [
+      "bugbounty",
+      "http2",
+      "request-smuggling",
+      "protocol-downgrade",
+      "desync"
+    ],
+    "summary": "Estudo de riscos decorrentes da traducao entre HTTP/2 e HTTP/1.1 e divergencias de framing. O material inclui casos de falhas reportadas e depois corrigidas em ambientes reais.",
+    "lesson": "Tratar a traducao de protocolo e o comportamento de intermediarios como fronteiras de confianca; reproduzir somente em sistemas sob escopo autorizado.",
+    "license": "Texto original pertence ao autor; armazenar apenas resumo proprio e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-rsa-41140",
+    "kind": "ctf_writeup",
+    "title": "JerseyCTF VI: Relay Artifact TX-7 (RSA)",
+    "author": "danielpeng / NYUSEC",
+    "source_url": "https://ctftime.org/writeup/41140",
+    "published_at": "2026",
+    "category": "ctf/crypto",
+    "tags": [
+      "ctf",
+      "rsa",
+      "shared-prime",
+      "gcd",
+      "cryptography"
+    ],
+    "summary": "O desafio usa material RSA e um diagnostico que compartilha um fator com o modulo. O relato descreve a identificacao da falha matematica e a recuperacao de uma mensagem de laboratorio.",
+    "lesson": "Uma implementacao RSA nao pode reutilizar fatores primos ou divulgar valores correlacionados. Na analise, comparar artefatos com invariantes matematicas antes de tentar busca exaustiva.",
+    "license": "Direitos reservados ao autor; somente ficha original e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-pcap-41139",
+    "kind": "ctf_writeup",
+    "title": "JerseyCTF VI: qaStaH nuq (PCAP HTTP)",
+    "author": "danielpeng / NYUSEC",
+    "source_url": "https://ctftime.org/writeup/41139",
+    "published_at": "2026",
+    "category": "ctf/forensics",
+    "tags": [
+      "ctf",
+      "pcap",
+      "wireshark",
+      "http",
+      "base64"
+    ],
+    "summary": "Write-up de investigacao forense em captura PCAP: a solucao observa trafego HTTP de interesse, identifica uma resposta com um arquivo textual e interpreta dados codificados como parte do desafio.",
+    "lesson": "Filtrar protocolos e rotas relevantes, preservar trilha da evidencia e examinar corpos de resposta e metadados antes de inferir que o dado esta ausente.",
+    "license": "Direitos reservados ao autor; somente ficha original e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-signal-41138",
+    "kind": "ctf_writeup",
+    "title": "JerseyCTF VI: Recovered Signal File (codificacoes)",
+    "author": "danielpeng / NYUSEC",
+    "source_url": "https://ctftime.org/writeup/41138",
+    "published_at": "2026",
+    "category": "ctf/crypto",
+    "tags": [
+      "ctf",
+      "forensics",
+      "base64",
+      "caesar",
+      "encoding"
+    ],
+    "summary": "Um registro de transmissao de laboratorio combina duas codificacoes simples. A analise usa padroes estruturais da mensagem para reconhecer uma camada de representacao e depois uma substituicao alfabetica.",
+    "lesson": "Distinguir codificacao de criptografia; experimentar transformacoes simples com rastreabilidade e checar se o resultado preserva a estrutura esperada.",
+    "license": "Direitos reservados ao autor; somente ficha original e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "jctf-files-41137",
+    "kind": "ctf_writeup",
+    "title": "JerseyCTF VI: Fix Your Ship (file carving)",
+    "author": "danielpeng / NYUSEC",
+    "source_url": "https://ctftime.org/writeup/41137",
+    "published_at": "2026",
+    "category": "ctf/forensics",
+    "tags": [
+      "ctf",
+      "file-carving",
+      "magic-bytes",
+      "png",
+      "jpeg",
+      "mp4"
+    ],
+    "summary": "Desafio de forense com arquivos propositalmente corrompidos. O relato reconstrui o reconhecimento de tipos pela estrutura de assinatura e metadados de formatos de imagem e video, recuperando pistas em cadeia.",
+    "lesson": "Comparar cabecalhos e assinaturas padrao, trabalhar em copias dos artefatos e documentar qualquer mudanca de bytes para manter a analise reprodutivel.",
+    "license": "Direitos reservados ao autor; somente ficha original e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "uiuctf-osint-41117",
+    "kind": "ctf_reference",
+    "title": "UIUCTF 2026: Something Handmade (OSINT)",
+    "author": "Abdelkader",
+    "source_url": "https://ctftime.org/writeup/41117",
+    "published_at": "2026",
+    "category": "ctf/osint",
+    "tags": [
+      "ctf",
+      "osint",
+      "uiuctf",
+      "discovery"
+    ],
+    "summary": "Referencia publica de write-up OSINT do UIUCTF 2026, com link ao texto hospedado pelo autor. Conteudo tecnico ainda nao revisado pelo time MITR3; ficha de descoberta para posterior curadoria.",
+    "lesson": "Revisar o relato original, separar pistas de inferencias e verificar procedencia antes de promover qualquer tecnica ao corpus confirmado.",
+    "license": "Direitos reservados ao autor; somente metadados e link.",
+    "validation": "index_only_unreviewed"
+  },
+  {
+    "id": "uiuctf-re-41116",
+    "kind": "ctf_reference",
+    "title": "UIUCTF 2026: glyphs (engenharia reversa)",
+    "author": "Abdelkader",
+    "source_url": "https://ctftime.org/writeup/41116",
+    "published_at": "2026",
+    "category": "ctf/reverse",
+    "tags": [
+      "ctf",
+      "reverse-engineering",
+      "uiuctf",
+      "discovery"
+    ],
+    "summary": "Referencia publica de um desafio de engenharia reversa do UIUCTF 2026. A pagina no CTFtime remete ao relato do autor; ainda nao ha extracao tecnica validada nesta ficha.",
+    "lesson": "Ao revisar, coletar arquitetura, hipotese, metodo estatico/dinamico, evidencias e limites de reproducao sem copiar o write-up integral.",
+    "license": "Direitos reservados ao autor; somente metadados e link.",
+    "validation": "index_only_unreviewed"
+  },
+  {
+    "id": "uiuctf-pwn-41119",
+    "kind": "ctf_reference",
+    "title": "UIUCTF 2026: Sparxie Vanishing Encore (PWN)",
+    "author": "Abdelkader",
+    "source_url": "https://ctftime.org/writeup/41119",
+    "published_at": "2026",
+    "category": "ctf/pwn",
+    "tags": [
+      "ctf",
+      "binary-exploitation",
+      "uiuctf",
+      "discovery"
+    ],
+    "summary": "Referencia publica de write-up para desafio de exploracao binaria no UIUCTF 2026. A fonte lista a categoria, o autor e o destino original, mas detalhes ainda aguardam revisao pelo VANTA.",
+    "lesson": "Exigir descricao do ambiente do desafio e evidencia reproduzivel antes de incorporar tecnicas operacionais no conhecimento validado.",
+    "license": "Direitos reservados ao autor; somente metadados e link.",
+    "validation": "index_only_unreviewed"
+  },
+  {
+    "id": "h1-hacktivity",
+    "kind": "source_catalog",
+    "title": "HackerOne Hacktivity — atividades e relatorios divulgados",
+    "author": "HackerOne",
+    "source_url": "https://docs.hackerone.com/en/articles/8410358-hacktivity",
+    "published_at": "",
+    "category": "sources/bugbounty",
+    "tags": [
+      "bugbounty",
+      "disclosure",
+      "hacktivity",
+      "reports",
+      "responsible-disclosure"
+    ],
+    "summary": "Documentacao oficial distingue atividade de programas publicos e relatorios efetivamente divulgados. Somente o filtro de relatatorios publicamente disclosed permite acessar detalhes sem extrapolar autorizacao.",
+    "lesson": "Nao tratar titulos redigidos ou reports privados como conteudo publico; preservar politica de disclosure, citacao e informacoes pessoais.",
+    "license": "Documentacao do titular; armazenar metadados e resumo proprio.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "bb-markdown",
+    "kind": "source_catalog",
+    "title": "Repositorio comunitario de relatorios bug bounty divulgados",
+    "author": "bugbountywithmarco / contribuidores",
+    "source_url": "https://github.com/bugbountywithmarco/bugbounty-disclosed-reports",
+    "published_at": "",
+    "category": "sources/bugbounty",
+    "tags": [
+      "bugbounty",
+      "disclosed-reports",
+      "markdown",
+      "curation"
+    ],
+    "summary": "Colecao comunitaria de relatorios de bug bounty publicamente divulgados em Markdown. O projeto descreve campos como ativo/programa, tipo de vulnerabilidade, impacto e link para relatorio original.",
+    "lesson": "Cada relato importado deve ser conferido na fonte primaria, com licenca e disclosure confirmados; nao assumir validade so pela presenca no repositorio.",
+    "license": "Repositorio sob MIT declarado; licencas de materiais de terceiros devem ser conferidas individualmente.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "ctftime-catalog",
+    "kind": "source_catalog",
+    "title": "CTFtime — indice de write-ups publicos",
+    "author": "CTFtime / autores dos write-ups",
+    "source_url": "https://ctftime.org/writeups",
+    "published_at": "",
+    "category": "sources/ctf",
+    "tags": [
+      "ctf",
+      "writeups",
+      "crypto",
+      "forensics",
+      "pwn",
+      "reverse",
+      "osint"
+    ],
+    "summary": "Indice de desafios e write-ups por evento, tarefa, autor e categorias. O site deixa explicito que os textos pertencem aos respectivos autores.",
+    "lesson": "Usar como indice de descoberta, evitar raspagem integral, verificar se o CTF acabou e citar a pagina do autor no retorno do RAG.",
+    "license": "Conteudo de cada write-up reservado ao respectivo autor; somente catalogacao.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "owasp-wstg",
+    "kind": "source_catalog",
+    "title": "OWASP Web Security Testing Guide",
+    "author": "OWASP contributors",
+    "source_url": "https://github.com/OWASP/wstg",
+    "published_at": "",
+    "category": "sources/web-methodology",
+    "tags": [
+      "owasp",
+      "wstg",
+      "methodology",
+      "web",
+      "qa"
+    ],
+    "summary": "Guia aberto de metodologias para testes de seguranca web, com cenarios identificaveis por codigos WSTG, recursos de relato e reproducibilidade.",
+    "lesson": "Vincular tecnicas observadas em bug bounty a cenarios WSTG especificos, sem transformar guias em prova de vulnerabilidade em um alvo.",
+    "license": "Consultar licenca especifica dos arquivos antes de replicar; apenas resumo proprio e link.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "owasp-cheatsheets",
+    "kind": "source_catalog",
+    "title": "OWASP Cheat Sheet Series — mitigacoes",
+    "author": "OWASP contributors",
+    "source_url": "https://github.com/OWASP/CheatSheetSeries",
+    "published_at": "",
+    "category": "sources/defense",
+    "tags": [
+      "owasp",
+      "cheatsheet",
+      "mitigation",
+      "secure-coding"
+    ],
+    "summary": "Catalogo de orientacoes praticas de seguranca de aplicacoes. Pode funcionar como contraparte defensiva de relatórios de bug bounty e CTFs, relacionando causa e recomendacao.",
+    "lesson": "Complementar cada tecnica catalogada com uma mitigacao verificavel e, quando disponivel, testes automatizados de regressao.",
+    "license": "CC BY-SA 4.0 indicado pelo repositorio; conservar atribuicao e condicoes.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "ps-ai-http-terminator-2026",
+    "kind": "research",
+    "title": "Can AI do novel security research? Meet the HTTP Terminator",
+    "author": "James Kettle / PortSwigger Research",
+    "source_url": "https://portswigger.net/research/can-ai-do-novel-security-research",
+    "published_at": "2026-08-05",
+    "category": "agentic-security/research",
+    "tags": [
+      "bugbounty",
+      "llm-agent",
+      "human-in-the-loop",
+      "http-desync",
+      "research-evaluation"
+    ],
+    "summary": "Estudo de um sistema de pesquisa assistida por IA aplicado a divergencias de parsing HTTP. O autor descreve descobertas em infraestrutura real e ressalta que a revisao humana, a validacao e as etapas de evidencia sao essenciais para interpretar resultados autonomos.",
+    "lesson": "No MITR3, avaliar agentes em laboratorios autorizados usando hipoteses, controle negativo, registros de origem e revisao humana. Uma descoberta gerada por IA e candidata a validacao, nunca um finding comprovado.",
+    "license": "Direitos PortSwigger; apenas sintese original e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-practical-cache-poisoning-2018",
+    "kind": "research",
+    "title": "Practical Web Cache Poisoning",
+    "author": "James Kettle / PortSwigger Research",
+    "source_url": "https://portswigger.net/research/practical-web-cache-poisoning",
+    "published_at": "2018",
+    "category": "web/cache",
+    "tags": [
+      "bugbounty",
+      "cache-poisoning",
+      "unkeyed-input",
+      "cdn",
+      "burp"
+    ],
+    "summary": "Pesquisa publica sobre influencia de entradas que afetam uma resposta sem compor a chave de cache. Distingue cache poisoning de cache deception e discute validacao cuidadosa para reduzir risco aos visitantes.",
+    "lesson": "Revisar criterios de cache, Vary e headers que afetam a resposta; executar experimentos unicamente em ambientes de teste sob escopo para evitar impacto em usuarios.",
+    "license": "Direitos PortSwigger; resumo proprio e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ps-top-web-2025",
+    "kind": "research",
+    "title": "Top 10 Web Hacking Techniques of 2025",
+    "author": "James Kettle / PortSwigger Research e comunidade",
+    "source_url": "https://portswigger.net/research/top-10-web-hacking-techniques-of-2025",
+    "published_at": "2026-02-05",
+    "category": "sources/research-prioritization",
+    "tags": [
+      "bugbounty",
+      "research",
+      "curation",
+      "web-security",
+      "technique-evaluation"
+    ],
+    "summary": "Curadoria comunitaria de pesquisas de seguranca web publicadas em 2025, escolhidas por indicacoes, votacao e avaliacao de especialistas. Funciona como indice para escolher artigos de estudo.",
+    "lesson": "Priorizar tecnicas documentadas e relevantes, depois ler individualmente a pesquisa primaria e classificar limites, mitigacoes e evidencias.",
+    "license": "Direitos individuais de cada artigo; indice e sintese propria.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ctfcit-2026-click",
+    "kind": "ctf_writeup",
+    "title": "CTF@CIT 2026: The click that may have fixed",
+    "author": "Enderaoe / Byte0xb105",
+    "source_url": "https://ctftime.org/writeup/40736",
+    "published_at": "2026",
+    "category": "ctf/windows-forensics",
+    "tags": [
+      "ctf",
+      "dfir",
+      "browser-history",
+      "powershell-history",
+      "timeline",
+      "forensics"
+    ],
+    "summary": "Write-up de um desafio forense com perfil de usuario Windows. A investigacao cruza historico de navegacao no Edge e registros do PowerShell para reconstruir um evento e encontrar o horario de acesso solicitado, sem executar o codigo suspeito.",
+    "lesson": "Em resposta a incidentes, coletar artefatos de navegador e linha de comando em copia forense, correlacionar marcadores temporais UTC e diferenciar indicadores de execucao real.",
+    "license": "Direitos reservados ao autor; ficha e link, sem copia de comandos.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ctfcit-2026-faultline",
+    "kind": "ctf_writeup",
+    "title": "CTF@CIT 2026: Faultline",
+    "author": "Enderaoe / Byte0xb105",
+    "source_url": "https://ctftime.org/writeup/40748",
+    "published_at": "2026",
+    "category": "ctf/reverse-engineering",
+    "tags": [
+      "ctf",
+      "reverse-engineering",
+      "elf",
+      "black-box",
+      "differential-testing",
+      "ghidra"
+    ],
+    "summary": "Desafio de engenharia reversa envolvendo executavel ELF e calculo de uma pontuacao a partir de perfis. O write-up usa entradas controladas e a variacao de um caractere para inferir componentes do algoritmo, antes de validar o modelo reconstruido.",
+    "lesson": "Adotar testes diferenciais, exemplos minimos e verificacao da formula inferida. Guardar entradas, saidas e versao do binario para reproducao no proprio laboratorio.",
+    "license": "Direitos reservados ao autor; resumo proprio e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "ctfcit-2026-saymyname",
+    "kind": "ctf_writeup",
+    "title": "CTF@CIT 2026: Say My Name",
+    "author": "Enderaoe / Byte0xb105",
+    "source_url": "https://ctftime.org/writeup/40749",
+    "published_at": "2026",
+    "category": "ctf/reverse-engineering",
+    "tags": [
+      "ctf",
+      "elf",
+      "strings",
+      "triage",
+      "reverse-engineering"
+    ],
+    "summary": "Desafio em que uma verificacao estatica simples de strings do executavel identifica a informacao relevante, evitando decompilacao desnecessaria. O caso mostra que resolver a camada mais simples primeiro pode economizar tempo.",
+    "lesson": "Antes de descompilar, executar triagem nao destrutiva sobre o binario autorizado: tipo, assinaturas, strings e metadados. Nao confundir caminho rapido com ausencia de validacao.",
+    "license": "Direitos reservados ao autor; resumo proprio e link.",
+    "validation": "third_party_public_not_reproduced"
+  },
+  {
+    "id": "owasp-asvs-5-stable",
+    "kind": "source_catalog",
+    "title": "OWASP Application Security Verification Standard 5.0.0",
+    "author": "OWASP ASVS Working Group",
+    "source_url": "https://github.com/OWASP/ASVS",
+    "published_at": "2025-05",
+    "category": "sources/defensive-verification",
+    "tags": [
+      "owasp",
+      "asvs",
+      "secure-development",
+      "verification",
+      "mitigation"
+    ],
+    "summary": "Versao estavel 5.0.0 do padrao ASVS, com requisitos estruturados para verificar aplicacoes e servicos web em varios niveis de garantia. No MITR3 cada requisito ja possui identificador e pode ser recuperado no indice de referencia.",
+    "lesson": "Vincular achados a requisitos versionados v5.0.0-ID, com revisao de aplicabilidade; requisitos nao constituem evidencia de falha em alvo real.",
+    "license": "CC BY-SA 4.0 — OWASP; preservar atribuicao e versao.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "h1-disclosure-2026",
+    "kind": "source_catalog",
+    "title": "HackerOne: Requesting Disclosure",
+    "author": "HackerOne Documentation",
+    "source_url": "https://docs.hackerone.com/en/articles/8475358-requesting-disclosure",
+    "published_at": "2026-05-14",
+    "category": "sources/bugbounty-policy",
+    "tags": [
+      "bugbounty",
+      "coordinated-disclosure",
+      "authorization",
+      "privacy"
+    ],
+    "summary": "Documentacao sobre pedido de divulgacao coordenada, diferenca entre relatorio integral e resumo limitado, e necessidade de consentimento antes de publicar detalhes de vulnerabilidades.",
+    "lesson": "Importar apenas relatorios efetivamente publicos. Nao inferir direito de divulgar anexos ou informacoes de clientes a partir do status de fechamento.",
+    "license": "Direitos HackerOne; metadados e resumo autoral.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "projectdiscovery-templates",
+    "kind": "source_catalog",
+    "title": "ProjectDiscovery Nuclei Templates — Catalogo Comunitario",
+    "author": "ProjectDiscovery e contribuidores",
+    "source_url": "https://github.com/projectdiscovery/nuclei-templates",
+    "published_at": "",
+    "category": "sources/vulnerability-detection",
+    "tags": [
+      "nuclei",
+      "cve",
+      "web",
+      "detection",
+      "false-positive",
+      "templates"
+    ],
+    "summary": "Repositorio comunitario de templates de verificacao de vulnerabilidades com metadados de autor, severidade e referencia. A existencia de um template nao confirma que um alvo esteja vulneravel.",
+    "lesson": "Revisar assinatura, condicoes e falsos positivos antes de executar templates somente em alvos com autorizacao. Nunca executar automaticamente conteudo de terceiros a partir do RAG.",
+    "license": "Consultar licenca do repositorio e restricoes dos materiais; manter link de origem.",
+    "validation": "source_catalog_only"
+  },
+  {
+    "id": "ps-request-smuggling-research",
+    "kind": "source_catalog",
+    "title": "PortSwigger: HTTP Request Smuggling Research",
+    "author": "PortSwigger Research",
+    "source_url": "https://portswigger.net/research/request-smuggling",
+    "published_at": "",
+    "category": "sources/web-research",
+    "tags": [
+      "request-smuggling",
+      "desync",
+      "http",
+      "research",
+      "labs"
+    ],
+    "summary": "Indice editorial de estudos de request smuggling e diferencas de interpretacao de mensagens por componentes HTTP. Inclui publicacoes historicas e links a exercicios didaticos.",
+    "lesson": "Usar o indice para localizar a fonte primaria; executar validacao de variantes de desync exclusivamente em laboratorios autorizados.",
+    "license": "Direitos PortSwigger; indice e sintese autoral.",
+    "validation": "source_catalog_only"
+  }
+]

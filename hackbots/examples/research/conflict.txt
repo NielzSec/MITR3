@@ -1,0 +1,4 @@
+LAB-ADV-002: synthetic conflicting advisory; no real CVE.
+Component: lab-widget; both records concern the same release and revision.
+Record A: lab-widget exact version 1.2.0 is AFFECTED.
+Record B: lab-widget exact version 1.2.0 is NOT_AFFECTED.

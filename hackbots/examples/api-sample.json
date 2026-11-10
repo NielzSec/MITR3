@@ -1,0 +1,13 @@
+{
+  "endpoint": "/api/v1/accounts/{accountId}/statements",
+  "request_actor": "user_bob_tenant_2",
+  "requested_target": "account_alice_tenant_1",
+  "observed_response": {
+    "status": 200,
+    "body": {
+      "account_id": "account_alice_tenant_1",
+      "owner": "alice@example.com",
+      "balance": 15420.50
+    }
+  }
+}

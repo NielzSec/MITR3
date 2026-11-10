@@ -1,0 +1,4 @@
+LAB-ADV-001: synthetic advisory; no real CVE.
+Component: lab-widget.
+Affected exact version: 1.2.0.
+Fixed exact version: 1.2.1.

@@ -1,0 +1,75 @@
+{
+  "version": "0.1.0",
+  "mission_id": "HB-M-JS-01",
+  "skill": "mitr3-hb-js-inventory",
+  "status": "review_pending",
+  "coverage": {
+    "expected": 1,
+    "analyzed": 1
+  },
+  "checklist": {
+    "scope_checked": true,
+    "inputs_verified": true,
+    "coverage_checked": true,
+    "citations_checked": true
+  },
+  "evidence": [
+    {
+      "id": "E1",
+      "source": "hackbots/examples/sample.js",
+      "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9",
+      "locator": "linha 1",
+      "observation": "Cabeçalho do artefato declara: '// Arquivo sintético de laboratório; sem endpoints reais'. SHA256 confere com o despacho."
+    },
+    {
+      "id": "E2",
+      "source": "hackbots/examples/sample.js",
+      "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9",
+      "locator": "linha 2, coluna 17",
+      "observation": "Constante de string com caminho relativo: const reference = '/api/v1/example'; — literal de rota sem chamada HTTP associada."
+    },
+    {
+      "id": "E3",
+      "source": "hackbots/examples/sample.js",
+      "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9",
+      "locator": "linha 3, coluna 1",
+      "observation": "Chamada literal: fetch('/api/v1/example'); — única referência fetch/axios do artefato, URL absoluta no path '/api/v1/example'."
+    },
+    {
+      "id": "E4",
+      "source": "hackbots.tools.js_inventory (execução determinística offline, schema_version 2, visibility shared)",
+      "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9",
+      "locator": "report_id a4d72ac695bb2d3d8aaf4f759500b280",
+      "observation": "Inventário determinístico confirma 1 referência: {line: 3, call: 'fetch', evidence_id: 'E000001', route_id: 'route-1', classification: 'literal-reference'}."
+    }
+  ],
+  "claims": [
+    {
+      "text": "O artefato contém exatamente uma referência literal de chamada HTTP: fetch('/api/v1/example') na linha 3, classificada como literal-reference (route-1, report_id a4d72ac695bb2d3d8aaf4f759500b280).",
+      "evidence_ids": ["E2", "E3", "E4"]
+    },
+    {
+      "text": "O caminho '/api/v1/example' também aparece como constante de string na linha 2, sem chamada HTTP associada, reaproveitado como argumento pelo fetch na linha 3.",
+      "evidence_ids": ["E2", "E3"]
+    },
+    {
+      "text": "Não há referências a axios nem a outros clientes HTTP no artefato; a varredura determinística retornou apenas a única referência fetch da linha 3.",
+      "evidence_ids": ["E3", "E4"]
+    },
+    {
+      "text": "Nenhuma requisição HTTP foi executada; escopo restrito ao arquivo sintético local com hash verificado.",
+      "evidence_ids": ["E1", "E4"]
+    }
+  ],
+  "review": {
+    "decision": "pending",
+    "reviewer": null
+  },
+  "limitations": [
+    "Correspondência estática por regex: templates dinâmicos, aliases e outros clientes HTTP podem não ser detectados.",
+    "Referências não implicam que os endpoints existam ou sejam vulneráveis.",
+    "Query strings, credenciais de URL e fragments são descartados intencionalmente.",
+    "IDs de rota opacos correlacionam apenas dentro deste report; o report de caminho completo só é persistido em hackbots/private com --save-private (não solicitado no despacho).",
+    "Números de linha, tipos de chamada e contagem de ocorrências permanecem visíveis; revisar metadados antes de compartilhar."
+  ]
+}

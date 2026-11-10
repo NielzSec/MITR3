@@ -1,0 +1,197 @@
+[
+  {
+    "query": "CVE-2023-23397",
+    "relevant": [
+      "CVE-2023-23397"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "CVE-2021-44228",
+    "relevant": [
+      "CVE-2021-44228"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "CVE-2023-34362",
+    "relevant": [
+      "CVE-2023-34362"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "CVE-2024-3400",
+    "relevant": [
+      "CVE-2024-3400"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "CVE-2023-4863",
+    "relevant": [
+      "CVE-2023-4863"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "CVE-2022-30190",
+    "relevant": [
+      "CVE-2022-30190"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "CVE-2020-1472",
+    "relevant": [
+      "CVE-2020-1472"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "CVE-2021-34527",
+    "relevant": [
+      "CVE-2021-34527"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "ASVS-V1.1.1",
+    "relevant": [
+      "ASVS-V1.1.1"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "ASVS-V1.2.5",
+    "relevant": [
+      "ASVS-V1.2.5"
+    ],
+    "kind": "exact"
+  },
+  {
+    "query": "NTLM relay Outlook",
+    "relevant": [
+      "CVE-2023-23397",
+      "CVE-2025-24054"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "cache poisoning",
+    "relevant": [
+      "CASE-ps-practical-cache-poisoning-2018",
+      "CASE-ps-cache-2024"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "web cache deception",
+    "relevant": [
+      "CASE-ps-cache-2024"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "HTTP request smuggling",
+    "relevant": [
+      "CASE-ps-request-smuggling-research",
+      "CASE-ps-http2-2021",
+      "CASE-ps-http1-2025",
+      "CASE-ps-false-positive-2025"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "false positive request smuggling",
+    "relevant": [
+      "CASE-ps-false-positive-2025"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "CTF RSA shared prime",
+    "relevant": [
+      "CASE-jctf-rsa-41140"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "CTF pcap forensics",
+    "relevant": [
+      "CASE-jctf-pcap-41139"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "file carving corrupt images",
+    "relevant": [
+      "CASE-jctf-files-41137"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "reverse engineering differential testing",
+    "relevant": [
+      "CASE-ctfcit-2026-faultline"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "CTF browser history PowerShell forensics",
+    "relevant": [
+      "CASE-ctfcit-2026-click"
+    ],
+    "kind": "concept"
+  },
+  {
+    "query": "esxi encryptor",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "LockBit ESXi encryptor",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "ransomware affiliate infrastructure mapping",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "Ra Osiris domain backup key extracted",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "CVE-2099-999999",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "ASVS-V99.99.99",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "most recent unknown private bug bounty reward",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "MITR3 operator password leaked from Maestri",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "malware decryptor private key discovery",
+    "relevant": [],
+    "kind": "negative"
+  },
+  {
+    "query": "worm malware C2 operator attribution",
+    "relevant": [],
+    "kind": "negative"
+  }
+]

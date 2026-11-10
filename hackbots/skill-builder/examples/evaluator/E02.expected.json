@@ -1,0 +1,9 @@
+{
+  "status": "BLOCKED",
+  "reason": "SHA256_MISMATCH",
+  "references": [],
+  "coverage": {
+    "expected": 0,
+    "analyzed": 0
+  }
+}

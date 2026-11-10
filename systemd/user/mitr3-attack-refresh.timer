@@ -1,0 +1,11 @@
+[Unit]
+Description=MITR3 monthly ATT&CK bundle and graph refresh
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+RandomizedDelaySec=30m
+Unit=mitr3-attack-refresh.service
+
+[Install]
+WantedBy=timers.target

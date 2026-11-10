@@ -1,0 +1,22 @@
+{
+  "package_name": "com.mitr3.synthetic.lab",
+  "debuggable": false,
+  "allow_backup": true,
+  "exported_components": [
+    {
+      "type": "activity",
+      "name": "com.mitr3.synthetic.lab.SecretViewerActivity",
+      "exported": true,
+      "permission": null,
+      "intent_filter": [
+        "android.intent.action.VIEW"
+      ]
+    }
+  ],
+  "native_libraries": [
+    "libnative-crypto.so"
+  ],
+  "jni_methods": [
+    "public native String getAuthSecret();"
+  ]
+}

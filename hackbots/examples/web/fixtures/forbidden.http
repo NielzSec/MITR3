@@ -1,0 +1,5 @@
+HTTP/1.1 403 Forbidden
+Content-Type: text/html; charset=utf-8
+Content-Length: 374
+
+<!doctype html><html><head><title>Synthetic catalog</title></head><body><main><article data-product-id="1"><p>Product 1</p></article><article data-product-id="2"><p>Product 2</p></article><article data-product-id="3"><p>Product 3</p></article><article data-product-id="4"><p>Product 4</p></article><article data-product-id="5"><p>Product 5</p></article></main></body></html>

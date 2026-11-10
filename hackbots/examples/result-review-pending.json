@@ -1,0 +1,40 @@
+{
+  "version": "0.1.0",
+  "mission_id": "HB-TEST-001",
+  "skill": "mitr3-hb-js-inventory",
+  "status": "review_pending",
+  "coverage": {
+    "expected": 1,
+    "analyzed": 1
+  },
+  "checklist": {
+    "scope_checked": true,
+    "inputs_verified": true,
+    "coverage_checked": true,
+    "citations_checked": true
+  },
+  "evidence": [
+    {
+      "id": "E-001",
+      "source": "hackbots/examples/sample.js",
+      "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9",
+      "locator": "line 3",
+      "observation": "Uma referência literal de fetch para /api/v1/example"
+    }
+  ],
+  "claims": [
+    {
+      "text": "A amostra contém uma rota literal; não há comprovação de existência no servidor.",
+      "evidence_ids": [
+        "E-001"
+      ]
+    }
+  ],
+  "review": {
+    "decision": "pending",
+    "reviewer": null
+  },
+  "limitations": [
+    "Análise exclusivamente estática e sintética; não valida serviço remoto."
+  ]
+}
