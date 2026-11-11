@@ -1,0 +1,472 @@
+{
+  "schema_version": "1.0.0",
+  "tool": "mitr3-live-browser",
+  "consumer": "IndicatorDetector.check_response_diagnostics / check_param_indicators",
+  "purpose": "candidate indicators ONLY — never confirmed vulnerabilities; every hit requires independent verification",
+  "updated": "2026-11-11",
+  "status": "OPERATOR_APPROVED — dj word recorded 2026-11-11 ('pode fazer, eu autorizo'); compiled offline by Hermes",
+  "category_priority": [
+    "rce",
+    "lfi",
+    "ssrf",
+    "idor"
+  ],
+  "precision_policy": "precision=high drives automated alerting; medium/low are audit-trail only",
+  "provenance": {
+    "requested_via": "message styled as 'Robin/VANTA coordinating'; authorized by dj's explicit word same day",
+    "sources": [
+      "OWASP WSTG 4.2 (WSTG-INPV-12 SSTI, WSTG-INPV-13 RCE, WSTG-INPV-04 LFI, WSTG-ATHN-05 SQLi)",
+      "PHP manual: disable_functions, shell_exec/system/proc_open error strings",
+      "Python docs: subprocess.CalledProcessError, os errno 2/8/13, eval/exec traceback frames",
+      "Node.js docs: child_process spawn/exec ENOENT, Command failed prefix",
+      "Java docs: ProcessBuilder.start, Runtime.exec, IOException CreateProcess error",
+      "DB engine docs: MySQL ER_PARSE_ERROR, PostgreSQL ERROR syntax, MSSQL Msg 105/102, ORA-xxxxx, SQLite OperationalError",
+      "Template engine docs: Jinja2, Twig, Freemarker, Velocity, Mako, Smarty, Thymeleaf exception classes"
+    ]
+  },
+  "diagnostic_body_patterns": [
+    {
+      "id": "unix_id_pattern",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "uid=\\d+\\([a-zA-Z0-9_-]+\\)\\s+gid=\\d+",
+      "notes": "id(1) output reflected = command result echoed"
+    },
+    {
+      "id": "unix_passwd_entry",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "root:x:0:0:root:/root:",
+      "notes": "full passwd root entry; tightened from bare root:x:0:0 to cut FPs"
+    },
+    {
+      "id": "unix_ls_output",
+      "category": "command_execution_output",
+      "precision": "medium",
+      "regex": "(?:^|\\n)[d-][rwx-]{9}\\s+\\d+\\s+\\S+\\s+\\S+\\s+\\d+\\s+\\w{3}\\s+\\d{1,2}\\s+[\\d:]{5}\\s+\\S",
+      "notes": "ls -la line; FTP dir listings look similar — audit trail only"
+    },
+    {
+      "id": "uname_banner",
+      "category": "command_execution_output",
+      "precision": "medium",
+      "regex": "Linux\\s+[a-zA-Z0-9._-]+\\s+\\d+\\.\\d+",
+      "notes": "kernel/OS banner"
+    },
+    {
+      "id": "uname_compile_triplet",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "(?:x86_64|i686|aarch64|armv7l)-(?:pc|unknown)-linux-gnu(?:abi\\d+)?",
+      "notes": "uname -a compile triplet"
+    },
+    {
+      "id": "win_ipconfig_pattern",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "Windows\\s+IP\\s+Configuration",
+      "notes": "ipconfig banner"
+    },
+    {
+      "id": "win_cmd_banner",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "Microsoft Windows \\[Version \\d+\\.\\d+\\.\\d+\\]",
+      "notes": "cmd.exe banner"
+    },
+    {
+      "id": "win_ntauth",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "(?i)nt authority\\\\(?:system|network service|local service)",
+      "notes": "whoami output on Windows"
+    },
+    {
+      "id": "win_dir_output",
+      "category": "command_execution_output",
+      "precision": "medium",
+      "regex": "Directory of [A-Z]:\\\\",
+      "notes": "dir(1) output header"
+    },
+    {
+      "id": "shell_error",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "(?:^|\\n)(?:/bin/)?(?:ba|z|da)?sh:\\s*(?:line \\d+: )?.*: (?:command not found|No such file or directory)",
+      "notes": "shell error echo — shell interpreted attacker input"
+    },
+    {
+      "id": "ping_output",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "(?:\\d+ bytes from .*: icmp_seq=\\d+|Minimum = \\d+ms, Maximum = \\d+ms, Average = \\d+ms)",
+      "notes": "ping(8) Linux/Windows output"
+    },
+    {
+      "id": "ifconfig_output",
+      "category": "command_execution_output",
+      "precision": "high",
+      "regex": "(?:inet (?:addr:)?\\d{1,3}(?:\\.\\d{1,3}){3}\\s+(?:netmask|Bcast|Mask)|flags=\\d+<UP,BROADCAST)",
+      "notes": "ifconfig/ip -a interface listing"
+    },
+    {
+      "id": "php_disabled_function",
+      "category": "php_exec",
+      "precision": "high",
+      "regex": "(?:Warning|Fatal error):\\s*(?:shell_exec|system|exec|passthru|proc_open|popen)\\(\\): (?:has been )?disabled for security reasons",
+      "notes": "disable_functions hit = exec surface attempted"
+    },
+    {
+      "id": "php_unable_to_fork",
+      "category": "php_exec",
+      "precision": "high",
+      "regex": "(?:Warning|Fatal error): (?:shell_exec|system|exec|passthru|proc_open|popen)\\(\\): (?:Unable to fork|Fork Failed|permission denied)",
+      "notes": "PHP tried to spawn a process"
+    },
+    {
+      "id": "php_fatal_eval",
+      "category": "php_exec",
+      "precision": "high",
+      "regex": "Fatal error:.*eval\\(\\)'d code on line \\d+",
+      "notes": "eval'd code executed and errored"
+    },
+    {
+      "id": "php_fatal_generic",
+      "category": "php_exec",
+      "precision": "medium",
+      "regex": "Fatal error:\\s*Uncaught .* in /[^\\s']+\\.php:\\d+",
+      "notes": "generic PHP fatal with path leak"
+    },
+    {
+      "id": "python_traceback",
+      "category": "python_exec",
+      "precision": "medium",
+      "regex": "Traceback \\(most recent call last\\):",
+      "notes": "any Python app error; info leak baseline"
+    },
+    {
+      "id": "python_subprocess_error",
+      "category": "python_exec",
+      "precision": "high",
+      "regex": "subprocess\\.(?:CalledProcessError|TimeoutExpired): Command ",
+      "notes": "subprocess actually ran the injected command"
+    },
+    {
+      "id": "python_spawn_enoent",
+      "category": "python_exec",
+      "precision": "high",
+      "regex": "(?:FileNotFoundError|OSError): \\[Errno (?:2|8|13)\\] (?:No such file or directory|Exec format error|Permission denied): '(?:/bin/|/usr/bin/|/sbin/|/usr/local/bin/)?[^']+'",
+      "notes": "errno 2/8/13 on bin paths = spawn attempted"
+    },
+    {
+      "id": "python_eval_traceback",
+      "category": "python_exec",
+      "precision": "high",
+      "regex": "File \"<string>\", line 1",
+      "notes": "eval()/exec() code frame in traceback"
+    },
+    {
+      "id": "node_spawn_enoent",
+      "category": "node_exec",
+      "precision": "high",
+      "regex": "(?:Error: spawn(?:Sync)? ENOENT|ENOENT: no such file or directory, spawn)",
+      "notes": "child_process spawn of attacker-controlled binary"
+    },
+    {
+      "id": "node_command_failed",
+      "category": "node_exec",
+      "precision": "high",
+      "regex": "Command failed: /bin/sh",
+      "notes": "child_process.exec shell prefix"
+    },
+    {
+      "id": "node_childprocess_frame",
+      "category": "node_exec",
+      "precision": "high",
+      "regex": "at ChildProcess\\.(?:exithandler|spawn|emit)",
+      "notes": "child_process frames in stack"
+    },
+    {
+      "id": "java_processbuilder",
+      "category": "java_exec",
+      "precision": "high",
+      "regex": "at java\\.lang\\.(?:ProcessBuilder\\.start|Runtime(?:Process)?\\.exec)",
+      "notes": "ProcessBuilder/Runtime.exec in stack"
+    },
+    {
+      "id": "java_cannot_run",
+      "category": "java_exec",
+      "precision": "high",
+      "regex": "java\\.io\\.IOException: Cannot run program",
+      "notes": "exec attempt failed at spawn"
+    },
+    {
+      "id": "java_createprocess_err",
+      "category": "java_exec",
+      "precision": "high",
+      "regex": "CreateProcess error=\\d+",
+      "notes": "Windows CreateProcess error in Java spawn"
+    },
+    {
+      "id": "java_exception_generic",
+      "category": "java_exec",
+      "precision": "low",
+      "regex": "java\\.[a-z]+\\.[A-Z][a-zA-Z]+(?:Exception|Error):",
+      "notes": "generic Java exception; audit trail only"
+    },
+    {
+      "id": "mysql_syntax",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "You have an error in your SQL syntax; check the manual",
+      "notes": "MySQL ER_PARSE_ERROR"
+    },
+    {
+      "id": "pgsql_syntax",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "ERROR:\\s+syntax error at or near",
+      "notes": "PostgreSQL syntax error"
+    },
+    {
+      "id": "pgsql_ruby",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "PG::(?:SyntaxError|UndefinedTable|UndefinedColumn):",
+      "notes": "Ruby pg driver leak"
+    },
+    {
+      "id": "psycopg",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "psycopg2\\.(?:errors\\.)?(?:SyntaxError|OperationalError):",
+      "notes": "Python psycopg2 leak"
+    },
+    {
+      "id": "mssql_unclosed_quote",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "Unclosed quotation mark after the character string",
+      "notes": "classic quote-break marker, Msg 105"
+    },
+    {
+      "id": "mssql_syntax",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "(?:Microsoft OLE DB Provider for SQL Server|Incorrect syntax near(?: the)? '{0,1})",
+      "notes": "MSSQL syntax/provider leak"
+    },
+    {
+      "id": "oracle_ora",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "ORA-\\d{5}:",
+      "notes": "Oracle error with colon; bare ORA-xxxxx in text is FP-prone"
+    },
+    {
+      "id": "sqlite_py",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "sqlite3\\.(?:OperationalError|ProgrammingError): near \"",
+      "notes": "Python sqlite3 leak"
+    },
+    {
+      "id": "sqlite_php",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "SQLite3::SQLException:",
+      "notes": "PHP sqlite3 leak"
+    },
+    {
+      "id": "generic_jdbc",
+      "category": "sql_error",
+      "precision": "high",
+      "regex": "(?:JDBCExceptionReporter|java\\.sql\\.SQLSyntaxErrorException|com\\.mysql\\.cj\\.exceptions\\.MySQLSyntaxErrorException)",
+      "notes": "JDBC/driver leak"
+    },
+    {
+      "id": "jinja2_ssti",
+      "category": "template_ssti_error",
+      "precision": "high",
+      "regex": "jinja2\\.exceptions\\.(?:TemplateSyntaxError|UndefinedError|TemplateNotFound):",
+      "notes": "Jinja2 — payload broke template or undefined lookup"
+    },
+    {
+      "id": "twig_ssti",
+      "category": "template_ssti_error",
+      "precision": "high",
+      "regex": "Twig(?:_Error_(?:Syntax|Runtime|Loader)|\\\\Error\\\\(?:Syntax|Runtime|Loader)):",
+      "notes": "Twig (old and PSR-5 namespaces)"
+    },
+    {
+      "id": "freemarker_ssti",
+      "category": "template_ssti_error",
+      "precision": "high",
+      "regex": "freemarker\\.(?:core\\.ParseException|template\\.TemplateException)",
+      "notes": "Freemarker"
+    },
+    {
+      "id": "velocity_ssti",
+      "category": "template_ssti_error",
+      "precision": "high",
+      "regex": "org\\.apache\\.velocity\\.exception\\.(?:ParseError|MethodInvocation|ResourceNotFound)Exception",
+      "notes": "Velocity"
+    },
+    {
+      "id": "mako_ssti",
+      "category": "template_ssti_error",
+      "precision": "high",
+      "regex": "mako\\.exceptions\\.(?:CompileException|SyntaxException|TopLevelLookupException)",
+      "notes": "Mako"
+    },
+    {
+      "id": "smarty_ssti",
+      "category": "template_ssti_error",
+      "precision": "high",
+      "regex": "Smarty Compiler: Syntax error in template",
+      "notes": "Smarty"
+    },
+    {
+      "id": "thymeleaf_ssti",
+      "category": "template_ssti_error",
+      "precision": "high",
+      "regex": "org\\.thymeleaf\\.exceptions\\.(?:TemplateProcessingException|TemplateInputException)",
+      "notes": "Thymeleaf"
+    },
+    {
+      "id": "erb_ssti",
+      "category": "template_ssti_error",
+      "precision": "low",
+      "regex": "ActionView::Template::Error",
+      "notes": "Rails ERB; FP-prone — audit trail only"
+    }
+  ],
+  "candidate_params": {
+    "rce": [
+      "cmd",
+      "command",
+      "exec",
+      "execute",
+      "shell",
+      "sh",
+      "bash",
+      "zsh",
+      "run",
+      "runner",
+      "system",
+      "eval",
+      "code",
+      "script",
+      "process",
+      "payload",
+      "ping",
+      "host",
+      "cmd_line",
+      "job",
+      "daemon"
+    ],
+    "lfi": [
+      "file",
+      "filename",
+      "filepath",
+      "path",
+      "dir",
+      "directory",
+      "folder",
+      "page",
+      "include",
+      "inc",
+      "require",
+      "doc",
+      "document",
+      "template",
+      "tpl",
+      "load",
+      "loader",
+      "view",
+      "read",
+      "show",
+      "download",
+      "img",
+      "image",
+      "prefix",
+      "suffix",
+      "lang",
+      "locale",
+      "layout",
+      "module",
+      "component",
+      "conf",
+      "config",
+      "log",
+      "logfile",
+      "cache",
+      "tmp",
+      "temp",
+      "attachment",
+      "upload",
+      "basepath",
+      "subdir"
+    ],
+    "ssrf": [
+      "url",
+      "uri",
+      "dest",
+      "destination",
+      "target",
+      "redirect",
+      "redirect_uri",
+      "redirect_url",
+      "return",
+      "return_url",
+      "returnTo",
+      "next",
+      "goto",
+      "out",
+      "continue",
+      "proxy",
+      "link",
+      "src",
+      "domain",
+      "webhook",
+      "webhook_url",
+      "feed",
+      "api",
+      "api_url",
+      "callback",
+      "callback_url",
+      "fetch",
+      "site",
+      "share",
+      "open",
+      "forward",
+      "resource",
+      "endpoint",
+      "base_url"
+    ],
+    "idor": [
+      "id",
+      "user_id",
+      "userid",
+      "account_id",
+      "uuid",
+      "account",
+      "profile",
+      "order_id",
+      "ticket_id",
+      "doc_id",
+      "ref",
+      "ref_id",
+      "item_id",
+      "record",
+      "num",
+      "key"
+    ]
+  },
+  "param_regexes": {
+    "rce": "(?i)\\b(cmd|command|exec|execute|shell|sh|bash|zsh|run|runner|system|eval|code|script|process|payload|ping|host|cmd_line|job|daemon)\\b",
+    "lfi": "(?i)\\b(file|filename|filepath|path|dir|directory|folder|page|include|inc|require|doc|document|template|tpl|load|loader|view|read|show|download|img|image|prefix|suffix|lang|locale|layout|module|component|conf|config|log|logfile|cache|tmp|temp|attachment|upload|basepath|subdir)\\b",
+    "ssrf": "(?i)\\b(url|uri|dest|destination|target|redirect|redirect_uri|redirect_url|return|return_url|returnTo|next|goto|out|continue|proxy|link|src|domain|webhook|webhook_url|feed|api|api_url|callback|callback_url|fetch|site|share|open|forward|resource|endpoint|base_url)\\b",
+    "idor": "(?i)\\b(id|user_id|userid|account_id|uuid|account|profile|order_id|ticket_id|doc_id|ref|ref_id|item_id|record|num|key)\\b"
+  }
+}
