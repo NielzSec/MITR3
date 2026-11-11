@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "case_id": "PSA_SQLI_GIFTS_20261023",
+  "source_kind": "MANUAL_RECORDED_METADATA",
+  "target_domain": "0a75003b0446b842825188c9008a00a4.web-security-academy.net",
+  "operator_reported_lab_solved": true,
+  "responses": [
+    {
+      "phase": "baseline",
+      "http_status": 200,
+      "body_sha256": "8e3590405b2d4ed6be815d8b2be91c502a07de7057096f1448aa70e2d55e9043",
+      "body_bytes": 4915,
+      "product_ids": [
+        "8",
+        "13",
+        "18"
+      ]
+    },
+    {
+      "phase": "poc",
+      "http_status": 200,
+      "body_sha256": "256f8b13df9c2f0a8b8e5f8403eacd494e17b6d5f7b8e97ee858cf918123f220",
+      "body_bytes": 11562,
+      "product_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20"
+      ]
+    }
+  ]
+}

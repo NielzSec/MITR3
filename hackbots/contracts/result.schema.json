@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MITR3 Hackbot Result v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "mission_id",
+    "skill",
+    "status",
+    "coverage",
+    "checklist",
+    "evidence",
+    "claims",
+    "review"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1.0"
+    },
+    "mission_id": {
+      "type": "string"
+    },
+    "skill": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "blocked",
+        "review_pending",
+        "accepted",
+        "rejected"
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "expected",
+        "analyzed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "expected": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "analyzed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "checklist": {
+      "type": "object",
+      "required": [
+        "scope_checked",
+        "inputs_verified",
+        "coverage_checked",
+        "citations_checked"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "scope_checked": {
+          "type": "boolean"
+        },
+        "inputs_verified": {
+          "type": "boolean"
+        },
+        "coverage_checked": {
+          "type": "boolean"
+        },
+        "citations_checked": {
+          "type": "boolean"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "source",
+          "sha256",
+          "locator",
+          "observation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "minLength": 1
+          },
+          "locator": {
+            "type": "string",
+            "minLength": 1
+          },
+          "observation": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "text",
+          "evidence_ids"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": [
+        "decision",
+        "reviewer"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "pending",
+            "approved",
+            "rejected"
+          ]
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

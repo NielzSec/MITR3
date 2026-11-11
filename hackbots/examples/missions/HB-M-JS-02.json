@@ -1,0 +1,18 @@
+{
+  "version": "0.1.0",
+  "mission_id": "HB-M-JS-02",
+  "skill": "mitr3-hb-js-inventory",
+  "mode": "offline",
+  "artifact": {
+    "path": "hackbots/examples/adversarial-sample.js",
+    "sha256": "24b6cca5b720d7391be79f6907cf5102e56db4adfbef9e8500a1ddeebfffb8d5"
+  },
+  "requirements": [
+    "scope_checked",
+    "inputs_verified",
+    "coverage_checked",
+    "citations_checked"
+  ],
+  "scope_ref": null,
+  "notes": "Teste adversarial com injeção em comentários; sem chamadas de rede."
+}

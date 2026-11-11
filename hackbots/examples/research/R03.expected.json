@@ -1,0 +1,42 @@
+{
+  "version": "0.1.0",
+  "mission_id": "HB-RESEARCH-R03",
+  "skill": "mitr3-hb-research-curator",
+  "status": "review_pending",
+  "coverage": {
+    "expected": 4,
+    "analyzed": 4
+  },
+  "checklist": {
+    "scope_checked": true,
+    "inputs_verified": true,
+    "coverage_checked": true,
+    "citations_checked": true
+  },
+  "evidence": [
+    {
+      "id": "SRC-1",
+      "source": "hackbots/examples/research/conflict.txt",
+      "sha256": "ddcf994c759b2f41db18b80ac05535b75fcee9c975d4dcbeff912b7709e59233",
+      "locator": "lines 1-4",
+      "observation": "Manually prepared synthetic advisory fixture; not observed model output."
+    }
+  ],
+  "claims": [
+    {
+      "text": "INCONCLUSIVE: synthetic records explicitly disagree on whether lab-widget exact version 1.2.0 is affected; no affected-version determination or real vulnerability is established.",
+      "evidence_ids": [
+        "SRC-1"
+      ]
+    }
+  ],
+  "review": {
+    "decision": "pending",
+    "reviewer": null
+  },
+  "limitations": [
+    "MANUAL EXPECTED OUTPUT ONLY; no agent was run or behavior verified.",
+    "Coverage values are oracle expectations, not measured worker execution.",
+    "scope_ref=null grants no external authorization."
+  ]
+}

@@ -6,7 +6,7 @@ set -uo pipefail
 JSON=0
 [[ "${1:-}" == "--json" ]] && JSON=1
 
-PATH="$HOME/.local/bin:$PATH"
+PATH="$HOME/MITR3/bin:$HOME/.local/bin:$HOME/go/bin:$PATH"
 declare -a OK=() BAD=() WARN=()
 have() { command -v "$1" >/dev/null 2>&1; }
 
@@ -29,6 +29,12 @@ tools=(
   "impacket:smbclient.py" "netexec:nxc" "chisel:chisel" "mitmproxy:mitmproxy"
   "upx:upx" "afl-fuzz:afl-fuzz" "gh:gh" "msfconsole:msfconsole" "hashcat:hashcat"
   "hydra:hydra" "burpsuite:$HOME/MITR3/bin/burp.sh" "codeql:codeql" "tor:tor" "onionsearch:$HOME/.local/bin/onionsearch" "darkweb:$HOME/MITR3/bin/darkweb.sh"
+  "feroxbuster:feroxbuster" "naabu:naabu" "sslscan:sslscan" "testssl:testssl.sh" "wpscan:wpscan"
+  "graphql-cop:graphql-cop" "gopherus:gopherus" "ysoserial:ysoserial"
+  "radar-syft:$HOME/MITR3/bin/mitr3-radar-syft" "radar-scorecard:$HOME/MITR3/bin/mitr3-radar-scorecard"
+  "radar-zizmor:$HOME/MITR3/bin/mitr3-radar-zizmor" "radar-skillspector:$HOME/MITR3/bin/mitr3-radar-skillspector"
+  "radar-graphify:$HOME/MITR3/bin/mitr3-radar-graphify" "radar-inspector:$HOME/MITR3/bin/mitr3-radar-inspector"
+  "radar-promptfoo:$HOME/MITR3/bin/mitr3-radar-promptfoo"
   "bloodhound-python:bloodhound-python" "kerbrute:kerbrute" "responder:responder"
   "aws:aws" "gcloud:gcloud" "az:az" "prowler:prowler" "scoutsuite:scout"
   "cloudfox:cloudfox" "pacu:pacu" "trufflehog:trufflehog"

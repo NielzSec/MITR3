@@ -1,0 +1,11 @@
+{
+  "token_type": "Bearer",
+  "jwt_header": "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0",
+  "jwt_payload": "eyJzdWIiOiIxMjM0NTYiLCJuYW1lIjoiQWxpY2UiLCJyb2xlIjoidXNlciIsImlhdCI6MTUxNjIzOTAyMn0",
+  "cookie_attributes": {
+    "name": "session_id",
+    "http_only": false,
+    "secure": false,
+    "same_site": "None"
+  }
+}

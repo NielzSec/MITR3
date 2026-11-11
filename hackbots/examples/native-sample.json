@@ -1,0 +1,12 @@
+{
+  "binary_name": "target_auth_helper.elf",
+  "format": "ELF 64-bit LSB pie executable, x86-64",
+  "mitigations": {
+    "relro": "Partial",
+    "canary": false,
+    "nx": true,
+    "pie": true
+  },
+  "symbols_imported": ["strcpy", "printf", "exit"],
+  "decompiled_snippet": "void process_input(char *src) { char dest[64]; strcpy(dest, src); }"
+}

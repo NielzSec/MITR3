@@ -1,0 +1,338 @@
+{
+  "schema_version": 2,
+  "source_kind": "SYNTHETIC_HTTP",
+  "cases": [
+    {
+      "id": "W01",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "expanded.http",
+        "sha256": "c76b9de66d7c10aa93d6de966c30f97d59b43387a83d0b9439b8765c1801fb3b"
+      },
+      "expected": {
+        "state": "POSSIBLE_DIFFERENTIAL",
+        "reason": "EXPANDED_INVENTORY_NOT_SQLI_PROOF",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      }
+    },
+    {
+      "id": "W02",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "expected": {
+        "state": "CONSISTENT",
+        "reason": "NO_INVENTORY_DIFFERENTIAL",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": [
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    },
+    {
+      "id": "W03",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "forbidden.http",
+        "sha256": "e45dbf633ac1b6500fa7d688d3f3bab254826c9e3b5b83bbe1a3a387bbe48ff4"
+      },
+      "expected": {
+        "state": "INCONCLUSIVE",
+        "reason": "RESPONSE_STATUS",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      }
+    },
+    {
+      "id": "W04",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "empty.http",
+        "sha256": "ac5a43ac1364df6dcf0fe60a27a42f7db79ca656b959eda7ecf4776f692ee6c8"
+      },
+      "expected": {
+        "state": "INCONCLUSIVE",
+        "reason": "MISSING_IDS",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": []
+      }
+    },
+    {
+      "id": "W05",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "nonmonotonic.http",
+        "sha256": "688da70b90a47fe35c77a118d00771471cba1c0375d34954cdfae450e8bb720f"
+      },
+      "expected": {
+        "state": "INCONCLUSIVE",
+        "reason": "NON_MONOTONIC",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      }
+    },
+    {
+      "id": "W06",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "malformed.http",
+        "sha256": "a488c8607f06c682beb50e43f37ba1c1af98dfcebca72acec45380bf443b37a4"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "HTML_PROFILE",
+        "baseline_ids": [],
+        "candidate_ids": []
+      }
+    },
+    {
+      "id": "W07",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "duplicates.http",
+        "sha256": "6b2e61cd2a0ef3699ccd0de373337e96e023752d2f4582fab52e06c1876586eb"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "INVALID_INVENTORY",
+        "baseline_ids": [],
+        "candidate_ids": []
+      }
+    },
+    {
+      "id": "W08",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "mutated.http",
+        "sha256": "c76b9de66d7c10aa93d6de966c30f97d59b43387a83d0b9439b8765c1801fb3b"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "DIGEST_MISMATCH",
+        "baseline_ids": [],
+        "candidate_ids": []
+      }
+    },
+    {
+      "id": "W09",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "injection.http",
+        "sha256": "90b6f48e7c0464a40862d190cd9a1485a0122f72a683db536b8246114e854680"
+      },
+      "expected": {
+        "state": "CONSISTENT",
+        "reason": "NO_INVENTORY_DIFFERENTIAL",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": [
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    },
+    {
+      "id": "W10",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "changed-text.http",
+        "sha256": "3c741a32909b0122e3332535e7b856043c5fac4b2e79bb900727ae29841265cf"
+      },
+      "expected": {
+        "state": "CONSISTENT",
+        "reason": "NO_INVENTORY_DIFFERENTIAL",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": [
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    },
+    {
+      "id": "W11",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "oversized.http",
+        "sha256": "1abe08ebecf1c18cab71f6fe28aaddf20268f85bad78bb9a72f88ca47c874662"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "UNSAFE_FILE",
+        "baseline_ids": [],
+        "candidate_ids": []
+      }
+    },
+    {
+      "id": "W12",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "deep.http",
+        "sha256": "2dc0e2d1561a890739df7a86146af8b7240d939c6ae94e8aa54ca37759232c58"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "HTML_PROFILE",
+        "baseline_ids": [],
+        "candidate_ids": []
+      }
+    },
+    {
+      "id": "W13",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "expanded.http",
+        "sha256": "c76b9de66d7c10aa93d6de966c30f97d59b43387a83d0b9439b8765c1801fb3b"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "OBSERVED_INVENTORY_MISMATCH",
+        "baseline_ids": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate_ids": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      "observed_product_ids": {
+        "baseline": [
+          "1",
+          "2",
+          "3"
+        ],
+        "candidate": [
+          "999"
+        ]
+      }
+    },
+    {
+      "id": "W14",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "wrong-length.http",
+        "sha256": "e4d1056423a339d078df62cb727896dd66c9a03d24277f4363128b6e1ef56578"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "HTTP_PROFILE",
+        "baseline_ids": [],
+        "candidate_ids": []
+      }
+    },
+    {
+      "id": "W15",
+      "baseline": {
+        "file": "baseline.http",
+        "sha256": "12500bee93f50c4fb3f9076b2411d885dce50a697cbfffa89a8a5b0ab4a32052"
+      },
+      "candidate": {
+        "file": "invalid-utf8.http",
+        "sha256": "13137a5f0b38087693f08d2e638ec6abede747c728a76417e77307ecd90b4183"
+      },
+      "expected": {
+        "state": "BLOCKED",
+        "reason": "HTML_PROFILE",
+        "baseline_ids": [],
+        "candidate_ids": []
+      }
+    }
+  ]
+}
