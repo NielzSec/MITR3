@@ -1,0 +1,105 @@
+{
+  "metadata": {
+    "audit_name": "MITR3-WEB Front-end Bundle Static Security Audit",
+    "target_url": "https://mitr3-web.zgordola1.workers.dev",
+    "timestamp_utc": "2026-11-11T17:44:32.877086+00:00",
+    "operator": "dj",
+    "auditor": "VANTA (executando doutrina GLYPH - MITR3)",
+    "scope": "Compiled front-end client bundles (_astro/*.js, assets/*.js)",
+    "mode": "static-code-audit-with-remote-hash-verification",
+    "status": "PASSED"
+  },
+  "verdict_summary": {
+    "exposed_secrets": 0,
+    "leaked_internal_endpoints": 0,
+    "external_network_calls_in_js": 0,
+    "dom_xss_sinks": 0,
+    "source_maps_exposed": 0,
+    "overall_rating": "CLEAN_ZERO_EXPOSURE"
+  },
+  "bundles_inventory": [
+    {
+      "path": "_astro/SiteLayout.astro_astro_type_script_index_0_lang.Dewsbwrc.js",
+      "size_bytes": 5119,
+      "sha256": "8382567a410ca864505ee05262e7cc1076dfbdc19df68b2ff46e516ed760d935",
+      "description": "Layout controller, IntersectionObserver scroll reveals e carregamento progressivo de módulos Astro",
+      "remote_match_verified": true
+    },
+    {
+      "path": "_astro/tool-orbit.CmjXbw5v.js",
+      "size_bytes": 5827,
+      "sha256": "5d00539b9f1128e95add08fdfefc5125b235de126d02e5686854c84e4002265b",
+      "description": "Componente interativo Tool Orbit (matemática de órbitas, trigonometria, GSAP timeline)",
+      "remote_match_verified": true
+    },
+    {
+      "path": "_astro/gsap-motion.wH2ACIvR.js",
+      "size_bytes": 14457,
+      "sha256": "89f1b2773263679497d45b452fd780e8f0cda2c5bbf26ffcebf6b927161d83a5",
+      "description": "Orquestrador de animações GSAP da home, ScrollTrigger bindings e controle de acessibilidade",
+      "remote_match_verified": true
+    },
+    {
+      "path": "_astro/ScrollTrigger.CHfANB6y.js",
+      "size_bytes": 113868,
+      "sha256": "ed0952f2da8315f94903004434d85f407edc8e032cf8ebd06a405f5bfb892d3d",
+      "description": "Plugin ScrollTrigger 3.15.0 (GreenSock vendor bundle compilado)",
+      "remote_match_verified": true
+    },
+    {
+      "path": "assets/main.js",
+      "size_bytes": 4944,
+      "sha256": "1e6b4d1900209e62d2b7c3be997ec7cfac44131dd1b45e774ecb4d2e38526733",
+      "description": "Controlador vanilla de UI: menu responsivo com trap de foco, ano dinâmico e gerador de briefing local via Blob",
+      "remote_match_verified": true
+    },
+    {
+      "path": "assets/reference-motion.js",
+      "size_bytes": 8713,
+      "sha256": "b521979b9f0cad9895c96a56042f3195c9ef7aeedf0b03bb80c75d422af74f32",
+      "description": "Canvas 2D procedimental (world-scene: malha esférica 3D com 1150 pontos e anéis orbitais matemáticos)",
+      "remote_match_verified": true
+    }
+  ],
+  "security_controls_evaluation": {
+    "secrets_and_credentials": {
+      "status": "PASS",
+      "findings": [],
+      "methodology": "Varredura regex e heurística de entropia para chaves de API (Google, AWS, GitHub, OpenAI), chaves privadas, tokens JWT, headers de autorização e credenciais embutidas."
+    },
+    "endpoints_and_infrastructure": {
+      "status": "PASS",
+      "findings": [],
+      "methodology": "Busca por IPs privados (RFC 1918, loopback 127.0.0.1), hosts internos (.internal, .local, localhost), rotas /api/, /v1/, /admin, /debug, e backends ocultos. Zero rotas internas encontradas."
+    },
+    "network_egress_in_code": {
+      "status": "PASS",
+      "findings": [],
+      "observation": "Nenhuma chamada a fetch(), axios, XMLHttpRequest, navigator.sendBeacon ou WebSocket presente no código cliente compilado. O formulário de contato gera um arquivo de texto localmente via Blob/URL.createObjectURL sem transmissão de dados."
+    },
+    "dom_sinks_and_injection": {
+      "status": "PASS",
+      "findings": [],
+      "observation": "Zero ocorrências de innerHTML, outerHTML, document.write, insertAdjacentHTML, eval() ou Function(). Toda manipulação textual utiliza textContent e manipulação de classes CSS."
+    },
+    "content_security_policy": {
+      "status": "HARDENED",
+      "header_value": "default-src 'self'; script-src 'self'; style-src 'self' 'sha256-7G90+WkyhaGNJ9eOEkfAnunZEiXC7+GKc/C8kJdqIZk='; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "enforcement_highlights": [
+        "connect-src 'none': bloqueia preventivamente qualquer conexão de rede originada do browser.",
+        "script-src 'self': proíbe scripts inline e bibliotecas remotas não empacotadas.",
+        "form-action 'none': bloqueia qualquer envio HTTP de formulários.",
+        "frame-ancestors 'none': bloqueia incorporação em iframes (clickjacking)."
+      ]
+    },
+    "source_maps": {
+      "status": "SECURED",
+      "count": 0,
+      "observation": "Nenhum arquivo .map ou comentário sourceMappingURL está presente nos artefatos de distribuição ou no servidor remoto."
+    }
+  },
+  "review": {
+    "decision": "approved_by_evidence",
+    "operator": "dj"
+  }
+}

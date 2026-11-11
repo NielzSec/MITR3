@@ -37,3 +37,10 @@ state/shared-secret-check-latest.json
 *.env
 Secrets.txt
 secrets.txt
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

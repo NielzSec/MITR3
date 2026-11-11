@@ -1,0 +1,3 @@
+lead_id,data_entrada,empresa,contato,cargo,email,telefone,origem,lane,estagio,pacote_estimado,dominios_estimados,proxima_acao,data_proxima_acao,notas
+LEAD-001,,,,,,,"landing",A,0,starter,,,,
+LEAD-002,,,,,,,"indicacao",A,0,starter,,,,
