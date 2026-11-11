@@ -7,13 +7,15 @@ into canonical property graph entities and directional attack edges.
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import sqlite3
+import stat
 import sys
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -72,6 +74,9 @@ class GraphEdge:
     def __post_init__(self):
         if self.type not in VALID_EDGE_TYPES:
             raise ValueError(f"Invalid edge type: {self.type}. Must be one of {sorted(VALID_EDGE_TYPES)}")
+        if (isinstance(self.weight, bool) or not isinstance(self.weight, (int, float))
+                or not math.isfinite(self.weight) or not 0 <= self.weight <= 1):
+            raise ValueError("Edge weight/multiplier must be finite and within [0, 1]")
         if not self.source_id or not self.target_id:
             raise ValueError("Edge source_id and target_id cannot be empty")
 
@@ -83,10 +88,102 @@ class AttackGraphNormalizer:
         self.nodes: Dict[str, GraphNode] = {}
         self.edges: Dict[str, GraphEdge] = {}
         self.strict: bool = strict
+        self.evidence_artifacts: Dict[str, bytes] = {}
+        self.input_artifact_hashes: Set[str] = set()
+
+    def record_evidence(self, data: Any) -> str:
+        """Stage exact input snapshot bytes; exports materialize them beside the graph."""
+        if isinstance(data, bytes):
+            raw = data
+        else:
+            text = data if isinstance(data, str) else json.dumps(data, sort_keys=True, ensure_ascii=False, allow_nan=False)
+            raw = text.encode("utf-8")
+        digest = compute_sha256(raw)
+        self.evidence_artifacts[digest] = raw
+        return digest
+
+    def input_evidence(self, data: Any, artifact_path: Optional[Path]) -> str:
+        if artifact_path is None:
+            return self.record_evidence(data)
+        raw = artifact_path.read_bytes()
+        document = json.loads(raw)
+        matches = document == data
+        if isinstance(data, dict) and isinstance(document, list):
+            matches = data in document
+        elif isinstance(data, dict) and isinstance(document, dict) and isinstance(document.get("findings"), list):
+            matches = matches or data in document["findings"]
+        if not matches:
+            raise ValueError("Input data does not match the physical artifact")
+        digest = self.record_evidence(raw)
+        self.input_artifact_hashes.add(digest)
+        return digest
+
+    def materialize_evidence(self, parent: Path) -> None:
+        for record in (*self.nodes.values(), *self.edges.values()):
+            digest = record.evidence_sha256
+            if not digest and record.type == "ATTACK_TECHNIQUE":
+                continue
+            if digest not in self.evidence_artifacts:
+                raise ValueError(f"No physical input snapshot available for {record.id}")
+        parent_fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            parent_stat = os.fstat(parent_fd)
+            if parent_stat.st_uid != os.geteuid() or parent_stat.st_mode & 0o022:
+                raise ValueError(f"Untrusted evidence parent directory: {parent}")
+            try:
+                os.mkdir("evidence", mode=0o700, dir_fd=parent_fd)
+            except FileExistsError:
+                pass
+            try:
+                directory_fd = os.open("evidence", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent_fd)
+            except OSError as exc:
+                raise ValueError(f"Untrusted evidence directory: {parent / 'evidence'}") from exc
+            try:
+                directory_stat = os.fstat(directory_fd)
+                if (directory_stat.st_uid != os.geteuid() or stat.S_IMODE(directory_stat.st_mode) != 0o700):
+                    raise ValueError(f"Untrusted evidence directory: {parent / 'evidence'}")
+                for digest, raw in self.evidence_artifacts.items():
+                    try:
+                        fd = os.open(digest, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                                     0o600, dir_fd=directory_fd)
+                    except FileExistsError:
+                        try:
+                            fd = os.open(digest, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=directory_fd)
+                        except OSError as exc:
+                            raise ValueError(f"Untrusted evidence artifact: {parent / 'evidence' / digest}") from exc
+                        artifact_stat = os.fstat(fd)
+                        if (not stat.S_ISREG(artifact_stat.st_mode) or artifact_stat.st_uid != os.geteuid()
+                                or stat.S_IMODE(artifact_stat.st_mode) != 0o600):
+                            os.close(fd)
+                            raise ValueError(f"Untrusted evidence artifact: {parent / 'evidence' / digest}")
+                        with os.fdopen(fd, "rb") as artifact:
+                            if artifact.read() != raw:
+                                raise ValueError(f"Evidence artifact changed: {parent / 'evidence' / digest}")
+                    except OSError as exc:
+                        raise ValueError(f"Could not create evidence artifact: {parent / 'evidence' / digest}") from exc
+                    else:
+                        with os.fdopen(fd, "wb") as artifact:
+                            artifact.write(raw)
+            finally:
+                os.close(directory_fd)
+        finally:
+            os.close(parent_fd)
+
+    def provenance(self, record):
+        if record.evidence_sha256 in self.evidence_artifacts:
+            return replace(record, metadata={**record.metadata,
+                "evidence_kind": "C2_INPUT_ARTIFACT" if record.evidence_sha256 in self.input_artifact_hashes else "C2_INPUT_SNAPSHOT",
+                "evidence_artifact": f"evidence/{record.evidence_sha256}"})
+        return record
 
     def add_node(self, node: GraphNode) -> GraphNode:
+        node = self.provenance(node)
         if node.id in self.nodes:
             existing = self.nodes[node.id]
+            if node.type in {"SOURCE", "SINK"}:
+                if existing != node:
+                    raise ValueError(f"Conflicting shared endpoint: {node.id}")
+                return existing
             merged_meta = dict(existing.metadata)
             merged_meta.update(node.metadata)
             node = GraphNode(
@@ -104,6 +201,7 @@ class AttackGraphNormalizer:
         return node
 
     def add_edge(self, edge: GraphEdge, strict: Optional[bool] = None) -> GraphEdge:
+        edge = self.provenance(edge)
         is_strict = self.strict if strict is None else strict
         if is_strict:
             if edge.source_id not in self.nodes:
@@ -123,7 +221,7 @@ class AttackGraphNormalizer:
                 errors.append(f"Orphan edge {edge.id}: target {edge.target_id} not found in nodes")
         return len(errors) == 0, errors
 
-    def ingest_harness_finding(self, finding: Dict[str, Any]) -> str:
+    def ingest_harness_finding(self, finding: Dict[str, Any], *, artifact_path: Optional[Path] = None) -> str:
         """
         Normalize a finding from mitr3-vuln-harness.py into:
         - SOURCE node (if entrypoint present)
@@ -143,7 +241,7 @@ class AttackGraphNormalizer:
         file_path = finding.get("file") or finding.get("file_path", "unknown_file")
         line = finding.get("line", 1)
         finding_id = f"fnd:{stable_slug(rule_id)}:{stable_slug(file_path)}:{line}"
-        ev_hash = compute_sha256(finding)
+        ev_hash = self.input_evidence(finding, artifact_path)
 
         # 1. Register FINDING node
         severity = str(finding.get("severity") or finding.get("base_severity", "MEDIUM")).upper()
@@ -179,7 +277,7 @@ class AttackGraphNormalizer:
                 type="SOURCE",
                 name=str(source_name),
                 file=file_path,
-                evidence_sha256=compute_sha256(source_name),
+                evidence_sha256=self.record_evidence(source_name),
                 metadata={"entrypoint_type": finding.get("entrypoint_type", "HTTP_ROUTE")}
             ))
             edge_id = f"edge:flows_to:{source_id}->{finding_id}"
@@ -191,11 +289,8 @@ class AttackGraphNormalizer:
                 evidence_sha256=ev_hash
             ))
 
-        # 3. Register SINK node if function/sink is defined
-        sink_target = (finding.get("sink_function") or
-                       finding.get("enclosing_function") or
-                       finding.get("sink") or
-                       finding.get("sink_pattern"))
+        # 3. Only explicit sink fields describe a sink; snippets/enclosing functions do not.
+        sink_target = (finding.get("sink_function") or finding.get("sink"))
         if sink_target:
             sink_id = f"snk:{stable_slug(file_path)}:{stable_slug(str(sink_target))}"
             self.add_node(GraphNode(
@@ -203,8 +298,7 @@ class AttackGraphNormalizer:
                 type="SINK",
                 name=str(sink_target),
                 file=file_path,
-                line=line,
-                evidence_sha256=compute_sha256(sink_target),
+                evidence_sha256=self.record_evidence(sink_target),
                 metadata={"sink_type": finding.get("sink_type", "EXECUTION_SINK")}
             ))
             edge_id = f"edge:calls:{finding_id}->{sink_id}"
@@ -224,7 +318,10 @@ class AttackGraphNormalizer:
                 control_name = str(mit.get("control", mit_id_raw))
                 status = mit.get("status", "ACTIVE")
                 provider = mit.get("provider", "iac")
-                multiplier = float(mit.get("multiplier", 0.5))
+                raw_multiplier = mit.get("multiplier", 0.5)
+                if isinstance(raw_multiplier, bool):
+                    raise ValueError("Mitigation multiplier must be finite and within [0, 1]")
+                multiplier = float(raw_multiplier)
             else:
                 mit_id_raw = str(mit)
                 control_name = str(mit)
@@ -237,7 +334,7 @@ class AttackGraphNormalizer:
                 id=mit_id,
                 type="MITIGATION",
                 name=control_name,
-                evidence_sha256=compute_sha256(mit),
+                evidence_sha256=self.record_evidence(mit),
                 metadata={
                     "resource_id": str(mit_id_raw),
                     "status": status,
@@ -277,8 +374,9 @@ class AttackGraphNormalizer:
 
         return finding_id
 
-    def ingest_sarif(self, sarif_data: Dict[str, Any]) -> List[str]:
+    def ingest_sarif(self, sarif_data: Dict[str, Any], *, artifact_path: Optional[Path] = None) -> List[str]:
         """Normalize standard SARIF v2.1 log into graph finding nodes."""
+        artifact_hash = self.input_evidence(sarif_data, artifact_path) if artifact_path else None
         ingested_ids = []
         for run in sarif_data.get("runs", []):
             tool_name = run.get("tool", {}).get("driver", {}).get("name", "scanner")
@@ -293,7 +391,7 @@ class AttackGraphNormalizer:
                     line = phys.get("region", {}).get("startLine", 1)
 
                 finding_id = f"fnd:{stable_slug(tool_name)}:{stable_slug(rule_id)}:{stable_slug(file_path)}:{line}"
-                ev_hash = compute_sha256(result)
+                ev_hash = artifact_hash or self.record_evidence(result)
 
                 node = GraphNode(
                     id=finding_id,
@@ -316,6 +414,7 @@ class AttackGraphNormalizer:
             raise ValueError(f"Integrity check failed: {'; '.join(errors)}")
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
+        self.materialize_evidence(out_path.parent)
         count = 0
         with out_path.open("w", encoding="utf-8") as f:
             for node in self.nodes.values():
@@ -337,53 +436,78 @@ class AttackGraphNormalizer:
         db_path.parent.mkdir(parents=True, exist_ok=True)
         con = sqlite3.connect(db_path)
         try:
+            tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            if tables and ("c2_graph_meta" not in tables or
+                           con.execute("SELECT version FROM c2_graph_meta").fetchall() != [(1,)]):
+                raise ValueError("Refusing existing database without C2 schema version 1; use a new staging database")
+            self.materialize_evidence(db_path.parent)
+            con.execute("PRAGMA foreign_keys = ON")
+            con.execute("BEGIN")
             with con:
-                con.execute("PRAGMA foreign_keys = ON;")
+                con.execute("CREATE TABLE IF NOT EXISTS c2_graph_meta (version INTEGER PRIMARY KEY CHECK(version=1))")
+                con.execute("INSERT INTO c2_graph_meta VALUES (1) ON CONFLICT DO NOTHING")
                 con.execute("""
                     CREATE TABLE IF NOT EXISTS attack_nodes (
-                        id TEXT PRIMARY KEY,
-                        type TEXT NOT NULL,
-                        name TEXT NOT NULL,
+                        id TEXT PRIMARY KEY NOT NULL CHECK(length(id)>0),
+                        type TEXT NOT NULL CHECK(type IN ('SOURCE','FINDING','SINK','MITIGATION','ATTACK_TECHNIQUE')),
+                        name TEXT NOT NULL CHECK(length(name)>0),
                         file TEXT,
-                        line INTEGER,
+                        line INTEGER CHECK(line IS NULL OR (typeof(line)='integer' AND line>=1)),
                         severity TEXT,
                         confidence TEXT,
-                        evidence_sha256 TEXT NOT NULL,
-                        metadata TEXT NOT NULL
-                    );
+                        evidence_sha256 TEXT NOT NULL CHECK((type='ATTACK_TECHNIQUE' AND evidence_sha256='') OR
+                            (length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*')),
+                        metadata TEXT NOT NULL CHECK(json_valid(metadata))
+                    )
                 """)
                 con.execute("""
                     CREATE TABLE IF NOT EXISTS attack_edges (
-                        id TEXT PRIMARY KEY,
-                        type TEXT NOT NULL,
-                        source_id TEXT NOT NULL,
-                        target_id TEXT NOT NULL,
-                        weight REAL NOT NULL,
-                        evidence_sha256 TEXT NOT NULL,
-                        metadata TEXT NOT NULL,
-                        FOREIGN KEY (source_id) REFERENCES attack_nodes(id) ON DELETE CASCADE,
-                        FOREIGN KEY (target_id) REFERENCES attack_nodes(id) ON DELETE CASCADE
-                    );
+                        id TEXT PRIMARY KEY NOT NULL CHECK(length(id)>0),
+                        type TEXT NOT NULL CHECK(type IN ('FLOWS_TO','CALLS','MITIGATED_BY','MAPS_TO')),
+                        source_id TEXT NOT NULL REFERENCES attack_nodes(id),
+                        target_id TEXT NOT NULL REFERENCES attack_nodes(id),
+                        weight REAL NOT NULL CHECK(typeof(weight) IN ('integer','real') AND weight>=0 AND weight<=1),
+                        evidence_sha256 TEXT NOT NULL CHECK(length(evidence_sha256)=64 AND evidence_sha256 NOT GLOB '*[^0-9a-f]*'),
+                        metadata TEXT NOT NULL CHECK(json_valid(metadata))
+                    )
                 """)
-                con.execute("CREATE INDEX IF NOT EXISTS idx_attack_edges_src ON attack_edges(source_id);")
-                con.execute("CREATE INDEX IF NOT EXISTS idx_attack_edges_tgt ON attack_edges(target_id);")
+                con.execute("CREATE INDEX IF NOT EXISTS idx_attack_edges_src ON attack_edges(source_id)")
+                con.execute("CREATE INDEX IF NOT EXISTS idx_attack_edges_tgt ON attack_edges(target_id)")
+                for action in ("INSERT", "UPDATE"):
+                    con.execute(f"""
+                        CREATE TRIGGER IF NOT EXISTS check_edge_endpoints_{action.lower()} BEFORE {action} ON attack_edges
+                        WHEN NOT EXISTS (SELECT 1 FROM attack_nodes s, attack_nodes t
+                          WHERE s.id=NEW.source_id AND t.id=NEW.target_id AND (
+                            (NEW.type='FLOWS_TO' AND s.type='SOURCE' AND t.type='FINDING') OR
+                            (NEW.type='CALLS' AND s.type='FINDING' AND t.type='SINK') OR
+                            (NEW.type='MITIGATED_BY' AND s.type='FINDING' AND t.type='MITIGATION') OR
+                            (NEW.type='MAPS_TO' AND s.type='FINDING' AND t.type='ATTACK_TECHNIQUE')))
+                        BEGIN SELECT RAISE(ABORT, 'Invalid or missing graph node endpoint'); END
+                    """)
                 con.execute("""
-                    CREATE TRIGGER IF NOT EXISTS check_edge_endpoints_insert BEFORE INSERT ON attack_edges
-                    WHEN NOT EXISTS (SELECT 1 FROM attack_nodes WHERE id = NEW.source_id)
-                      OR NOT EXISTS (SELECT 1 FROM attack_nodes WHERE id = NEW.target_id)
-                    BEGIN SELECT RAISE(ABORT, 'Missing graph node endpoint'); END;
+                    CREATE TRIGGER IF NOT EXISTS c2_node_delete BEFORE DELETE ON attack_nodes
+                    WHEN EXISTS (SELECT 1 FROM attack_edges WHERE source_id=OLD.id OR target_id=OLD.id)
+                    BEGIN SELECT RAISE(ABORT, 'Node still referenced'); END
                 """)
-
+                con.execute("""
+                    CREATE TRIGGER IF NOT EXISTS c2_node_identity BEFORE UPDATE OF id,type ON attack_nodes
+                    WHEN NEW.id<>OLD.id OR NEW.type<>OLD.type
+                    BEGIN SELECT RAISE(ABORT, 'Node identity is immutable'); END
+                """)
                 for n in self.nodes.values():
                     con.execute("""
-                        INSERT OR REPLACE INTO attack_nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                        INSERT INTO attack_nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(id) DO UPDATE SET type=excluded.type,name=excluded.name,file=excluded.file,
+                        line=excluded.line,severity=excluded.severity,confidence=excluded.confidence,
+                        evidence_sha256=excluded.evidence_sha256,metadata=excluded.metadata
                     """, (n.id, n.type, n.name, n.file, n.line, n.severity, n.confidence, n.evidence_sha256, json.dumps(n.metadata)))
-
                 for e in self.edges.values():
                     con.execute("""
-                        INSERT OR REPLACE INTO attack_edges VALUES (?, ?, ?, ?, ?, ?, ?);
+                        INSERT INTO attack_edges VALUES (?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(id) DO UPDATE SET type=excluded.type,source_id=excluded.source_id,
+                        target_id=excluded.target_id,weight=excluded.weight,
+                        evidence_sha256=excluded.evidence_sha256,metadata=excluded.metadata
                     """, (e.id, e.type, e.source_id, e.target_id, e.weight, e.evidence_sha256, json.dumps(e.metadata)))
-
             return len(self.nodes), len(self.edges)
         finally:
             con.close()
@@ -404,17 +528,17 @@ def main():
             sys.exit(1)
         data = json.loads(path.read_text(encoding="utf-8"))
         if isinstance(data, dict) and data.get("version") == "2.1.0" and "runs" in data:
-            normalizer.ingest_sarif(data)
+            normalizer.ingest_sarif(data, artifact_path=path)
         elif isinstance(data, dict) and "findings" in data and isinstance(data["findings"], list):
             for item in data["findings"]:
                 if isinstance(item, dict):
-                    normalizer.ingest_harness_finding(item)
+                    normalizer.ingest_harness_finding(item, artifact_path=path)
         elif isinstance(data, list):
             for item in data:
                 if isinstance(item, dict):
-                    normalizer.ingest_harness_finding(item)
+                    normalizer.ingest_harness_finding(item, artifact_path=path)
         elif isinstance(data, dict):
-            normalizer.ingest_harness_finding(data)
+            normalizer.ingest_harness_finding(data, artifact_path=path)
 
     valid, errors = normalizer.validate_integrity()
     if not valid:

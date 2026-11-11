@@ -156,7 +156,7 @@ class TestHarnessFindingNormalization(unittest.TestCase):
             "infra_multiplier": 0.2,
             "effective_score": 11.25,
             "final_verdict": "ACTIONABLE_PRIORITY_0",
-            "sink_pattern": "cursor.execute(query)",
+            "sink_function": "cursor.execute",
             "source": "login_handler",
         }
 
@@ -180,10 +180,10 @@ class TestHarnessFindingNormalization(unittest.TestCase):
         self.assertEqual(len(src_nodes), 1)
         self.assertEqual(src_nodes[0].name, "login_handler")
 
-        # SINK from sink_pattern
+        # SINK from explicit sink_function
         snk_nodes = [n for n in self.normalizer.nodes.values() if n.type == "SINK"]
         self.assertEqual(len(snk_nodes), 1)
-        self.assertEqual(snk_nodes[0].name, "cursor.execute(query)")
+        self.assertEqual(snk_nodes[0].name, "cursor.execute")
 
         valid, errors = self.normalizer.validate_integrity()
         self.assertTrue(valid)
@@ -646,6 +646,234 @@ class TestCLIIntegration(unittest.TestCase):
         self.assertEqual(res.returncode, 0, f"CLI error: {res.stderr}")
         self.assertIn("Graph normalized successfully: 3 nodes, 2 edges", res.stdout)
         self.assertTrue(sqlite_out.exists())
+
+
+class TestC2Corrections(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+
+    def graph(self):
+        graph = AttackGraphNormalizer()
+        graph.ingest_harness_finding({"rule_id": "sql", "file": "app.py", "line": 7,
+                                      "source": "request", "sink": "execute",
+                                      "mitigations": [{"id": "waf", "multiplier": 0.4}]})
+        return graph
+
+    def test_shared_sink_is_independent_of_ingestion_order(self):
+        records = [{"rule_id": "a", "file": "app.py", "line": 10, "sink": "execute"},
+                   {"rule_id": "b", "file": "app.py", "line": 20, "sink": "execute"}]
+        graphs = []
+        for sequence in (records, list(reversed(records))):
+            graph = AttackGraphNormalizer()
+            for record in sequence:
+                graph.ingest_harness_finding(record)
+            graphs.append(graph)
+        self.assertEqual(graphs[0].nodes, graphs[1].nodes)
+        self.assertEqual(graphs[0].edges, graphs[1].edges)
+        self.assertIsNone(graphs[0].nodes["snk:app.py:execute"].line)
+        self.assertEqual({n.line for n in graphs[0].nodes.values() if n.type == "FINDING"}, {10, 20})
+
+    def test_conflicting_shared_sink_fails_closed(self):
+        graph = self.graph()
+        with self.assertRaisesRegex(ValueError, "Conflicting shared endpoint"):
+            graph.ingest_harness_finding({"rule_id": "b", "file": "app.py", "sink": "execute", "sink_type": "OTHER"})
+
+    def test_rejects_invalid_multipliers_without_clamping(self):
+        for value in (-0.01, 1.01, float("nan"), float("inf"), float("-inf"), "NaN", True):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                AttackGraphNormalizer().ingest_harness_finding({"mitigations": [{"id": "x", "multiplier": value}]})
+        for value in (0, 1):
+            graph = AttackGraphNormalizer()
+            graph.ingest_harness_finding({"mitigations": [{"id": "x", "multiplier": value}]})
+            self.assertEqual(next(iter(graph.edges.values())).weight, value)
+        for value in (-1, 2, float("nan"), True):
+            with self.subTest(edge_weight=value), self.assertRaises(ValueError):
+                GraphEdge(id="x", type="CALLS", source_id="a", target_id="b", weight=value)
+
+    def test_native_c1_output_stays_unanchored(self):
+        from dataclasses import asdict
+        spec = importlib.util.spec_from_file_location("c2_harness_contract", BASE / "bin" / "mitr3-vuln-harness.py")
+        harness = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = harness
+        spec.loader.exec_module(harness)
+        (self.root / "app.py").write_text("def handler(value):\n    execute(value)\n", encoding="utf-8")
+        candidate = harness.CandidateFinding(id="test", scanner="semgrep", rule_id="sql", file_path="app.py",
+                                             line=2, severity="HIGH", message="fixture", sink_pattern="execute(value)")
+        record = asdict(harness.evaluate_cluster([candidate], self.root, []))
+        self.assertEqual(record["ast_gate"], 1)
+        graph = AttackGraphNormalizer()
+        graph.ingest_harness_finding(record)
+        self.assertEqual({node.type for node in graph.nodes.values()}, {"FINDING"})
+        self.assertEqual(graph.edges, {})
+
+    def test_diagnostic_fields_do_not_invent_sink(self):
+        graph = AttackGraphNormalizer()
+        graph.ingest_harness_finding({"sink_pattern": "execute(value)", "enclosing_function": "handler",
+                                      "ast_details": "AST confirmada em handler (chamadas: execute)", "ast_gate": 1})
+        self.assertEqual({node.type for node in graph.nodes.values()}, {"FINDING"})
+
+    def test_export_materializes_exact_snapshot_bytes(self):
+        import hashlib
+        graph = self.graph()
+        output = self.root / "graph.jsonl"
+        graph.export_jsonl(output)
+        for line in output.read_text().splitlines():
+            record = json.loads(line)
+            path = self.root / record["metadata"]["evidence_artifact"]
+            self.assertTrue(path.is_file())
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), record["evidence_sha256"])
+            self.assertEqual(record["metadata"]["evidence_kind"], "C2_INPUT_SNAPSHOT")
+        first = next(n for n in graph.nodes.values() if n.type == "FINDING")
+        self.assertEqual(json.loads((self.root / first.metadata["evidence_artifact"]).read_bytes())["line"], 7)
+
+    def test_physical_input_hash_uses_exact_bytes_and_checks_binding(self):
+        import hashlib
+        record = {"rule_id": "physical", "file": "app.py"}
+        artifact = self.root / "report.json"
+        raw = (json.dumps({"findings": [record]}, indent=4) + "\n").encode()
+        artifact.write_bytes(raw)
+        graph = AttackGraphNormalizer()
+        node_id = graph.ingest_harness_finding(record, artifact_path=artifact)
+        graph.export_jsonl(self.root / "graph.jsonl")
+        node = graph.nodes[node_id]
+        self.assertEqual(node.evidence_sha256, hashlib.sha256(raw).hexdigest())
+        self.assertEqual(node.metadata["evidence_kind"], "C2_INPUT_ARTIFACT")
+        self.assertEqual((self.root / node.metadata["evidence_artifact"]).read_bytes(), raw)
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            graph.ingest_harness_finding({"rule_id": "different"}, artifact_path=artifact)
+
+    def test_sarif_cli_preserves_raw_artifact_provenance(self):
+        import hashlib
+        artifact = self.root / "input.sarif"
+        raw = b'{"version":"2.1.0", "runs":[{"results":[{"ruleId":"x"}]}]}\n'
+        artifact.write_bytes(raw)
+        output = self.root / "graph.jsonl"
+        result = subprocess.run([sys.executable, str(NORMALIZER_PATH), str(artifact), "--jsonl", str(output)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        node = json.loads(output.read_text())
+        self.assertEqual(node["evidence_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual((self.root / node["metadata"]["evidence_artifact"]).read_bytes(), raw)
+
+    def test_changed_evidence_is_never_overwritten(self):
+        graph = self.graph()
+        graph.export_jsonl(self.root / "first.jsonl")
+        digest = next(iter(graph.evidence_artifacts))
+        path = self.root / "evidence" / digest
+        path.write_bytes(b"changed")
+        with self.assertRaisesRegex(ValueError, "Evidence artifact changed"):
+            graph.export_jsonl(self.root / "second.jsonl")
+        self.assertEqual(path.read_bytes(), b"changed")
+        self.assertFalse((self.root / "second.jsonl").exists())
+
+    def test_export_refuses_evidence_directory_symlink(self):
+        graph = self.graph()
+        outside = self.root / "outside"
+        outside.mkdir(mode=0o700)
+        sentinel = outside / "keep"
+        sentinel.write_bytes(b"untouched")
+        (self.root / "evidence").symlink_to(outside, target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "Untrusted evidence directory"):
+            graph.export_jsonl(self.root / "graph.jsonl")
+        self.assertEqual(sentinel.read_bytes(), b"untouched")
+        self.assertEqual(sorted(p.name for p in outside.iterdir()), ["keep"])
+        self.assertFalse((self.root / "graph.jsonl").exists())
+
+    def test_export_refuses_evidence_file_symlink(self):
+        graph = self.graph()
+        digest = next(iter(graph.evidence_artifacts))
+        outside = self.root / "outside"
+        outside.mkdir(mode=0o700)
+        sentinel = outside / "keep"
+        sentinel.write_bytes(b"untouched")
+        evidence = self.root / "evidence"
+        evidence.mkdir(mode=0o700)
+        (evidence / digest).symlink_to(sentinel)
+        with self.assertRaisesRegex(ValueError, "Untrusted evidence artifact"):
+            graph.export_jsonl(self.root / "graph.jsonl")
+        self.assertEqual(sentinel.read_bytes(), b"untouched")
+        self.assertFalse((self.root / "graph.jsonl").exists())
+
+    def test_sqlite_partial_upsert_preserves_unrelated_edges(self):
+        graph = self.graph()
+        db = self.root / "graph.sqlite3"
+        graph.persist_sqlite(db)
+        subset = AttackGraphNormalizer()
+        subset.ingest_harness_finding({"rule_id": "other", "file": "app.py", "line": 99, "sink": "execute"})
+        subset.persist_sqlite(db)
+        with sqlite3.connect(db) as con:
+            self.assertEqual(con.execute("SELECT count(*) FROM attack_edges").fetchone()[0], len(graph.edges) + 1)
+            self.assertEqual(con.execute("PRAGMA foreign_key_check").fetchall(), [])
+        for record in subset.nodes.values():
+            self.assertTrue((self.root / record.metadata["evidence_artifact"]).is_file())
+
+    def test_sqlite_guards_work_with_foreign_keys_off_and_on(self):
+        for fk in (0, 1):
+            with self.subTest(foreign_keys=fk):
+                db = self.root / f"guards-{fk}.sqlite3"
+                graph = self.graph()
+                graph.persist_sqlite(db)
+                with sqlite3.connect(db) as con:
+                    con.execute(f"PRAGMA foreign_keys={fk}")
+                    source = next(n.id for n in graph.nodes.values() if n.type == "SOURCE")
+                    edge = next(e.id for e in graph.edges.values() if e.type == "CALLS")
+                    sink = next(n.id for n in graph.nodes.values() if n.type == "SINK")
+                    finding = next(n.id for n in graph.nodes.values() if n.type == "FINDING")
+                    invalid = [
+                        ("UPDATE attack_edges SET target_id='ghost' WHERE id=?", (edge,)),
+                        ("UPDATE attack_edges SET type='FLOWS_TO' WHERE id=?", (edge,)),
+                        ("UPDATE attack_edges SET weight=1.1 WHERE id=?", (edge,)),
+                        ("UPDATE attack_nodes SET id='renamed' WHERE id=?", (source,)),
+                        ("UPDATE attack_nodes SET type='SINK' WHERE id=?", (source,)),
+                        ("DELETE FROM attack_nodes WHERE id=?", (source,)),
+                        ("DELETE FROM attack_nodes WHERE id=?", (sink,)),
+                        ("INSERT INTO attack_edges VALUES ('bad-weight','CALLS',?,?,-0.1,?,'{}')", (finding, sink, "a" * 64)),
+                        ("UPDATE attack_edges SET metadata='not-json' WHERE id=?", (edge,)),
+                        ("INSERT INTO attack_edges VALUES ('bad','CALLS','ghost','ghost',1,?,'{}')", ("a" * 64,)),
+                        ("UPDATE attack_nodes SET evidence_sha256='bad' WHERE id=?", (source,)),
+                    ]
+                    for sql, args in invalid:
+                        with self.subTest(sql=sql), self.assertRaises(sqlite3.IntegrityError):
+                            con.execute(sql, args)
+                    con.execute("UPDATE attack_edges SET weight=0.7 WHERE id=?", (edge,))
+                    con.execute("UPDATE attack_nodes SET name='new name' WHERE id=?", (source,))
+                    con.execute("DELETE FROM attack_edges WHERE source_id=? OR target_id=?", (source, source))
+                    con.execute("DELETE FROM attack_nodes WHERE id=?", (source,))
+                    self.assertEqual(con.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_sqlite_failure_rolls_back_node_updates(self):
+        from dataclasses import replace
+        graph = self.graph()
+        db = self.root / "rollback.sqlite3"
+        graph.persist_sqlite(db)
+        finding = next(n for n in graph.nodes.values() if n.type == "FINDING")
+        graph.nodes[finding.id] = replace(finding, severity="CRITICAL")
+        source = next(n.id for n in graph.nodes.values() if n.type == "SOURCE")
+        graph.add_edge(GraphEdge(id="bad-shape", type="CALLS", source_id=source, target_id=finding.id,
+                                 evidence_sha256=finding.evidence_sha256))
+        with self.assertRaises(sqlite3.IntegrityError):
+            graph.persist_sqlite(db)
+        with sqlite3.connect(db) as con:
+            self.assertEqual(con.execute("SELECT severity FROM attack_nodes WHERE id=?", (finding.id,)).fetchone()[0], finding.severity)
+            self.assertEqual(con.execute("SELECT count(*) FROM attack_edges WHERE id='bad-shape'").fetchone()[0], 0)
+
+    def test_manual_digest_without_artifact_cannot_be_exported(self):
+        graph = AttackGraphNormalizer()
+        graph.add_node(GraphNode(id="manual", type="FINDING", name="manual", evidence_sha256="a" * 64))
+        with self.assertRaisesRegex(ValueError, "No physical input snapshot"):
+            graph.export_jsonl(self.root / "missing.jsonl")
+        self.assertFalse((self.root / "missing.jsonl").exists())
+
+    def test_sqlite_rejects_legacy_database_without_migrating(self):
+        db = self.root / "legacy.sqlite3"
+        with sqlite3.connect(db) as con:
+            con.execute("CREATE TABLE attack_nodes (id TEXT PRIMARY KEY)")
+            con.execute("INSERT INTO attack_nodes VALUES ('preserve')")
+        before = db.read_bytes()
+        with self.assertRaisesRegex(ValueError, "without C2 schema version"):
+            self.graph().persist_sqlite(db)
+        self.assertEqual(db.read_bytes(), before)
 
 
 if __name__ == "__main__":
