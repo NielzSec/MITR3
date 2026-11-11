@@ -11,12 +11,16 @@ as bases da decisão, preservando os nós e as arestas. O banco padrão é
 `state/mitr3-attack.sqlite3`. Não usar o SQLite produzido diretamente pelo
 normalizer da C2: primeiro executar o ingest da C3.
 
-As tabelas próprias são `verify_meta` (versão `1`), `verification_evidence`,
+As tabelas próprias são `verify_meta` (versão `2`), `verification_evidence`,
 `evidence_revocations` e `path_verdicts`. Escritas inicializam o schema C4;
 `verify` sem `--write` e `list` exigem inicialização anterior e não escrevem.
 Schemas C4 incompletos, desconhecidos ou sem marcador são recusados.
 Para avaliar um grafo ainda sem evidências, usar `verify --write` para
 inicializar a C4. Essa operação também persiste os veredictos estruturais.
+O schema v1 continua legível, mas suas evidências aparecem como `UNBOUND_GRAPH`
+e não contam. `migrate` atualiza o schema sem atribuir retroativamente um
+snapshot às evidências antigas; rebaixa arestas `FEASIBLE_PATH` e preserva
+arestas `PROVEN` preexistentes.
 
 Evidências, revogações e veredictos são append-only por triggers de UPDATE e
 DELETE. Os vínculos de evidência são conferidos contra a estrutura do grafo:
@@ -35,6 +39,7 @@ python3 bin/mitr3-graph-verify.py --db /tmp/graph.sqlite3 --evidence-root /tmp/a
 python3 bin/mitr3-graph-verify.py --db /tmp/graph.sqlite3 --evidence-root /tmp/artifacts verify --json
 python3 bin/mitr3-graph-verify.py --db /tmp/graph.sqlite3 --evidence-root /tmp/artifacts verify --write --json
 python3 bin/mitr3-graph-verify.py --db /tmp/graph.sqlite3 revoke EVIDENCE_ID --reason 'análise substituída' --by operador
+python3 bin/mitr3-graph-verify.py --db /tmp/graph.sqlite3 migrate
 python3 bin/mitr3-graph-verify.py --db /tmp/graph.sqlite3 --evidence-root /tmp/artifacts verify --exposure unauthenticated
 ```
 
@@ -83,14 +88,20 @@ O SHA-256 é calculado pelo programa; o JSON não pode fornecer um hash declarad
 Campos desconhecidos, JSON não finito e pares kind/verdict inválidos são recusados.
 
 O ID é SHA-256 do registro canônico, incluindo conteúdo, escopo, justificativa,
-analisador, caminho e hash do artefato, sem autor/timestamp. Registro idêntico
-retorna `already_recorded` e preserva o primeiro autor. Revogar exige motivo e
-autor; mantém o histórico. Repetir `record` não reativa uma evidência revogada.
+analisador, caminho, hash do artefato e hash do snapshot C3 atual, sem
+autor/timestamp. O snapshot precisa estar registrado em `graph_snapshots`.
+Registro idêntico no mesmo snapshot retorna `already_recorded` e preserva o
+primeiro autor. Revogar exige motivo e autor; mantém o histórico. Repetir
+`record` não reativa uma evidência revogada.
 
-Cada `verify`/`list` revalida os artefatos e hashes. Apenas evidências não
-revogadas com artefato `VERIFIED` contam. `HASH_MISMATCH`, `MISSING`, escape da
-raiz e demais problemas aparecem na saída e deixam de influenciar o resultado.
-Um hash comprova integridade do arquivo observado, não a verdade da análise.
+Cada `verify`/`list` revalida o artefato e compara o snapshot registrado com o
+hash do grafo C3 atual. Só contam evidências não revogadas com artefato
+`VERIFIED` e `CURRENT_GRAPH`. `HASH_MISMATCH`, `MISSING`, `STALE_GRAPH`,
+`UNBOUND_GRAPH`, escape da raiz e demais problemas aparecem na saída e não
+influenciam o resultado. A migração v1 preserva evidências históricas sem
+vínculo como `UNBOUND_GRAPH`; novas gravações recebem o snapshot atual e um
+novo ID. Hashes demonstram integridade e identidade do conteúdo observado, não
+a verdade da análise.
 
 ## Resultados e promoção
 
@@ -138,10 +149,11 @@ não altera o hash estrutural do grafo. Findings sem SOURCE/SINK aparecem em
 - O escopo textual environment/flow/identity/condition é registrado, mas não
   confrontado com um inventário externo de ambientes. Usar banco/raiz de
   evidências coerentes com o contexto aprovado pelo operador.
-- Evidências se vinculam aos IDs dos nós, sem fixar o hash de conteúdo/snapshot
-  na gravação. Reingest que muda o conteúdo sob os mesmos IDs exige revisão e
-  revogação das evidências antigas; hash do artefato inalterado não garante
-  que a evidência ainda se aplique ao código novo.
+- Evidências novas são vinculadas ao hash do snapshot C3 na gravação; mudança
+  no conteúdo do grafo torna as evidências anteriores `STALE_GRAPH`, que deixam
+  de contar mesmo se os IDs dos nós forem reutilizados. Bancos v1 precisam de
+  migração explícita; evidências legadas permanecem `UNBOUND_GRAPH` até serem
+  novamente registradas com análise atualizada.
 - O rebuild STIX agora preserva C3 e C4, incluindo histórico, índices e triggers.
   Requer parada dos usuários do banco e conexões fechadas antes de iniciar;
   mantém `BEGIN IMMEDIATE` no arquivo antigo até a substituição e recusa WAL,
@@ -153,6 +165,8 @@ não altera o hash estrutural do grafo. Findings sem SOURCE/SINK aparecem em
   copia pais C3 antes de filhos C4 e restaura índices/triggers por último; a guarda
   C4 de `attack_nodes` também é preservada. Histórico não é revalidado contra o
   grafo atual, pois pode representar snapshots anteriores.
+  O rebuild carrega schemas C4 v1 e v2; após migrar um banco v1, as evidências
+  sem snapshot permanecem `UNBOUND_GRAPH` e não contam.
   Todas as arestas FEASIBLE_PATH voltam a STRUCTURAL_HYPOTHESIS no rebuild:
   o rebuild não conhece a raiz dos artefatos para revalidar sua aplicabilidade.
   Veredictos históricos e PROVEN preexistente são preservados; executar
@@ -172,15 +186,22 @@ não altera o hash estrutural do grafo. Findings sem SOURCE/SINK aparecem em
 python3 -m unittest discover -s tests -p test_graph_verify.py -v
 ```
 
-Resultado executado nesta entrega: **34/34 testes passaram (100%)**, sem falhas,
-erros ou skips.
+Resultado anterior de 10/11: **34/34 testes passaram**. Após o vínculo C4 com
+snapshot C3, a execução afetada de 11/11 foi:
 
-A suíte exercita schema, triggers append-only, escopo exato entre cadeias,
-validação/registro idempotente, revogação, integridade viva dos artefatos,
-os quatro resultados, confiança, filtros, promoção/rebaixamento, preservação
-de PROVEN preexistente, rollback e CLI em subprocessos. Usa bancos e artefatos
-temporários, sem banco operacional nem rede. C1/C2/C3 não são reexecutadas;
-C3 é usada como produtora do banco real da fixture.
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p test_graph_verify.py -v
+```
 
-A revisão independente desta entrega examina código, testes e documentação;
-aceite operacional humano e custódia Git permanecem com operador/VANTA.
+Resultado: **46/46 testes passaram**, sem falhas, erros ou skips.
+
+A suíte exercita schema, migração v1 preservadora, vínculo e invalidação de
+snapshot, triggers append-only, escopo exato entre cadeias, registro idempotente,
+revogação, integridade viva dos artefatos, rebuild C4 v1/v2, resultados,
+promoção/rebaixamento, rollback e CLI em subprocessos. Usa bancos e artefatos
+temporários, sem banco operacional nem rede. C1/C2/C3 não foram reexecutadas;
+C3 é usada como produtora do banco de fixture.
+
+Revisão independente read-only desta alteração: **APPROVE**, sem achados
+bloqueadores. Aceite operacional humano e custódia Git permanecem com
+operador/VANTA.

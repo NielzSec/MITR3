@@ -83,15 +83,30 @@ class Base(unittest.TestCase):
         self.assertEqual(proc.returncode, code, proc.stderr)
         return proc
 
+    def downgrade_c4_to_v1(self):
+        raw = json.loads(self.input.read_text(encoding="utf-8"))
+        old_record = verify.build_record(raw, self.root)
+        old_id = L3.digest({key: value for key, value in old_record.items() if key != "recorded_by"})
+        with closing(L3.connect_rw(self.db)) as con:
+            con.execute("DROP TRIGGER verification_evidence_snapshot")
+            con.execute("DROP TRIGGER verification_evidence_no_update")
+            con.execute("DROP INDEX verification_evidence_snapshot")
+            con.execute("UPDATE verification_evidence SET evidence_id=?", (old_id,))
+            con.execute("ALTER TABLE verification_evidence DROP COLUMN graph_snapshot_sha256")
+            con.execute("UPDATE verify_meta SET value='1' WHERE key='schema_version'")
+            con.execute("CREATE TRIGGER verification_evidence_no_update BEFORE UPDATE ON verification_evidence "
+                        "BEGIN SELECT RAISE(ABORT,'Evidence is append-only; revoke it instead'); END")
+        return old_id
+
 
 class SchemaTests(Base):
     def test_schema_is_complete_and_idempotent(self):
         with closing(L3.connect_rw(self.db)) as con:
             verify.ensure_schema(con)
             self.assertTrue(set(verify.VERIFY_TABLES) <= L3.table_names(con))
-            self.assertEqual(con.execute("SELECT value FROM verify_meta WHERE key='schema_version'").fetchone(), ("1",))
+            self.assertEqual(con.execute("SELECT value FROM verify_meta WHERE key='schema_version'").fetchone(), ("2",))
             names = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='trigger'")}
-            self.assertTrue({"verification_evidence_scope", "verify_nodes_delete_guard"} <= names)
+            self.assertTrue({"verification_evidence_scope", "verification_evidence_snapshot", "verify_nodes_delete_guard"} <= names)
 
     def test_uninitialised_foreign_partial_and_unsupported_schemas_are_rejected(self):
         for setup, message in (("", "Layer 3"),
@@ -126,6 +141,12 @@ class SchemaTests(Base):
             con.execute("DROP TABLE path_verdicts")
         with self.assertRaisesRegex(ValueError, "incomplete"):
             self.result()
+
+    def test_reads_refuse_schema_with_missing_integrity_trigger(self):
+        with closing(L3.connect_rw(self.db)) as con:
+            con.execute("DROP TRIGGER verification_evidence_no_delete")
+        with self.assertRaisesRegex(ValueError, "missing integrity triggers"):
+            verify.list_evidence(self.db, self.root)
 
     def test_evidence_revocations_and_verdicts_are_append_only(self):
         eid = self.record()["evidence_id"]
@@ -181,6 +202,53 @@ class EvidenceTests(Base):
         self.assertEqual(item["recorded_by"], "unit-test")
         self.assertTrue(item["counts"])
         self.assertEqual(item["artifact_status"], "VERIFIED")
+        self.assertEqual(item["graph_snapshot_status"], "CURRENT_GRAPH")
+
+    def test_evidence_is_invalidated_when_graph_snapshot_changes(self):
+        first = self.record()
+        with closing(L3.connect_rw(self.db)) as con:
+            con.execute("UPDATE attack_nodes SET content_sha256=? WHERE id='f'", ("c" * 64,))
+            new_snapshot = L3.record_snapshot(con, [])
+        self.assertNotEqual(first["graph_snapshot_sha256"], new_snapshot)
+        old = verify.list_evidence(self.db, self.root)[0]
+        self.assertEqual(old["graph_snapshot_status"], "STALE_GRAPH")
+        self.assertFalse(old["counts"])
+        self.assertEqual(self.result()["evidence"]["not_counting"],
+                         [{"evidence_id": first["evidence_id"], "status": "STALE_GRAPH"}])
+        self.assertEqual(self.chain()["verification_state"], "STRUCTURAL_HYPOTHESIS")
+
+        current = self.record()
+        self.assertNotEqual(first["evidence_id"], current["evidence_id"])
+        entries = verify.list_evidence(self.db, self.root)
+        self.assertEqual({entry["graph_snapshot_status"] for entry in entries}, {"CURRENT_GRAPH", "STALE_GRAPH"})
+        self.assertEqual(self.result()["evidence"]["counting"], 1)
+
+    def test_legacy_v1_evidence_stays_unbound_after_explicit_migration(self):
+        legacy = self.record()
+        self.result(write=True)
+        with closing(L3.connect_rw(self.db)) as con:
+            con.execute("UPDATE attack_edges SET verification_state='PROVEN' WHERE id='sf'")
+        legacy_id = self.downgrade_c4_to_v1()
+        legacy["evidence_id"] = legacy_id
+
+        before = verify.list_evidence(self.db, self.root)[0]
+        self.assertEqual(before["graph_snapshot_status"], "UNBOUND_GRAPH")
+        self.assertFalse(before["counts"])
+        with self.assertRaisesRegex(ValueError, "explicit migration"):
+            self.record()
+
+        result = json.loads(self.cli("migrate").stdout)
+        self.assertEqual(result["status"], "migrated")
+        self.assertEqual(result["feasible_edges_demoted"], 1)
+        self.assertEqual(result["legacy_evidence"], "UNBOUND_GRAPH; preserved but does not count")
+        self.assertEqual(self.rows("SELECT id,verification_state FROM attack_edges WHERE id IN ('sf','fk') ORDER BY id"),
+                         [("fk", "STRUCTURAL_HYPOTHESIS"), ("sf", "PROVEN")])
+        preserved = verify.list_evidence(self.db, self.root)[0]
+        self.assertEqual(preserved["evidence_id"], legacy["evidence_id"])
+        self.assertEqual(preserved["graph_snapshot_status"], "UNBOUND_GRAPH")
+        current = self.record()
+        self.assertNotEqual(current["evidence_id"], legacy["evidence_id"])
+        self.assertEqual(self.result()["evidence"]["counting"], 1)
 
     def test_invalid_records_rejected_without_inserting(self):
         cases = [None, [], {}, self.raw(unexpected="field"), self.raw(kind="bogus"), self.raw(kind=[]),
@@ -291,6 +359,7 @@ class EvaluateTests(Base):
                                             ("f-other-k", "CALLS", "f", "other-k")):
                 con.execute("INSERT INTO attack_edges(id,type,source_id,target_id,weight,content_sha256,evidence_sha256,metadata) "
                             "VALUES(?,?,?,?,1,?,?,'{}')", (edge_id, kind, src, dst, "c" * 64, "d" * 64))
+            L3.record_snapshot(con, [])
         self.control()
         chains = self.result()["chains"]
         self.assertEqual(len(chains), 4)
@@ -463,6 +532,19 @@ class RebuildTests(Base):
                 con.execute("DELETE FROM attack_nodes WHERE id='other-k' OR id='f'")
         self.assertEqual(self.result(write=True)["written"]["edges_promoted"], 2)
         self.assertEqual(self.rows("SELECT count(*) FROM entities"), [(1,)])
+
+    def test_rebuild_preserves_v1_evidence_as_unbound(self):
+        self.record()
+        legacy_id = self.downgrade_c4_to_v1()
+        report = self.rebuild()
+        self.assertEqual(report["code_graph_carried"]["verification_evidence"], 1)
+        self.assertEqual(self.rows("SELECT value FROM verify_meta WHERE key='schema_version'"), [("1",)])
+        evidence = verify.list_evidence(self.db, self.root)[0]
+        self.assertEqual(evidence["evidence_id"], legacy_id)
+        self.assertEqual(evidence["graph_snapshot_status"], "UNBOUND_GRAPH")
+        self.assertFalse(evidence["counts"])
+        self.assertEqual(self.result()["evidence"]["not_counting"],
+                         [{"evidence_id": legacy_id, "status": "UNBOUND_GRAPH"}])
 
     def test_missing_artifact_does_not_leave_feasible_edges_after_rebuild(self):
         self.record()

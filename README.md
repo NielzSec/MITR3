@@ -1,6 +1,8 @@
 # MITR3 — Modular Intelligence, Threat Research & Reconnaissance Repository
 
-Host Linux (`Arch Linux`) · Orquestração via **Orca** & **Morfeus (OpenCode)** · Última sincronização de custódia: 11/11/2026.
+Host Linux (`Arch Linux`) · Coordenação declarada via **Orca** e **Morfeus/OpenCode** · Última sincronização de custódia: 11/11/2026.
+
+> Estado operacional verificado em 11/11/2026: [auditoria cruzada](docs/MITR3-CROSS-AUDIT-20261111.md). Papéis declarados, testes reportados e processos observados são registrados separadamente.
 
 ---
 
@@ -59,7 +61,9 @@ A partir de 10/11/2026, o repositório opera sob estrita segregação de ambient
 
 ---
 
-## 3. Squad Operacional e Enxame de Agentes
+## 3. Papéis declarados do Squad
+
+O quadro descreve responsabilidades planejadas. Um registro em `hackbots/bots.json` não prova que o agente está implementado, configurado no host, ativo ou executando uma missão. Consulte [Hackbots](hackbots/README.md) para a definição dos estados.
 
 | Assento | Agente | Motor | Responsabilidade Primária |
 | :--- | :--- | :--- | :--- |
@@ -71,8 +75,8 @@ A partir de 10/11/2026, o repositório opera sob estrita segregação de ambient
 
 ### Orquestração via Orca
 - O **Orca** atua como painel de controle, transporte de dispatch e isolamento de worktrees.
-- Morfeus/OpenCode é o coordenador lógico dos despachos.
-- Limite operacional estrito: máximo de 2 workers simultâneos na fase piloto, mantendo custo zero com provedores suportados e avaliação independente antes de qualquer promoção.
+- Morfeus/OpenCode é o coordenador lógico declarado; a integração Morfeus → Orca → Runner ainda não tem um handoff real documentado com run ID e log sanitizado.
+- O registry define máximo de 2 workers para o piloto offline. Isso não comprova execução integrada nem custo zero; cada missão precisa de evidência própria e aceite humano.
 
 ### Doutrina Operacional de Comunicação (Slack Loop)
 - **Regra obrigatória**: Todo agente deve ler o canal `#all-mitr3` antes de iniciar qualquer tarefa operacional e publicar os resultados, commits e hashes SHA256 ao concluir:
@@ -88,7 +92,7 @@ A partir de 10/11/2026, o repositório opera sob estrita segregação de ambient
 
 ## 4. Pipeline de Graph Engineering (Camadas 1 a 4)
 
-O ecossistema MITR3 conta com um pipeline unificado e matematicamente comprovado de análise e correlação de vulnerabilidades em grafo:
+O repositório contém um pipeline implementado para normalizar e correlacionar dados em grafo. Revisões independentes dos lotes C1–C4 foram registradas; isso não substitui validação de dados operacionais nem prova todas as rotas de ponta a ponta:
 
 ```
 [Código / IaC / Scanners]
@@ -133,13 +137,13 @@ O ecossistema MITR3 conta com um pipeline unificado e matematicamente comprovado
    - Preservação de tabelas de Layer 3 durante reconstruções de STIX/ATT&CK sem perda de estado.
 4. **Camada 4 — Evidence & Verification Engine** ([`bin/mitr3-graph-verify.py`](file:///home/nielz/MITR3/bin/mitr3-graph-verify.py)):
    - Avaliação e poda de caminhos de ataque baseada em mitigação real comprovada por artefatos em disco.
-   - Tabela de evidências, revogações e veredictos estritamente append-only.
+   - Tabelas de evidências, revogações e veredictos preservam histórico. Evidências novas ficam vinculadas ao hash do snapshot C3 e deixam de contar quando o grafo muda. Schema v1 exige migração explícita; evidências históricas sem snapshot permanecem sem contagem até nova análise.
 
 ---
 
-## 5. Toolchain e Matriz de Ferramentas (75/75 Operacionais)
+## 5. Inventário da Toolchain
 
-O ambiente conta com 75 ferramentas operacionais validadas via [`bin/mitr3-health.sh`](file:///home/nielz/MITR3/bin/mitr3-health.sh) cobrindo todos os domínios de engajamento:
+O inventário documenta 75 ferramentas candidatas e usa [`bin/mitr3-health.sh`](file:///home/nielz/MITR3/bin/mitr3-health.sh) para uma verificação pontual do host. O total do inventário não deve ser apresentado como estado operacional atual sem um resultado datado e vinculado ao host:
 
 - **Active Directory / Kerberos**: `bloodhound-python`, `kerbrute`, `responder`, `crackmapexec`, `certipy`.
 - **Cloud Security**: `aws` (CLI v2), `gcloud` (Google Cloud SDK), `az` (Azure CLI), `prowler`, `scout` (ScoutSuite), `cloudfox`, `pacu`.
@@ -149,7 +153,7 @@ O ambiente conta com 75 ferramentas operacionais validadas via [`bin/mitr3-healt
 
 ### Plano de Servidores MCP (Model Context Protocol)
 
-O ambiente integra 16 servidores MCP configurados em `~/.config/opencode/opencode.json`:
+O arquivo `~/.config/opencode/opencode.json` declara 16 servidores MCP. A configuração não prova que todos estão conectados ou saudáveis no momento:
 - `megabrain`: Base de conhecimento com embeddings, busca semântica e histórico operacional.
 - `mitr3-nexus`: Portão constitucional de escopo humano (`docs/SCOPE.md`).
 - `rea`: Suíte de engenharia reversa conectada diretamente ao Ghidra headless.

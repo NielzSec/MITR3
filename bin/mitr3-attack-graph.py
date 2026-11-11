@@ -216,7 +216,7 @@ CODE_GRAPH_TABLES = ("code_graph_meta", "attack_nodes", "attack_edges", "techniq
 VERIFY_TABLES = ("verify_meta", "verification_evidence", "evidence_revocations", "path_verdicts")
 VERIFY_TRIGGERS = {"verification_evidence_scope", "verification_evidence_no_update", "verification_evidence_no_delete",
                    "evidence_revocations_no_update", "evidence_revocations_no_delete", "path_verdicts_no_update",
-                   "path_verdicts_no_delete", "verify_nodes_delete_guard"}
+                   "path_verdicts_no_delete", "verify_nodes_delete_guard", "verification_evidence_snapshot"}
 
 
 def carry_code_graph(new, old=None):
@@ -237,11 +237,14 @@ def carry_code_graph(new, old=None):
             if not set(tables) <= names:
                 raise ValueError("Unsafe rebuild: incomplete Layer " + layer + " schema; old database preserved")
             version = old.execute("SELECT value FROM " + marker + " WHERE key='schema_version'").fetchone()
-            if version != ("1",):
+            supported = {("1",)} if layer == "3" else {("1",), ("2",)}
+            if version not in supported:
                 raise ValueError("Unsafe rebuild: unsupported Layer " + layer + " schema; migrate explicitly")
         if "verify_meta" in names:
             triggers = {r[0] for r in old.execute("SELECT name FROM sqlite_master WHERE type='trigger'")}
-            if not VERIFY_TRIGGERS <= triggers:
+            version = old.execute("SELECT value FROM verify_meta WHERE key='schema_version'").fetchone()
+            required_triggers = VERIFY_TRIGGERS if version == ("2",) else VERIFY_TRIGGERS - {"verification_evidence_snapshot"}
+            if not required_triggers <= triggers:
                 raise ValueError("Unsafe rebuild: missing Layer 4 integrity triggers; old database preserved")
         if old.execute("PRAGMA integrity_check").fetchall() != [("ok",)] or old.execute("PRAGMA foreign_key_check").fetchall():
             raise ValueError("Unsafe rebuild: source database integrity failure; old database preserved")

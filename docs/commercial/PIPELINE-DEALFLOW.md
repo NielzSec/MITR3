@@ -1,66 +1,45 @@
-# MITR3 — Pipeline de Prospecção & Dealflow (2026-11-11)
+# MITR3 — Pipeline de Prospecção & Dealflow
 
-Alinhado à landing page e ao one-pager (`ONE-PAGER-ATTACK-SURFACE-EXPRESS.md`).
-Esteira: `docs/commercial/dealflow-leads.csv` (fonte única de verdade; mover lead = editar linha).
+**Estado em 11/11/2026:** há **15 empresas candidatas com fonte oficial registrada, 0 leads validados e 0 contatos autorizados**. As fontes confirmam a existência de produtos/plataformas digitais; não confirmam demanda por serviço, intenção de compra, elegibilidade de ativos ou autorização. Não usar os registros antigos `LEAD-001` e `LEAD-002`: eram placeholders sem empresa, contato ou fonte e foram removidos.
 
-## Duas lanes de dealflow
+O tracker `dealflow-leads.csv` é a fonte de verdade. Um registro só entra como lead validado quando contém fonte pública verificável, data de coleta e critério objetivo de qualificação. Nome de empresa sem sinal de necessidade é apenas candidato e não deve ser contabilizado como lead qualificado.
 
-| Lane | Entrada | Conversão | Métrica-chave |
-| :--- | :--- | :--- | :--- |
-| **A — Clientes (serviços)** | Landing page, outbound, indicação | Proposta → aceite → execução → upsell | Taxa de fechamento por pacote |
-| **B — Bug bounty** | Programas públicos (HackerOne, Bugcrowd, Intigriti, VDP) | Caça → report aceito → bounty → reputação → referência para Lane A | Bounty médio, aceitação de reports |
+## Lanes
 
-Lane B alimenta a Lane A: reputação em plataformas + casos de sucesso (como Cimapi e Costa Lavos no one-pager) viram prova social.
+| Lane | Entrada | Conversão | Limite |
+| --- | --- | --- | --- |
+| **A — Serviços** | Inbound, indicação ou pesquisa pública de empresas | Qualificação → proposta → aceite → execução | Nenhum contato até aprovação do operador; nenhum teste ativo antes de autorização e escopo assinados. |
+| **B — Bug bounty** | Programa público com política e escopo publicados | Triagem → análise dentro do escopo → revisão humana → submissão | O programa autoriza apenas o escopo e as técnicas que declara; política MITR3 mais restritiva prevalece. |
 
-## Lane A — Estágios (0 a 5)
+## Status verificáveis
 
-| # | Estágio | Critério de saída |
-| :--- | :--- | :--- |
-| 0 | **Lead** | Contato identificado (landing, LinkedIn, WhatsApp, indicação, scrub de superfície exposta com LGPD ok) |
-| 1 | **Qualificado** | ICP match + decisor mapeado + dor declarada (ver qualificação abaixo) |
-| 2 | **Diagnóstico/Prova** | Oferta de mini-diagnóstico passivo ou demo de achado público (sem teste ativo sem autorização) |
-| 3 | **Proposta enviada** | `EXECUTIVE-PROPOSAL-TEMPLATE.md` preenchida com pacote e escopo |
-| 4 | **Aceite** | Termo assinado + 50% + escopo formal (`docs/SCOPE.md`) |
-| 5 | **Entrega/Upsell** | Relatório entregue + debriefing feito + follow-up (reteste, plano anual, indicação) |
+| Estado | Critério |
+| --- | --- |
+| `candidato` | Empresa e produto/plataforma confirmados em fonte pública; sinal comercial ainda não qualificado. |
+| `validado` | Empresa, fonte, data e critério registrados; encaixe com o serviço confirmado por evidência pública. |
+| `não_verificado` | Informação insuficiente ou fonte indisponível; não contar como lead. |
+| `descartado` | Fora do perfil, fonte fraca, duplicado ou sem autorização para prosseguir. |
 
-### Qualificação (ICP por pacote)
+Campos pessoais (nome, e-mail e telefone) ficam vazios até existir fonte pública adequada e necessidade operacional. Não coletar dados sensíveis nem registrar detalhes de vulnerabilidade de terceiros no CSV. Usar apenas metadados e links públicos.
 
-| Sinal | → Pacote |
-| :--- | :--- |
-| 1–3 domínios, PME, sem time de SEC dedicado | **Express Starter R$ 1.850 / 24h** |
-| 4–10 domínios + APIs, time de TI interno, compliance (LGPD) | **Business Standard R$ 3.490 / 48h** |
-| Escopo em nuvem, reteste, multiente, recorrência | **Enterprise (sob consulta)** |
+## Qualificação de serviços
 
-Perguntas de qualificação mínima: quantos domínios/app expostos? Já sofreu incidente ou acha? Quem decide e quando? Orçamento aprovado?
+Sinal mínimo para qualificar: serviço/produto público compatível com a oferta, evidência pública datada e próximo passo permitido. Não inferir exposição vulnerável a partir do setor, do domínio ou de uma notícia genérica. Não classificar uma empresa como afetada sem prova específica.
 
-### Regras de front-end comercial
+O pacote Standard de R$ 3.490 está **proposto, não aprovado**. O rascunho atual limita-se a até 5 URLs web e 5 grupos de rotas de uma API, com prazo proposto de 3 dias úteis após escopo, autorização e pré-requisitos completos. A proposta precisa de aceite comercial e revisão jurídica antes de ser enviada.
 
-- Prospecção passiva apenas (OSINT público); **nenhum teste ativo sem contrato e escopo assinado** — usar achado passivo como gancho de demo.
-- Dados de lead: nome, empresa, contato, origem. Sem evidências de vulnerabilidade de terceiros dentro do tracker (link para evidência no MegaBrain/hash, nunca colar payload).
-- SLA de resposta a inbound: 24h (coerente com promessa de entrega de 24h).
+## Regras de operação
 
-## Lane B — Bug bounty
+- A pesquisa comercial é passiva e usa fontes públicas. Não enumerar, varrer ou testar ativos de prospect.
+- Não enviar e-mails, mensagens ou propostas sem autorização explícita do operador.
+- Não alegar casos de sucesso, estatísticas de mercado, disponibilidade de atendimento ou canais de contato sem evidência e aprovação.
+- No mínimo, cada registro deve ter `empresa`, `origem`, `fonte_url`, `data_coleta`, `lane`, `status_verificacao`, `criterio_qualificacao` e `proxima_acao`.
+- Uma proposta enviada exige ativos nominados, autorização expressa, janela de teste e regras de engajamento assinadas em `docs/SCOPE.md`.
 
-| # | Estágio | Critério de saída |
-| :--- | :--- | :--- |
-| 0 | **Programa triado** | Programa ativo, escopo web/API, recompensa ≥ alvo do squad |
-| 1 | **Recon & inventário** | Superfície mapeada (skills `mitr3-hb-js-inventory`, scope gate) |
-| 2 | **Caça** | Duplicatas filtradas; candidatos com evidência + hash |
-| 3 | **Report submetido** | Report dentro do escopo do programa, revisão humana antes do submit |
-| 4 | **Resolvido** | Bounty pago / duplicata / informative — registrar valor e lição |
-| 5 | **Alavanca** | CVE/write-up (com aprovação do operador) → conteúdo para landing e outbound |
+## Próximas ações
 
-Lanchar Stage 0 só com o gate de escopo (programa define autorização; MITR3 RoE superior).
+1. Hunter: qualificar passivamente os 15 candidatos por segmento e sinal público de necessidade; documentar evidência específica antes de mudar qualquer status. Sem contato, enumeração ou teste.
+2. Scribe: revisar a proposta Standard como documento de trabalho, mantendo preço e SLA identificados como proposta.
+3. Operador: aprovar qualquer primeiro contato, preço, escopo, canais e termos finais.
 
-## Cadência operacional
-
-- **Semanal**: revisar CSV — tudo em Stage ≥2 há >14 dias precisa de ação ou descarte.
-- **Mensal**: 1 case de sucesso → atualizar one-pager/landing; reconciliar bounties Lane B.
-- Origem de leads nova só entra no CSV se tiver um canal repetível (landing, indicação, plataforma).
-
-## Status inicial
-
-- [x] Documento-mestre + tracker criados
-- [ ] Primeiras 10 leads Lane A carregadas (outbound/indicações Cimapi, Costa Lavos)
-- [ ] Lane B: consolidar lista de programas alvo (ex.: MELI #33462 em andamento) no CSV
-- [ ] Formulário/CTA da landing gravando direto no CSV (integração futura)
+Até que a qualificação seja sustentada por evidência, o pipeline tem **15 candidatos, 0 leads validados e 0 contatos autorizados**.

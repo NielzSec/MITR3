@@ -37,8 +37,16 @@ def _layer3():
 
 L3 = _layer3()
 DB = L3.DB
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"
+LEGACY_SCHEMA_VERSION = "1"
 VERIFY_TABLES = ("verify_meta", "verification_evidence", "evidence_revocations", "path_verdicts")
+LEGACY_VERIFY_TRIGGERS = {"verification_evidence_scope", "verification_evidence_no_update", "verification_evidence_no_delete",
+                          "evidence_revocations_no_update", "evidence_revocations_no_delete", "path_verdicts_no_update",
+                          "path_verdicts_no_delete", "verify_nodes_delete_guard"}
+SNAPSHOT_TRIGGER = """CREATE TRIGGER verification_evidence_snapshot BEFORE INSERT ON verification_evidence
+  WHEN NEW.graph_snapshot_sha256 IS NULL OR NOT EXISTS(
+    SELECT 1 FROM graph_snapshots WHERE snapshot_sha256=NEW.graph_snapshot_sha256)
+  BEGIN SELECT RAISE(ABORT,'Evidence must bind to a recorded graph snapshot'); END"""
 MAX_ARTIFACT_BYTES = 256_000_000
 CONFIDENCE_WEIGHTS = {"scanner_agreement": 0.30, "harness_ast_gate": 0.25, "verified_ast_reachable": 0.45}
 CONTEXT_KEYS = ("environment", "flow", "identity", "condition")
@@ -64,6 +72,7 @@ CREATE TABLE verification_evidence (
   applies_to TEXT NOT NULL CHECK(json_valid(applies_to)),
   artifact_path TEXT NOT NULL CHECK(length(artifact_path) BETWEEN 1 AND 4096),
   artifact_sha256 TEXT NOT NULL CHECK(%(asha)s),
+  graph_snapshot_sha256 TEXT REFERENCES graph_snapshots(snapshot_sha256),
   analyzer TEXT NOT NULL CHECK(length(analyzer)>0),
   justification TEXT NOT NULL CHECK(length(justification)>0),
   recorded_by TEXT NOT NULL CHECK(length(recorded_by)>0),
@@ -72,6 +81,7 @@ CREATE TABLE verification_evidence (
      OR (kind='IAC_CONTROL' AND mitigation_id IS NOT NULL AND strength IS NOT NULL AND (
           (verdict='REDUCES' AND strength<1.0 AND COALESCE(json_extract(applies_to,'$.environment'),'')<>'')
        OR (verdict='BLOCKS' AND strength=1.0 AND source_id IS NOT NULL AND sink_id IS NOT NULL AND %(context)s)))));
+CREATE INDEX verification_evidence_snapshot ON verification_evidence(graph_snapshot_sha256);
 CREATE TABLE evidence_revocations (
   evidence_id TEXT PRIMARY KEY REFERENCES verification_evidence(evidence_id),
   reason TEXT NOT NULL CHECK(length(reason)>0),
@@ -99,6 +109,10 @@ CREATE TRIGGER verification_evidence_scope BEFORE INSERT ON verification_evidenc
     OR (NEW.source_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM attack_edges WHERE type='FLOWS_TO' AND source_id=NEW.source_id AND target_id=NEW.finding_id))
     OR (NEW.sink_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM attack_edges WHERE type='CALLS' AND source_id=NEW.finding_id AND target_id=NEW.sink_id))
   BEGIN SELECT RAISE(ABORT,'Evidence scope does not match graph structure'); END;
+CREATE TRIGGER verification_evidence_snapshot BEFORE INSERT ON verification_evidence
+  WHEN NEW.graph_snapshot_sha256 IS NULL OR NOT EXISTS(
+    SELECT 1 FROM graph_snapshots WHERE snapshot_sha256=NEW.graph_snapshot_sha256)
+  BEGIN SELECT RAISE(ABORT,'Evidence must bind to a recorded graph snapshot'); END;
 CREATE TRIGGER verification_evidence_no_update BEFORE UPDATE ON verification_evidence
   BEGIN SELECT RAISE(ABORT,'Evidence is append-only; revoke it instead'); END;
 CREATE TRIGGER verification_evidence_no_delete BEFORE DELETE ON verification_evidence
@@ -132,6 +146,9 @@ def ensure_schema(con):
     if "verify_meta" not in present:
         raise ValueError("Verification tables exist without a Layer 4 marker (written by another tool); refusing to reuse them")
     require_schema(con)
+    version = con.execute("SELECT value FROM verify_meta WHERE key='schema_version'").fetchone()
+    if version == (LEGACY_SCHEMA_VERSION,):
+        raise ValueError("Layer 4 schema v1 needs explicit migration: run `mitr3-graph-verify.py migrate`; legacy evidence will remain unbound and will not count")
 
 
 def require_schema(con):
@@ -139,8 +156,47 @@ def require_schema(con):
     if "verify_meta" not in names:
         raise ValueError("Layer 4 not initialised: record evidence first (verify of a graph with no evidence still needs the schema)")
     version = con.execute("SELECT value FROM verify_meta WHERE key='schema_version'").fetchone()
-    if not version or version[0] != SCHEMA_VERSION or not set(VERIFY_TABLES) <= names:
+    if not version or version[0] not in {LEGACY_SCHEMA_VERSION, SCHEMA_VERSION} or not set(VERIFY_TABLES) <= names:
         raise ValueError("Unsupported or incomplete Layer 4 schema; migrate explicitly")
+    columns = {row[1] for row in con.execute("PRAGMA table_info(verification_evidence)")}
+    if (version[0] == SCHEMA_VERSION) != ("graph_snapshot_sha256" in columns):
+        raise ValueError("Unsupported or incomplete Layer 4 schema; migrate explicitly")
+    triggers = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type='trigger'")}
+    required_triggers = LEGACY_VERIFY_TRIGGERS | ({"verification_evidence_snapshot"} if version[0] == SCHEMA_VERSION else set())
+    if not required_triggers <= triggers:
+        missing = ", ".join(sorted(required_triggers - triggers))
+        raise ValueError("Incomplete Layer 4 schema; missing integrity triggers: " + missing)
+
+
+def migrate_schema(db=DB):
+    """Explicitly upgrade v1 evidence; legacy rows remain unbound and cannot count."""
+    with closing(L3.connect_rw(db)) as con:
+        L3.require_schema(con)
+        require_schema(con)
+        version = con.execute("SELECT value FROM verify_meta WHERE key='schema_version'").fetchone()[0]
+        if version == SCHEMA_VERSION:
+            return {"status": "already_current", "schema_version": SCHEMA_VERSION}
+        con.execute("BEGIN IMMEDIATE")
+        try:
+            con.execute("ALTER TABLE verification_evidence ADD COLUMN graph_snapshot_sha256 TEXT REFERENCES graph_snapshots(snapshot_sha256)")
+            con.execute("CREATE INDEX verification_evidence_snapshot ON verification_evidence(graph_snapshot_sha256)")
+            con.execute(SNAPSHOT_TRIGGER)
+            con.execute("UPDATE verify_meta SET value=? WHERE key='schema_version' AND value=?",
+                        (SCHEMA_VERSION, LEGACY_SCHEMA_VERSION))
+            if con.execute("SELECT changes()").fetchone()[0] != 1:
+                raise ValueError("Layer 4 schema changed during migration")
+            demoted = con.execute("UPDATE attack_edges SET verification_state='STRUCTURAL_HYPOTHESIS' "
+                                  "WHERE verification_state='FEASIBLE_PATH'").rowcount
+            if con.execute("PRAGMA foreign_key_check").fetchall():
+                raise ValueError("Layer 4 migration produced foreign-key violations")
+            if con.execute("PRAGMA integrity_check").fetchall() != [("ok",)]:
+                raise ValueError("Layer 4 migration failed integrity check")
+            con.execute("COMMIT")
+        except BaseException:
+            con.execute("ROLLBACK")
+            raise
+    return {"status": "migrated", "schema_version": SCHEMA_VERSION, "feasible_edges_demoted": demoted,
+            "legacy_evidence": "UNBOUND_GRAPH; preserved but does not count"}
 
 
 def check_artifact(root, relative):
@@ -198,7 +254,6 @@ def build_record(raw, root):
               "artifact_path": rel, "artifact_sha256": sha,
               "analyzer": L3.text(raw.get("analyzer"), "analyzer", 256, True),
               "justification": L3.text(raw.get("justification"), "justification", L3.MAX_TEXT, True)}
-    record["evidence_id"] = L3.digest(record)  # identity excludes who/when, so the same finding recorded twice is one row
     record["recorded_by"] = L3.text(raw.get("recorded_by"), "recorded_by", 256, True)
     return record
 
@@ -208,17 +263,31 @@ def record_evidence(source, db=DB, evidence_root=ROOT):
     record = build_record(raw, evidence_root)
     with closing(L3.connect_rw(db)) as con:
         ensure_schema(con)
+        con.execute("BEGIN IMMEDIATE")
         try:
+            snapshot = L3.snapshot_hash(con)
+            if not con.execute("SELECT 1 FROM graph_snapshots WHERE snapshot_sha256=?", (snapshot,)).fetchone():
+                raise ValueError("Current Layer 3 graph has no recorded snapshot; run the graph snapshot command first")
+            record["graph_snapshot_sha256"] = snapshot
+            identity = {key: value for key, value in record.items() if key != "recorded_by"}
+            record["evidence_id"] = L3.digest(identity)
             cursor = con.execute(
                 "INSERT OR IGNORE INTO verification_evidence(evidence_id,kind,finding_id,mitigation_id,source_id,sink_id,verdict,strength,"
-                "applies_to,artifact_path,artifact_sha256,analyzer,justification,recorded_by,recorded_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "applies_to,artifact_path,artifact_sha256,graph_snapshot_sha256,analyzer,justification,recorded_by,recorded_at) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (record["evidence_id"], record["kind"], record["finding_id"], record["mitigation_id"], record["source_id"], record["sink_id"],
                  record["verdict"], record["strength"], L3.canonical(record["applies_to"]), record["artifact_path"], record["artifact_sha256"],
-                 record["analyzer"], record["justification"], record["recorded_by"], L3.now()))
+                 record["graph_snapshot_sha256"], record["analyzer"], record["justification"], record["recorded_by"], L3.now()))
+            con.execute("COMMIT")
         except sqlite3.IntegrityError as exc:
+            con.execute("ROLLBACK")
             raise ValueError("Evidence rejected by database: %s" % exc) from None
+        except BaseException:
+            con.execute("ROLLBACK")
+            raise
     return {"evidence_id": record["evidence_id"], "artifact_path": record["artifact_path"],
-            "artifact_sha256": record["artifact_sha256"], "status": "recorded" if cursor.rowcount else "already_recorded"}
+            "artifact_sha256": record["artifact_sha256"], "graph_snapshot_sha256": record["graph_snapshot_sha256"],
+            "status": "recorded" if cursor.rowcount else "already_recorded"}
 
 
 def revoke_evidence(evidence_id, reason, by, db=DB):
@@ -233,27 +302,42 @@ def revoke_evidence(evidence_id, reason, by, db=DB):
 
 
 def load_evidence(con, root):
-    """All recorded evidence with a live artifact check. Revoked evidence is kept in the list, flagged."""
+    """Return artifact-checked evidence bound to the exact current graph snapshot."""
     revoked = {row[0] for row in con.execute("SELECT evidence_id FROM evidence_revocations")}
     cache, items = {}, []
+    current_snapshot = L3.snapshot_hash(con)
     columns = ("evidence_id", "kind", "finding_id", "mitigation_id", "source_id", "sink_id", "verdict", "strength", "applies_to",
                "artifact_path", "artifact_sha256", "analyzer", "justification", "recorded_by", "recorded_at")
-    for row in con.execute("SELECT %s FROM verification_evidence ORDER BY evidence_id" % ",".join(columns)):
-        item = dict(zip(columns, row))
+    has_snapshot = "graph_snapshot_sha256" in {row[1] for row in con.execute("PRAGMA table_info(verification_evidence)")}
+    select_columns = columns + (("graph_snapshot_sha256",) if has_snapshot else ())
+    selected = ",".join(select_columns) if has_snapshot else ",".join(columns) + ",NULL AS graph_snapshot_sha256"
+    for row in con.execute("SELECT %s FROM verification_evidence ORDER BY evidence_id" % selected):
+        item = dict(zip((*columns, "graph_snapshot_sha256"), row))
         item["applies_to"] = json.loads(item["applies_to"])
         if item["artifact_path"] not in cache:
             cache[item["artifact_path"]] = check_artifact(root, item["artifact_path"])
         status, _, sha = cache[item["artifact_path"]]
         item["revoked"] = item["evidence_id"] in revoked
         item["artifact_status"] = "HASH_MISMATCH" if status == "VERIFIED" and sha != item["artifact_sha256"] else status
-        item["counts"] = item["artifact_status"] == "VERIFIED" and not item["revoked"]
+        item["graph_snapshot_status"] = ("UNBOUND_GRAPH" if not item["graph_snapshot_sha256"] else
+                                         "CURRENT_GRAPH" if item["graph_snapshot_sha256"] == current_snapshot else "STALE_GRAPH")
+        item["counts"] = (item["artifact_status"] == "VERIFIED" and not item["revoked"]
+                          and item["graph_snapshot_status"] == "CURRENT_GRAPH")
         items.append(item)
     return items
 
 
+def problem_status(item):
+    if item["revoked"]:
+        return "REVOKED"
+    if item["artifact_status"] != "VERIFIED":
+        return item["artifact_status"]
+    return item["graph_snapshot_status"]
+
+
 def summarize(item):
     keys = ("evidence_id", "kind", "verdict", "strength", "mitigation_id", "analyzer", "justification",
-            "artifact_path", "artifact_sha256", "recorded_by", "applies_to")
+            "artifact_path", "artifact_sha256", "graph_snapshot_sha256", "recorded_by", "applies_to")
     return {key: item[key] for key in keys}
 
 
@@ -343,13 +427,13 @@ def evaluate(con, root, exposure="any"):
                         "applied": [summarize(e) for e in strongest.values() if e["verdict"] == "REDUCES"],
                         "claimed_only": [{"mitigation_id": m, "claimed_weight": w, "note": "claim without verified evidence; not counted"}
                                          for m, w in claimed.get(fid, []) if m not in applied]},
-                "problems": [{"evidence_id": e["evidence_id"], "status": "REVOKED" if e["revoked"] else e["artifact_status"]}
+                "problems": [{"evidence_id": e["evidence_id"], "status": problem_status(e)}
                              for e in scoped if not e["counts"]]},
-            "evidence_fingerprint": L3.digest(sorted((e["evidence_id"], e["artifact_sha256"]) for e in live)),
+            "evidence_fingerprint": L3.digest(sorted((e["evidence_id"], e["artifact_sha256"], e["graph_snapshot_sha256"]) for e in live)),
             "_edges": (flows_edge, calls_edge)})
     if exposure != "any":
         chains = [c for c in chains if c["exposure"] == exposure.upper()]
-    problems = [{"evidence_id": e["evidence_id"], "status": "REVOKED" if e["revoked"] else e["artifact_status"]} for e in evidence if not e["counts"]]
+    problems = [{"evidence_id": e["evidence_id"], "status": problem_status(e)} for e in evidence if not e["counts"]]
     unanchored = [{"finding": fid, "missing": [n for n, ok in (("SOURCE", src), ("SINK", snk)) if not ok]} for fid, src, snk in con.execute(
         "SELECT id,has_source,has_sink FROM (SELECT f.id AS id,EXISTS(SELECT 1 FROM attack_edges WHERE target_id=f.id AND type='FLOWS_TO') AS has_source,"
         "EXISTS(SELECT 1 FROM attack_edges WHERE source_id=f.id AND type='CALLS') AS has_sink FROM attack_nodes f WHERE f.type='FINDING') "
@@ -360,6 +444,7 @@ def evaluate(con, root, exposure="any"):
             "summary": {"chains": len(chains), "outcomes": count("outcome", OUTCOMES), "exposure": count("exposure", EXPOSURES),
                         "states": count("verification_state", ("STRUCTURAL_HYPOTHESIS", "FEASIBLE_PATH"))},
             "limits": ["PROVEN is never set by this layer", "confidence is an ordering score, not a probability",
+                       "evidence counts only for the exact current C3 snapshot; legacy unbound evidence does not count",
                        "mitigation strength combines controls as independent (assumption)"]}
 
 
@@ -417,7 +502,8 @@ def list_evidence(db=DB, evidence_root=ROOT):
         require_schema(con)
         con.execute("BEGIN")
         return [dict(summarize(e), finding_id=e["finding_id"], source_id=e["source_id"], sink_id=e["sink_id"], revoked=e["revoked"],
-                     artifact_status=e["artifact_status"], counts=e["counts"]) for e in load_evidence(con, evidence_root)]
+                     artifact_status=e["artifact_status"], graph_snapshot_status=e["graph_snapshot_status"], counts=e["counts"])
+                for e in load_evidence(con, evidence_root)]
 
 
 def main(argv=None):
@@ -431,6 +517,7 @@ def main(argv=None):
     revoke.add_argument("evidence_id")
     revoke.add_argument("--reason", required=True)
     revoke.add_argument("--by", required=True)
+    sub.add_parser("migrate", help="Explicitly migrate Layer 4 v1; legacy evidence remains unbound")
     sub.add_parser("list", help="List evidence with live artifact checks")
     query = sub.add_parser("verify", help="Evaluate SOURCE->FINDING->SINK chains")
     query.add_argument("--exposure", type=str.lower, choices=("any", "unauthenticated", "authenticated", "unknown"), default="any")
@@ -442,6 +529,8 @@ def main(argv=None):
             result = record_evidence(args.input, args.db, args.evidence_root)
         elif args.action == "revoke":
             result = revoke_evidence(args.evidence_id, args.reason, args.by, args.db)
+        elif args.action == "migrate":
+            result = migrate_schema(args.db)
         elif args.action == "list":
             result = list_evidence(args.db, args.evidence_root)
         else:

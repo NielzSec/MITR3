@@ -1,57 +1,38 @@
-# MITR3 — Diagnóstico Express de Superfície Externa & Telemetria
-**Proteja a sua infraestrutura contra invasões antes que agentes maliciosos encontrem as portas abertas.**
+# MITR3 — Avaliação autorizada de superfície web e API
 
----
+**Rascunho interno — não publicar nem enviar.** Preço, prazo, disponibilidade, canal comercial e condições ainda dependem de aprovação. Não usar como promessa de segurança ou garantia de ausência de falhas.
 
-### O Problema Que Toda Empresa Enfrenta Sem Saber
+## O serviço
 
-Mais de **80% dos incidentes de segurança modernos** não começam com explorações complexas de "zero-day", mas sim com **pequenos descuidos operacionais deixados na internet pública**:
-* Painéis administrativos, de métricas ou automações (Grafana, n8n, Airflow) acessíveis sem senha.
-* Ambientes de homologação/teste compartilhando banco de dados e credenciais de produção.
-* Chaves de API, tokens privados e rotas ocultas expostas em arquivos JavaScript e sourcemaps.
-* Portas de serviços legados (brokers ERP, bancos de dados, relays) expostas indevidamente na nuvem.
-* Falhas de certificados e protocolos TLS obsoletos facilitando interceptação de dados sensíveis.
+Uma avaliação delimitada de ativos web e API nominados pelo cliente, com autorização expressa e regras de engajamento por escrito. O objetivo é documentar comportamentos observados, impacto contextualizado e recomendações de correção.
 
----
+## Escopo Standard proposto
 
-### O Que é a Auditoria Express MITR3?
+- 1 domínio primário;
+- até 5 URLs/páginas listadas;
+- até 5 grupos de rotas de uma API listada;
+- observação passiva de certificados TLS dos hostnames autorizados;
+- prazo proposto: até 3 dias úteis após autorização, inventário e demais pré-requisitos.
 
-A **Auditoria Express de Superfície Externa** é um diagnóstico rápido, cirúrgico e de alta precisão técnica realizado pela esteira de segurança avançada do **MITR3**.
+O escopo final é o anexo assinado. Subdomínios, IPs, terceiros, cloud, autenticação, código-fonte e reteste não entram automaticamente.
 
-Ao contrário de consultorias tradicionais que demoram semanas e cobram dezenas de milhares de reais:
-1. **100% Segura e Não-Intrusiva**: Nossos testes operam sob rigorosa metodologia *black-box* passiva e semi-ativa. Não realizamos ataques de negação de serviço (DoS), não alteramos seus dados e não causamos instabilidade operacional.
-2. **Execução Ágil em 24 a 48 Horas**: Nossa esteira multi-agente correlaciona dados de DNS, certificados, telemetria e código front-end com máxima velocidade.
-3. **Evidências Criptograficamente Comprovadas**: Cada apontamento é acompanhado de hash SHA-256, requisição HTTP reprodutível e impacto direto no negócio.
+## Entregáveis propostos
 
----
+- resumo executivo com escopo e limitações;
+- relatório técnico com evidência minimizada e recomendações;
+- hashes SHA-256 dos arquivos entregues;
+- debrief remoto de até 30 minutos.
 
-### O Que Entregamos à Sua Liderança
+Hashes asseguram integridade dos arquivos depois da entrega; não comprovam sozinhos a validade de uma conclusão.
 
-Você receberá um pacote completo e pronto para ação:
+## Salvaguardas
 
-1. **Relatório Executivo C-Level**: Resumo em linguagem clara de negócio (para Diretores, CEOs e Sócios), pontuando riscos financeiros, reputacionais e implicações perante a **LGPD**.
-2. **Caderno Técnico de Engenharia**: Passo a passo detalhado para o seu time de TI/Desenvolvimento corrigir cada apontamento em poucas horas.
-3. **Inventário Completo de Superfície Externa**: Relação de todos os domínios, subdomínios, IPs, serviços e portas que a sua empresa expõe hoje publicamente.
-4. **Sessão de Debrifing (30 min)**: Alinhamento direto com nossos especialistas para esclarecer dúvidas e priorizar as correções.
+Sem autorização assinada, não há teste ativo. Não estão incluídos DoS/carga, engenharia social, persistência, alteração/exclusão de dados, exfiltração ou ativos não listados. A avaliação não promete encontrar todos os riscos nem garantir que o ambiente esteja seguro.
 
----
+## Investimento
 
-### Planos de Investimento
+**R$ 3.490,00 — valor proposto, não aprovado.** Condições, validade, impostos e disponibilidade dependem de aprovação comercial e jurídica.
 
-| Pacote | Escopo de Ativos | Prazo de Entrega | Investimento |
-| :--- | :--- | :--- | :--- |
-| **Express Starter** | Até 3 domínios/aplicações web + 5 IPs | **24 Horas** | **R$ 1.850,00** |
-| **Business Standard** | Até 10 domínios/subdomínios + 20 IPs + APIs | **48 Horas** | **R$ 3.490,00** |
-| **Enterprise Comprehensive** | Escopo corporativo ilimitado + Nuvem + Revisão | **5 Dias** | **Sob Consulta** |
+## Prontidão comercial
 
----
-
-### Casos de Sucesso Comprovados
-
-O MITR3 já realizou auditorias de segurança autorizadas para indústrias e empresas de grande porte (incluindo **Cimapi** e **Costa Lavos**), identificando com precisão exposições críticas de telemetria, configurações inseguras de transporte e rotas desprotegidas antes de qualquer exploração por terceiros.
-
----
-
-**Solicite o seu diagnóstico agora mesmo:**  
-Contato: comercial@mitr3.com.br | WhatsApp/LinkedIn Direto  
-*MITR3 Intelligence & Security Squad — Precisão que protege o seu negócio.*
+O canal de contato, a oferta e as referências de clientes ainda não estão aprovados para publicação. O domínio/e-mail comercial precisa ser confirmado pelo operador. Remover este aviso somente após aprovação explícita e validação dos canais e das alegações.
