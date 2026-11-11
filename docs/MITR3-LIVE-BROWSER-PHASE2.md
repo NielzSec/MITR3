@@ -6,6 +6,15 @@ Phase 2 adds operator-confirmed active `replay` and candidate `probe` commands t
 - The `replay` command transmits captured requests, which may cause side effects on state-changing endpoints (even on HTTP `GET`).
 Therefore, Phase 2 is an **active offensive probing framework**, NOT a read-only tool. It strictly requires a validated Nexus scope contract and human authorization before traffic is enabled. No target was contacted while implementing or testing these commands.
 
+## Authorization record
+
+- 2026-11-11: dj's explicit word ("eu autorizo emitir requests para externo para testes")
+  authorizes outbound test traffic from Phase 2 commands. Standing rule (MITR3-OPERATIONS.md,
+  operator authority): this covers targets dj has the right to authorize — bug bounty programs
+  in scope, CTF infrastructure, contracted engagements, team infrastructure. Third-party targets
+  without an external contract remain out of scope. Per-target scope pinning via `--allow-origin`
+  and TTY confirmation are unchanged requirements.
+
 ## Preconditions and scope
 
 - Use a `.raw.jsonl` capture beneath a `human-only` directory owned by the
