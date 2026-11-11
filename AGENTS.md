@@ -1,11 +1,31 @@
 # MITR3 — Orientações para agentes neste repositório
 
+## Diretriz de Branching e Publicação GitHub (10/11/2026)
+
+- **Branch `master`**: Branch operacional de staging e desenvolvimento ativo. Todos os próximos commits sobem inicialmente para `master`.
+- **Branch `main`**: Branch de release pública sanitizada. Nenhuma alteração é promovida de `master` para `main` sem liberação explícita do operador dj.
+- **Gestão Git**: VANTA é responsável pela custódia, organização de lotes, auditoria de segredos (`bin/mitr3-secrets-audit.py`) e sincronização remota via GitHub CLI / Git.
+
 O OpenCode segue como maestro. Use as especialidades de Hermes/Gemma4,
 Codex, VANTA/Antigravity, DeepSeek e JEV conforme a tarefa.
 
 Para pesquisas de vulnerabilidades, CVEs/CWE, bug bounty, RE e CTF,
 leia docs/MITR3-INTELLIGENCE-RAG.md e a skill
 skills/mitr3-intelligence-rag/SKILL.md.
+
+Para evidências do Burp Suite (MELI #33462), consultar a skill
+`skills/mitr3-burp-qa/SKILL.md` e
+`docs/MITR3-BURP-SQUAD-WORKFLOW-20261021.md`. OpenCode é o único emissor
+de tráfego via browser/Burp Repeater manual. Os demais agentes usam SOMENTE
+metadados sanitizados gerados por `bin/mitr3-burp-qa.py`; nunca conectar o
+Burp MCP com ferramentas de envio de HTTP diretamente a todos os agentes.
+
+Para aprender **como os pesquisadores pensaram** em relatos divulgados, CVEs e
+CTFs, leia docs/MITR3-PESQUISA-CASES-METODO-20261021.md e a skill
+skills/mitr3-case-reasoning/SKILL.md. Consulte o casebook OFFLINE com
+`python3 bin/mitr3-casebook.py search "termo"`. Este corpus é staging, não
+finding confirmado nem ficha aprovada pelo operador/MegaBrain; relatos antigos
+podem ser duplicatas (MercadoLibre #2495989, cancelamentos).
 
 A busca local faz referencia a CISA KEV, OWASP ASVS 5.0.0 e a fichas
 curadas de write-ups. Responda com ID, URL, limite de confiança e
@@ -20,3 +40,26 @@ Novos conteudos passam por fila com revisao humana:
 bin/mitr3-rag-curate.py. Nao use automacoes para aprovar a propria
 pesquisa. O MITR3 Nexus exige contrato humano de escopo; ver docs/SCOPE.md.
 
+## MITR3 Ponytail efficiency contract (2026-10-21)
+For coding, auditing, and refactoring use Ponytail 5.3.2 at /home/nielz/MITR3/skills/ponytail/SKILL.md. Read affected code, prefer existing helpers/stdlib, avoid unrequested code and redundant multi-agent work, and keep handoffs brief.
+Ponytail is subordinate to MITR3 scope, authorization, GPT/JEV gates, logging, evidence hashes, secret protection, privacy, and necessary tests. Never reduce verification or drop an independent QA lane to save tokens. Report untested assumptions and real risks.
+
+## MITR3 Hackbots — fase 0 (2026-10-23)
+
+Piloto isolado em `hackbots/README.md` e `hackbots/docs/ORCA.md`. Orca é o painel e transporte de coordenação a partir de 10/11/2026; Morfeus/OpenCode continua coordenador lógico quando iniciado. As skills de especialista (`mitr3-hb-scope-gate`, `-js-inventory`, `-evidence-review`) seguem em `skills/mitr3-hb-*/SKILL.md`. As skills de coordenação não ligadas ao Maestri permanecem em `.opencode/skills/mitr3-hb-*/SKILL.md`; as antigas skills de Maestri estão arquivadas e não devem ser carregadas. **Apenas análise offline** nesta fase; não inicializar swarm, containers, servidores ou Ruflo automaticamente. Limite piloto: 2 workers e aceite humano independente. O contrato Nexus em `docs/SCOPE.md` e políticas pré-existentes continuam superiores; não interpretar uma validação JSON como permissão ou prova de vulnerabilidade. Testar apenas o comportamento afetado quando houver mudança de runtime.
+
+
+## MITR3 — Skill Builder obrigatório, ferramentas próprias primeiro (24/10/2026)
+
+Toda skill e mini-skill criada, adaptada ou revisada para o MITR3
+**DEVE ser gerada via `hackbots/skill-builder/skill_builder.py`**, com
+`methodology.json`, `new`, `audit`, testes/Evaluator, QA independente
+e aceite humano antes de instalação operacional. **Proibido criar
+`SKILL.md` manualmente em diretórios ativos**, inclusive por agentes
+de terceiros. Priorizar **sempre** nossas ferramentas existentes
+(MegaBrain, Builder, Evaluator, Execution Verifier, Runner/Broker,
+REA, JEV, ferramentas MITR3) em vez de criar novos scripts ou plugins.
+Inventariar antes; justificar necessidade de alternativa externa.
+As 16 mini-skills atualmente em `hackbots/team/*/skills/` são
+`BUILDER_PROVENANCE_UNVERIFIED` até migração/auditoria. Ler contrato:
+`hackbots/team/SKILL-BUILDER-ONLY-POLICY.md`.
