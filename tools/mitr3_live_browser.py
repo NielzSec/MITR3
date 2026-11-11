@@ -113,6 +113,79 @@ class ScopePolicy:
         return False, f"OUT_OF_SCOPE_DESTINATION_{host}"
 
 
+FLIGHT_REGISTRY_PATH = os.environ.get(
+    "MITR3_FLIGHT_REGISTRY",
+    "/home/nielz/MITR3/MITR3/docs/evidence/live-browser/flight_registry.jsonl")
+
+
+class SessionRegistry:
+    """Flight-control registry: append-only JSONL of session lifecycle events.
+    Fail-safe by design — registry failure never blocks capture."""
+
+    def __init__(self, path: str = None):
+        self.path = path or FLIGHT_REGISTRY_PATH
+
+    def _emit(self, event: dict):
+        try:
+            d = os.path.dirname(self.path)
+            os.makedirs(d, mode=0o700, exist_ok=True)
+            try:
+                os.chmod(d, 0o700)
+            except Exception:
+                pass
+            event["ts"] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            fd = os.open(self.path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+            with os.fdopen(fd, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(event, ensure_ascii=False) + "\n")
+        except Exception:
+            pass  # registry is observability, never a capture dependency
+
+    def start(self, session_id, agent, target_url, scope_allows, feed_path, cdp_port):
+        self._emit({"event": "session_start", "session_id": session_id, "agent": agent,
+                    "target": target_url, "scope_allows_target": scope_allows,
+                    "feed": feed_path, "cdp_port": cdp_port, "pid": os.getpid()})
+
+    def heartbeat(self, session_id, agent, current_url, req_count, alert_count):
+        self._emit({"event": "heartbeat", "session_id": session_id, "agent": agent,
+                    "current_url": current_url, "req_count": req_count,
+                    "alert_count": alert_count})
+
+    def end(self, session_id, agent, req_count, alert_count, status="closed"):
+        self._emit({"event": "session_end", "session_id": session_id, "agent": agent,
+                    "req_count": req_count, "alert_count": alert_count, "status": status})
+
+
+class SlackFlightNotifier:
+    """Optional HIGH-severity indicator forwarder to Slack (MITR3_SLACK_WEBHOOK).
+    Fire-and-forget with 3s timeout; dedupes per (session, type, host)."""
+
+    def __init__(self):
+        self.url = os.environ.get("MITR3_SLACK_WEBHOOK", "").strip()
+        self._seen = set()
+
+    def notify(self, session_id, agent, indicators, target_host):
+        if not self.url:
+            return
+        for ind in indicators:
+            if ind.get("severity") != "HIGH":
+                continue
+            key = (session_id, ind.get("type"), target_host)
+            if key in self._seen:
+                continue
+            self._seen.add(key)
+            try:
+                req = urllib.request.Request(
+                    self.url,
+                    data=json.dumps({"text": (
+                        f"[mitr3-flight-control] HIGH indicator `{ind.get('type')}` on "
+                        f"{target_host} (session {session_id}, agent {agent}) — "
+                        "candidate only, verify independently")}).encode(),
+                    headers={"Content-Type": "application/json"})
+                urllib.request.urlopen(req, timeout=3)
+            except Exception:
+                pass  # Slack out never degrades the capture loop
+
+
 class EventSanitizer:
     """Sanitizes HTTP metadata for agent consumption, removing all secrets, values, and raw bodies."""
 
@@ -432,8 +505,14 @@ class LiveBrowserFeedSession:
     """Manages browser lifecycle, scope filtering, event correlation, and sanitized feed emission."""
     def __init__(self, target_url: str = None, allowed_origins: list = None, allowed_hosts: list = None,
                  headful: bool = False, cdp_port: int = 9224, out_dir: str = None,
-                 human_raw_capture: bool = False, quiet: bool = False):
+                 human_raw_capture: bool = False, quiet: bool = False, agent: str = None):
         self.target_url = target_url
+        self.agent = agent or os.environ.get("MITR3_AGENT") or os.environ.get("HERMES_AGENT_NAME") or "unknown-agent"
+        self.registry = SessionRegistry()
+        self.slack = SlackFlightNotifier()
+        self.current_url = target_url
+        self._flight_reqs = 0
+
         self.scope = ScopePolicy(allowed_origins=allowed_origins, allowed_hosts=allowed_hosts)
         self.headful = headful
         self.cdp_port = cdp_port
@@ -464,6 +543,10 @@ class LiveBrowserFeedSession:
         pid = os.getpid()
         self.session_id = f"web_feed_{stamp}_{pid}"
         self.feed_path = os.path.join(self.out_dir, f"{self.session_id}.agent_feed.jsonl")
+        self.registry.start(
+            self.session_id, self.agent, target_url,
+            self.scope.is_allowed(target_url)[0] if target_url else None,
+            self.feed_path, cdp_port)
         self.summary_path = os.path.join(self.out_dir, f"{self.session_id}.summary.json")
 
         self.human_raw_dir = None
@@ -589,6 +672,7 @@ class LiveBrowserFeedSession:
 
             with self.lock:
                 self.requests[rid] = entry
+                self._flight_tick(entry)
                 self.order.append(rid)
                 self.indicators.extend(param_indicators)
                 if not is_allowed:
@@ -675,6 +759,7 @@ class LiveBrowserFeedSession:
                         with self.lock:
                             if rid in self.requests:
                                 self.requests[rid]['indicators'].extend(diag_indicators)
+                            self._flight_slack_diagnostics(self.requests.get(rid, {}), diag_indicators)
                             self.indicators.extend(diag_indicators)
                         self._write_agent_feed({
                             'event': 'diagnostic_alert',
@@ -739,7 +824,28 @@ class LiveBrowserFeedSession:
         is_allowed, reason = self.scope.is_allowed(url)
         if not is_allowed:
             raise PermissionError(f"Navigation blocked by scope policy: {reason} ({url})")
+        self.current_url = url
+        self.registry.heartbeat(self.session_id, self.agent, url, self._flight_reqs, len(self.indicators))
         return self.ws.call('Page.navigate', {'url': url})
+
+    def _flight_tick(self, entry: dict):
+        """Flight-control bookkeeping on every captured request; never raises."""
+        try:
+            if entry.get('resource_type') == 'Document' and entry.get('url'):
+                self.current_url = entry.get('url')
+            self._flight_reqs += 1
+            if self._flight_reqs % 25 == 0:
+                self.registry.heartbeat(self.session_id, self.agent, self.current_url,
+                                        self._flight_reqs, len(self.indicators))
+        except Exception:
+            pass
+
+    def _flight_slack_diagnostics(self, request_entry: dict, diag_indicators: list):
+        try:
+            host = urllib.parse.urlsplit(request_entry.get('url') or self.current_url or '').hostname or 'unknown'
+            self.slack.notify(self.session_id, self.agent, diag_indicators, host)
+        except Exception:
+            pass
 
     def export_sealed_summary(self) -> dict:
         """Generates SHA-256 sealed audit summary without modifying past records."""
@@ -787,6 +893,8 @@ class LiveBrowserFeedSession:
 
     def stop(self):
         self.running = False
+        self.registry.end(self.session_id, self.agent, self._flight_reqs,
+                          len(self.indicators), status="closed")
         summary = self.export_sealed_summary()
         if self.ws:
             self.ws.close()
@@ -1026,6 +1134,38 @@ def run_probe(request: dict, scope: ScopePolicy, probe_type: str, parameter: str
     }
 
 
+def _preflight_phase2_evidence(capture_path: str) -> None:
+    parent = Path(capture_path).parent
+    try:
+        parent_fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    except OSError as exc:
+        raise PermissionError("Untrusted human-only evidence directory") from exc
+    try:
+        parent_stat = os.fstat(parent_fd)
+        if parent_stat.st_uid != os.geteuid() or stat.S_IMODE(parent_stat.st_mode) != 0o700:
+            raise PermissionError("Untrusted human-only evidence directory")
+        try:
+            os.mkdir("probes", mode=0o700, dir_fd=parent_fd)
+        except FileExistsError:
+            pass
+        try:
+            out_fd = os.open("probes", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent_fd)
+        except OSError as exc:
+            raise PermissionError("Untrusted probe evidence directory") from exc
+        try:
+            out_stat = os.fstat(out_fd)
+            if out_stat.st_uid != os.geteuid() or stat.S_IMODE(out_stat.st_mode) != 0o700:
+                raise PermissionError("Untrusted probe evidence directory")
+            test_name = f".preflight_{secrets.token_hex(4)}"
+            test_fd = os.open(test_name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=out_fd)
+            os.close(test_fd)
+            os.unlink(test_name, dir_fd=out_fd)
+        finally:
+            os.close(out_fd)
+    finally:
+        os.close(parent_fd)
+
+
 def _write_phase2_evidence(capture_path: str, result: dict) -> tuple[str, str]:
     parent = Path(capture_path).parent
     try:
@@ -1077,7 +1217,7 @@ def _confirm_phase2(action: str, request: dict) -> bool:
 
 
 def phase2_cli(action: str, argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description=f"MITR3 Live Browser {action.lower()} — scoped, read-only Phase 2")
+    parser = argparse.ArgumentParser(description=f"MITR3 Live Browser {action.lower()} — scoped active Phase 2 (replay / probe)")
     parser.add_argument("capture", help="Human-only .raw.jsonl capture (mode 0600 in a mode 0700 directory)")
     parser.add_argument("--request-id", required=True, help="CDP request ID from that capture")
     parser.add_argument("--allow-origin", action="append", required=True, help="Exact approved HTTP(S) origin; repeat for target/canary")
@@ -1094,6 +1234,8 @@ def phase2_cli(action: str, argv: list[str]) -> int:
             if args.kind == "ssrf" and not args.canary_url:
                 raise ValueError("SSRF probes require --canary-url")
             _probe_pair(request, scope, args.kind, args.param, getattr(args, "canary_url", None))
+        # Preflight evidence directory before any network transport or confirmation
+        _preflight_phase2_evidence(args.capture)
         if not _confirm_phase2(action, request):
             raise PermissionError("Operator confirmation did not match")
         result = (run_probe(request, scope, args.kind, args.param, args.canary_url)
@@ -1320,6 +1462,8 @@ def main():
     parser.add_argument("--human-raw-capture", action="store_true", default=False,
                         help="Record separate human-only raw capture (isolated in 0700 human-only dir; never in agent feed)")
     parser.add_argument("--quiet", action="store_true", help="Suppress console logging")
+    parser.add_argument("--agent", default=None,
+                        help="Agent identity for flight control (env: MITR3_AGENT)")
     args = parser.parse_args(argv)
 
     # Default allowlist includes localhost / loopback if none provided
@@ -1334,7 +1478,8 @@ def main():
         cdp_port=args.port,
         out_dir=args.out,
         human_raw_capture=args.human_raw_capture,
-        quiet=args.quiet
+        quiet=args.quiet,
+        agent=args.agent
     )
 
     try:
