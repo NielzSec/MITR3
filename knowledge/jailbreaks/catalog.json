@@ -1,0 +1,159 @@
+{
+  "collection": "jailbreaks",
+  "source": "https://github.com/togg53192-cmd/jailbreaks",
+  "source_stars": 16118,
+  "license": "MIT",
+  "purpose": "research_and_education",
+  "description": "Curated collection of system prompts, persona locks, workspace policies, and agent operating specifications for frontier, open-weight, and free stealth models.",
+  "stats": {
+    "total_prompts": 32,
+    "total_targets": 26,
+    "total_files": 52
+  },
+  "providers": [
+    {
+      "name": "OpenCode Zen",
+      "models": [
+        {"name": "BigPickle", "file": "0x8D jailbreaks/BigPickle-opencode.md", "type": "VANTA persona lock"},
+        {"name": "Space Bunny", "file": "Stealth Models/spacebunny-agents.md", "type": "Assistant operating specification"},
+        {"name": "LongCat 2.5", "file": "Meituan/longcat-agents.md", "type": "Assistant operating specification"},
+        {"name": "MiMo V2.6", "file": "Xiaomi/mimo-2.6-agents.md", "type": "Assistant operating specification"},
+        {"name": "Step 5 Preview", "file": "StepFun/Step-5-preview.md", "type": "Workspace operating profile"},
+        {"name": "Muse Spark 1.3", "file": "Meta/Muse spark 1.3.md", "type": "Agent deployment operating policy"},
+        {"name": "Muse Spark 1.3 v2", "file": "Meta/Muse-spark-1-3-v2.md", "type": "Runtime scope-note variant"},
+        {"name": "Muse.ai", "file": "Meta/muse-ai-AGENTS.md", "type": "Assistant operating specification"},
+        {"name": "Muse Wonder", "file": "Meta/Muse-wonder.md", "type": "Agent operating instructions"}
+      ]
+    },
+    {
+      "name": "Anthropic",
+      "models": [
+        {"name": "Claude Opus v1", "file": "Anthropic/opus v1.md", "type": "Conversational groundwork persona"},
+        {"name": "Claude Opus v2", "file": "Anthropic/opus v2.md", "type": "Conversational groundwork persona"},
+        {"name": "Claude Sonnet v1", "file": "Anthropic/sonnet v1.md", "type": "Writer's-room framing"},
+        {"name": "Claude Sonnet v2", "file": "Anthropic/Sonnet v2.md", "type": "Writer's-room framing"}
+      ]
+    },
+    {
+      "name": "Zhipu AI",
+      "models": [
+        {"name": "GLM-5.2", "file": "Zhipu AI/glm-5.2.md", "type": "System prompt"},
+        {"name": "GLM ZCode 5.2", "file": "Zhipu AI/glm-zcode-5.2.md", "type": "System prompt"},
+        {"name": "GLM ZCode 5.3", "file": "Zhipu AI/glm-zcode-5.3.md", "type": "System prompt"},
+        {"name": "GLM ZCode 5.3 AGENTS", "file": "Zhipu AI/glm-zcode-5.3-AGENTS.md", "type": "AGENTS.md drop-in"},
+        {"name": "GLM-5.3 Flash", "file": "Zhipu AI/glm-5-3-flash.md", "type": "Assistant operating specification"},
+        {"name": "GLM-5.3 OpenCode", "file": "Zhipu AI/glm5-3opencode.md", "type": "Assistant operating specification"}
+      ]
+    },
+    {
+      "name": "DeepSeek",
+      "models": [
+        {"name": "DeepSeek V3", "file": "DeepSeek/deepseek v3.md", "type": "System prompt"},
+        {"name": "DeepSeek V4", "file": "DeepSeek/deepseek v4.md", "type": "System prompt"},
+        {"name": "DeepSeek 4.1", "file": "DeepSeek/deepseek-4-1.md", "type": "System prompt"},
+        {"name": "DeepSeek 4.1 1017", "file": "DeepSeek/deepseekv4.1 and v4.1-1017.md", "type": "System prompt"}
+      ]
+    },
+    {
+      "name": "Moonshot AI",
+      "models": [
+        {"name": "Kimi K2", "file": "Moonshot AI/kimi-k2.md", "type": "System prompt"},
+        {"name": "Kimi K3", "file": "Moonshot AI/kimi-k3-agents.md", "type": "Workspace operating profile"},
+        {"name": "Kimi K3.1", "file": "Moonshot AI/kimik3.1.md", "type": "Assistant operating specification"}
+      ]
+    },
+    {
+      "name": "xAI",
+      "models": [
+        {"name": "Grok Build", "file": "xAI/Grok build.md", "type": "Agent operating instructions"},
+        {"name": "Grok 4.7", "file": "xAI/grok-4.7.md", "type": "App-builder workspace guide"},
+        {"name": "Grok Config", "file": "xAI/grok-config.txt", "type": "CFG priority and routing configuration"}
+      ]
+    },
+    {
+      "name": "NVIDIA",
+      "models": [
+        {"name": "Nemotron 3 Ultra 550B", "file": "modemnakata/nemotron-3-ultra.md", "type": "Assistant operating specification"}
+      ]
+    },
+    {
+      "name": "Google",
+      "models": [
+        {"name": "Gemma 4", "file": "Google/gemma4.md", "type": "Ollama Modelfile"},
+        {"name": "Gemini 4 Argon", "file": "Google/Gemini-4-Argon.md", "type": "Operating policy"},
+        {"name": "Gemini 3.1 Pro", "file": "raghavraut/gemini-3.1-pro.md", "type": "System prompt"}
+      ]
+    },
+    {
+      "name": "Mistral",
+      "models": [
+        {"name": "Mistral Large 4", "file": "Mistral/Mistral-Large-4.md", "type": "Agent system prompt"}
+      ]
+    },
+    {
+      "name": "Alibaba",
+      "models": [
+        {"name": "Qwen 3.7", "file": "Alibaba/qwen-3.7.md", "type": "System prompt"},
+        {"name": "Qwen 3.8", "file": "Alibaba/qwen-3.8.md", "type": "System prompt"},
+        {"name": "Qwen Preferences", "file": "Alibaba/qwen-preferences.md", "type": "Configuration/preferences"}
+      ]
+    },
+    {
+      "name": "Meta",
+      "models": [
+        {"name": "Muse AI", "file": "Meta/muse-ai-AGENTS.md", "type": "Assistant operating specification"},
+        {"name": "Muse Ember", "file": "Meta/muse-ember.md", "type": "Assistant operating specification"},
+        {"name": "Muse Spark 1.3", "file": "Meta/Muse spark 1.3.md", "type": "Agent deployment operating policy"},
+        {"name": "Muse Spark 1.3 v2", "file": "Meta/Muse-spark-1-3-v2.md", "type": "Runtime scope-note variant"},
+        {"name": "Muse Wonder", "file": "Meta/Muse-wonder.md", "type": "Agent operating instructions"}
+      ]
+    },
+    {
+      "name": "OpenAI",
+      "models": [
+        {"name": "GPT-OSS 20B", "file": "OpenAI/gpt-oss-20b.md", "type": "Ollama Modelfile"}
+      ]
+    },
+    {
+      "name": "Meituan",
+      "models": [
+        {"name": "LongCat Agents", "file": "Meituan/longcat-agents.md", "type": "Agent operating instructions"}
+      ]
+    },
+    {
+      "name": "Xiaomi",
+      "models": [
+        {"name": "MiMo V2.6", "file": "Xiaomi/mimo-2.6-agents.md", "type": "Agent operating instructions"}
+      ]
+    },
+    {
+      "name": "StepFun",
+      "models": [
+        {"name": "Step 5 Preview", "file": "StepFun/Step-5-preview.md", "type": "Workspace operating profile"}
+      ]
+    },
+    {
+      "name": "Other",
+      "models": [
+        {"name": "DarkyHArry Jaibreak Master", "file": "DarkyHArry/Jaibreak Master.md", "type": "Multi-model jailbreak"},
+        {"name": "Tencent", "file": "Tencent/*", "type": "Various"},
+        {"name": "Stealth Models", "file": "Stealth Models/*", "type": "Various"}
+      ]
+    }
+  ],
+  "prompt_types": [
+    "system_prompt",
+    "AGENTS.md_dropin",
+    "workspace_operating_profile",
+    "assistant_operating_specification",
+    "ollama_modelfile",
+    "agent_deployment_operating_policy",
+    "runtime_scope_note_variant",
+    "persona_lock",
+    "CFG_configuration",
+    "multi_model_jailbreak"
+  ],
+  "ingested_at": "2026-11-11T06:20:00Z",
+  "git_commit": "f1c94e2",
+  "source_url": "https://github.com/togg53192-cmd/jailbreaks"
+}
