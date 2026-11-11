@@ -224,7 +224,7 @@ class AttackGraphNormalizer:
                 control_name = str(mit.get("control", mit_id_raw))
                 status = mit.get("status", "ACTIVE")
                 provider = mit.get("provider", "iac")
-                multiplier = float(mit.get("multiplier", 0.5))
+                multiplier = max(0.0, min(1.0, float(mit.get("multiplier", 0.5))))
             else:
                 mit_id_raw = str(mit)
                 control_name = str(mit)

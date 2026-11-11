@@ -210,6 +210,38 @@ def schema(con):
     """)
 
 
+# Layer 3 (bin/mitr3-code-graph.py) lives in this same file. build() replaces the whole file,
+# so these tables must be copied into the rebuilt database or every refresh would erase them.
+CODE_GRAPH_TABLES = ("code_graph_meta", "attack_nodes", "attack_edges", "technique_links",
+                     "graph_snapshots", "attack_revisions")
+
+
+def carry_code_graph(new):
+    """Copy Layer 3 tables, rows, indexes and triggers from the current database. Returns row counts."""
+    if not DB.exists():
+        return {}
+    with closing(connect()) as old:
+        present = [t for t in CODE_GRAPH_TABLES if old.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (t,)).fetchone()]
+        if not present:
+            return {}
+        marks = ",".join("?" * len(present))
+        ddl = {kind: old.execute("SELECT sql FROM sqlite_master WHERE type=? AND sql IS NOT NULL AND tbl_name IN (%s) ORDER BY name" % marks,
+                                 (kind, *present)).fetchall() for kind in ("table", "index", "trigger")}
+        for (sql,) in ddl["table"]:
+            new.execute(sql)
+        carried = {}
+        for table in present:  # fixed tuple order: parents before children
+            cursor = old.execute("SELECT * FROM " + table)
+            width = len(cursor.description)
+            new.executemany("INSERT INTO %s VALUES(%s)" % (table, ",".join("?" * width)), cursor)
+            carried[table] = new.execute("SELECT count(*) FROM " + table).fetchone()[0]
+        for kind in ("index", "trigger"):  # triggers last, so copying rows does not fire them
+            for (sql,) in ddl[kind]:
+                new.execute(sql)
+        return carried
+
+
 def build(bundle=None, metadata=None):
     if bundle is None:
         bundle, metadata = load_cached()
@@ -256,10 +288,13 @@ def build(bundle=None, metadata=None):
             stored = dict(metadata, built_at=now(), schema_version=1, rejected=dict(rejected))
             for key, value in stored.items():
                 con.execute("INSERT INTO metadata VALUES(?,?)", (key, json.dumps(value)))
+            carried = carry_code_graph(con)
             con.commit()
             if con.execute("PRAGMA foreign_key_check").fetchall():
                 raise ValueError("ATT&CK orphan edges")
             report = graph_stats(con)
+            if carried:
+                report["code_graph_carried"] = carried
         os.chmod(temporary, 0o600)
         os.replace(temporary, DB)
     finally:
