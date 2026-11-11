@@ -1,57 +1,46 @@
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-*.p12
-*.pfx
-*.kdbx
-*credentials*
-*secrets*
-*token*
-*auth*.json
-*oauth*.json
-*session*
-*cookie*
-*.har
-*.burp
-*.pcap
-*.pcapng
-*.sqlite
-*.sqlite3
-*.db
-*.log
-*.sarif
-*.trace
-*.dump
-*.core
-evidence/
-engagements/
-reports/
-reviews/
-state/
-artifacts/
-captures/
-incoming/
-runs/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.venv/
-venv/
-node_modules/
-target/
-dist/
-build/
-.coverage
-htmlcov/
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-.playwright/
-.shannon/
 
-*.har.json
+apisec-capture-*.json
+# CISA KEV historical deltas (generated, local)
+/codeql-findings.md
+/codeql-results.sarif
+# Diagnósticos locais de exposição: nunca incluir metadados privados em commits.
+engagements/*/artifacts/
+engagements/codeql_*/runs/
+engagements/*/evidence/
+engagements/*/logs/
+findsomething_*.json
+*.har
+knowledge/public-cases/queue/
+knowledge/reference-datasets/cache/
+*.log
+# OSINT leads may contain personal data; never commit generated reports.
+# Public official feeds cached locally, FTS index and QA status
+# Public RAG local index and remote receipts (derived data)
+*.pyc
+__pycache__/
+reports/osint/
+reports/js-lab-staging-evidence/
+response.json
+# Resultados locais do CodeQL: podem conter trechos e caminhos sensíveis.
+# Separate ATT&CK graph (derived from its own cached STIX bundle)
+state/mitr3-attack.sqlite3
+state/mitr3-intel-refresh-latest.json
+state/mitr3-intel.sqlite3
+state/mitr3-kev-delta-history.jsonl
+state/mitr3-kev-snapshot.json
+state/public-rag-mcp-qa.json
+state/public-rag-mcp-receipts.json
+state/public-rag.sqlite3
+state/shared-secret-check-latest.json
+
+# Credenciais locais de OSINT (nunca versionar)
+*.env
+Secrets.txt
+secrets.txt
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

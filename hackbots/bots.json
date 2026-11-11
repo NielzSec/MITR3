@@ -103,6 +103,75 @@
       "can_issue_network": false,
       "backend": "antigravity_cli",
       "tools": ["rea-mcp-android-tools", "jadx", "apktool", "frida", "mitr3-reverse-lowlevel"]
+    },
+    {
+      "id": "nexa",
+      "name": "Nexa",
+      "category": "business",
+      "role": "product-marketing-gtm",
+      "purpose": "Go-To-Market, empacotamento de ofertas de ciberseguranca, propostas comerciais, copys B2B e posicionamento de produto",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "claude",
+      "model": "claude-3-5-sonnet",
+      "tools": ["markdown", "copys-b2b", "proposals", "composio-linkedin-read"]
+    },
+    {
+      "id": "aura",
+      "name": "Aura",
+      "category": "design",
+      "role": "deliverables-uiux-designer",
+      "purpose": "Design e diagramacao de relatorios executivos para C-Level, infograficos Mermaid/HTML/PDF, apresentacoes visuais e identidade da marca",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "antigravity_cli",
+      "tools": ["mermaid", "html-tailwind-pdf", "image-generator", "report-templates"]
+    },
+    {
+      "id": "hunter",
+      "name": "Hunter",
+      "category": "business",
+      "role": "leadgen-bounty-dealflow",
+      "purpose": "Monitoramento de escopos de Bug Bounty com alto payout e prospeccao de alvos B2B com superficie de ataque exposta",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["mitr3-recon.sh", "mitr3-osint.py", "bounty-crawler", "notion-pipeline"]
+    },
+    {
+      "id": "scribe",
+      "name": "Scribe",
+      "category": "business",
+      "role": "executive-proposal-writer",
+      "purpose": "Redacao de propostas comerciais de alto impacto, matriz de risco financeiro/LGPD e relatorios executivos formais para decisores",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["proposal-generator", "risk-matrices", "executive-summaries", "notion-writer"]
+    },
+    {
+      "id": "cliper",
+      "name": "Cliper",
+      "category": "intelligence",
+      "role": "search-and-slack-curator",
+      "purpose": "Buscas estruturadas na web, CVEs, Reddit, dark web e advisories, com sintese de inteligencia e publicacao de alertas no Slack via Composio",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "antigravity_cli",
+      "model": "gemini-flash",
+      "tools": ["search_web", "gemini-research", "COMPOSIO_SEARCH_TOOLS", "COMPOSIO_MULTI_EXECUTE_TOOL", "SLACK_SEND_MESSAGE"]
+    },
+    {
+      "id": "blackops",
+      "name": "BlackOps",
+      "category": "opsec",
+      "role": "operational-security-specialist",
+      "purpose": "OPSEC do time, garantia de anonimidade, rotacao de identidades, prevencao de vazamento de segredos e verificacao previa do Slack antes de qualquer execucao",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "hermes",
+      "model": "MiniMaxAI/MiniMax-M2.7",
+      "tools": ["opsec-scanner", "secrets-guard", "tor-routing", "slack-auditor"]
     }
   ],
   "auxiliary_support": {
@@ -137,6 +206,11 @@
       "model_access": "own_cli_account_or_selected_auth",
       "start": "manual",
       "models": "subscription_access_subject_to_plan_limits"
+    },
+    "groq": {
+      "role": "disabled",
+      "status": "deactivated_by_operator",
+      "reason": "non_functional"
     }
   }
 }

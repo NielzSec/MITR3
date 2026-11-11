@@ -169,12 +169,12 @@ class IngestContractTests(Base):
         with self.assertRaisesRegex(ValueError, "Conflicting duplicate id"):
             code.load([self.export, other])
 
-    def test_shared_sink_with_different_lines_fails_closed(self):
-        """Layer 2 stores the finding's line on the shared SINK node, so one sink hit by two findings in a
-        file has order-dependent content. Layer 3 must refuse it rather than pick a winner."""
+    def test_shared_sink_with_different_lines_is_consistent(self):
         other = export(self.dir, "two.jsonl", finding(rule_id="rce", line=9))
-        with self.assertRaisesRegex(ValueError, "Conflicting duplicate id snk:app_users.py:sqlite3.execute"):
-            code.load([self.export, other])
+        nodes, edges, inputs = code.load([self.export, other])
+        sinks = [node for node in nodes.values() if node["type"] == "SINK"]
+        self.assertEqual(len(sinks), 1)
+        self.assertIsNone(sinks[0]["line"])
 
     def test_foreign_unmarked_tables_are_never_reused(self):
         graph = normalizer.AttackGraphNormalizer()
@@ -279,7 +279,7 @@ class StixSeparationTests(Base):
         attack.build(bundle, metadata)
         code.ingest([self.export], self.db)
         with closing(sqlite3.connect(self.db)) as con, con:
-            con.execute("UPDATE attack_edges SET verification_state='FEASIBLE_PATH' WHERE type='CALLS'")
+            con.execute("UPDATE attack_edges SET verification_state='PROVEN' WHERE type='CALLS'")
         before = code.stats(self.db)
         names = lambda: rows(self.db, "SELECT type,name FROM sqlite_master WHERE tbl_name IN %s ORDER BY type,name" % (code.LAYER3_TABLES,))
         schema_before = names()

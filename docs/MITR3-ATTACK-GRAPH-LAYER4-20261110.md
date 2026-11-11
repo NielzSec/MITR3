@@ -142,10 +142,23 @@ não altera o hash estrutural do grafo. Findings sem SOURCE/SINK aparecem em
   na gravação. Reingest que muda o conteúdo sob os mesmos IDs exige revisão e
   revogação das evidências antigas; hash do artefato inalterado não garante
   que a evidência ainda se aplique ao código novo.
-- **Não executar rebuild da C1 no banco com evidências C4 sem backup e migração.**
-  O `carry_code_graph` atual copia apenas as tabelas da C3: perderia evidências,
-  revogações e veredictos C4, podendo manter arestas FEASIBLE_PATH. A integração
-  desse rebuild não foi alterada nesta tarefa.
+- O rebuild STIX agora preserva C3 e C4, incluindo histórico, índices e triggers.
+  Requer parada dos usuários do banco e conexões fechadas antes de iniciar;
+  mantém `BEGIN IMMEDIATE` no arquivo antigo até a substituição e recusa WAL,
+  sem converter journal mode automaticamente. Conexões antigas abertas podem
+  continuar apontando ao inode substituído: o lock não substitui essa parada.
+  Schemas incompletos/versões desconhecidas, ausência dos triggers C4 esperados,
+  falhas de integridade/FKs e conflitos na cópia impedem `os.replace`, preservando
+  o banco anterior. A cópia usa uma transação estável da origem, cria as tabelas,
+  copia pais C3 antes de filhos C4 e restaura índices/triggers por último; a guarda
+  C4 de `attack_nodes` também é preservada. Histórico não é revalidado contra o
+  grafo atual, pois pode representar snapshots anteriores.
+  Todas as arestas FEASIBLE_PATH voltam a STRUCTURAL_HYPOTHESIS no rebuild:
+  o rebuild não conhece a raiz dos artefatos para revalidar sua aplicabilidade.
+  Veredictos históricos e PROVEN preexistente são preservados; executar
+  `verify --write` com a raiz correta antes de usar novas promoções. C3 sem C4
+  continua suportada, mas FEASIBLE_PATH sem histórico C4 provoca recusa explícita.
+  O campo de relatório `code_graph_carried` inclui as contagens das tabelas C4.
 - As tabelas são append-only, mas a chave de veredicto usa apenas evidências
   válidas. Se diferentes problemas de evidência produzirem o mesmo conjunto
   válido e o mesmo snapshot, o novo diagnóstico será visível na consulta, mas

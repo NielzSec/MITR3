@@ -5,7 +5,7 @@ Separate from the CVE/CWE/ASVS database. No text-derived or cross-catalog edges.
 """
 from __future__ import annotations
 import collections
-from contextlib import closing
+from contextlib import closing, ExitStack
 import datetime as dt
 import hashlib
 import io
@@ -210,21 +210,41 @@ def schema(con):
     """)
 
 
-# Layer 3 (bin/mitr3-code-graph.py) lives in this same file. build() replaces the whole file,
-# so these tables must be copied into the rebuilt database or every refresh would erase them.
+# C3/C4 share this database with STIX; replacement must carry their history and guards.
 CODE_GRAPH_TABLES = ("code_graph_meta", "attack_nodes", "attack_edges", "technique_links",
                      "graph_snapshots", "attack_revisions")
+VERIFY_TABLES = ("verify_meta", "verification_evidence", "evidence_revocations", "path_verdicts")
+VERIFY_TRIGGERS = {"verification_evidence_scope", "verification_evidence_no_update", "verification_evidence_no_delete",
+                   "evidence_revocations_no_update", "evidence_revocations_no_delete", "path_verdicts_no_update",
+                   "path_verdicts_no_delete", "verify_nodes_delete_guard"}
 
 
-def carry_code_graph(new):
-    """Copy Layer 3 tables, rows, indexes and triggers from the current database. Returns row counts."""
+def carry_code_graph(new, old=None):
+    """Copy C3 then C4, preserving history and schema objects; refuse incomplete schemas."""
     if not DB.exists():
         return {}
-    with closing(connect()) as old:
-        present = [t for t in CODE_GRAPH_TABLES if old.execute(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (t,)).fetchone()]
+    with ExitStack() as stack:
+        if old is None:
+            old = stack.enter_context(closing(connect()))
+            old.execute("BEGIN")
+        names = {r[0] for r in old.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        present = [t for t in (*CODE_GRAPH_TABLES, *VERIFY_TABLES) if t in names]
         if not present:
             return {}
+        for tables, marker, layer in ((CODE_GRAPH_TABLES, "code_graph_meta", "3"), (VERIFY_TABLES, "verify_meta", "4")):
+            if not names.intersection(tables) and layer == "4":
+                continue
+            if not set(tables) <= names:
+                raise ValueError("Unsafe rebuild: incomplete Layer " + layer + " schema; old database preserved")
+            version = old.execute("SELECT value FROM " + marker + " WHERE key='schema_version'").fetchone()
+            if version != ("1",):
+                raise ValueError("Unsafe rebuild: unsupported Layer " + layer + " schema; migrate explicitly")
+        if "verify_meta" in names:
+            triggers = {r[0] for r in old.execute("SELECT name FROM sqlite_master WHERE type='trigger'")}
+            if not VERIFY_TRIGGERS <= triggers:
+                raise ValueError("Unsafe rebuild: missing Layer 4 integrity triggers; old database preserved")
+        if old.execute("PRAGMA integrity_check").fetchall() != [("ok",)] or old.execute("PRAGMA foreign_key_check").fetchall():
+            raise ValueError("Unsafe rebuild: source database integrity failure; old database preserved")
         marks = ",".join("?" * len(present))
         ddl = {kind: old.execute("SELECT sql FROM sqlite_master WHERE type=? AND sql IS NOT NULL AND tbl_name IN (%s) ORDER BY name" % marks,
                                  (kind, *present)).fetchall() for kind in ("table", "index", "trigger")}
@@ -236,6 +256,11 @@ def carry_code_graph(new):
             width = len(cursor.description)
             new.executemany("INSERT INTO %s VALUES(%s)" % (table, ",".join("?" * width)), cursor)
             carried[table] = new.execute("SELECT count(*) FROM " + table).fetchone()[0]
+        if "verify_meta" not in names and new.execute(
+                "SELECT 1 FROM attack_edges WHERE verification_state='FEASIBLE_PATH' LIMIT 1").fetchone():
+            raise ValueError("Unsafe rebuild: FEASIBLE_PATH without Layer 4 history; old database preserved")
+        # Rebuild cannot revalidate artifacts; retain verdict history, require fresh verify --write.
+        new.execute("UPDATE attack_edges SET verification_state='STRUCTURAL_HYPOTHESIS' WHERE verification_state='FEASIBLE_PATH'")
         for kind in ("index", "trigger"):  # triggers last, so copying rows does not fire them
             for (sql,) in ddl[kind]:
                 new.execute(sql)
@@ -263,7 +288,15 @@ def build(bundle=None, metadata=None):
     os.close(fd)
     rejected = collections.Counter()
     try:
-        with closing(sqlite3.connect(temporary)) as con:
+        with ExitStack() as stack:
+            old = None
+            if DB.exists():
+                old = stack.enter_context(closing(sqlite3.connect(
+                    "file:" + urllib.parse.quote(str(DB), safe="/") + "?mode=rw", uri=True)))
+                if old.execute("PRAGMA journal_mode").fetchone()[0] == "wal":
+                    raise ValueError("Unsafe rebuild: WAL database; stop writers and migrate to DELETE journal mode first")
+                old.execute("BEGIN IMMEDIATE")  # hold writer exclusion through replacement
+            con = stack.enter_context(closing(sqlite3.connect(temporary)))
             schema(con)
             for identifier, obj in entities.items():
                 name = obj.get("name")
@@ -288,15 +321,20 @@ def build(bundle=None, metadata=None):
             stored = dict(metadata, built_at=now(), schema_version=1, rejected=dict(rejected))
             for key, value in stored.items():
                 con.execute("INSERT INTO metadata VALUES(?,?)", (key, json.dumps(value)))
-            carried = carry_code_graph(con)
+            carried = carry_code_graph(con, old)
             con.commit()
             if con.execute("PRAGMA foreign_key_check").fetchall():
-                raise ValueError("ATT&CK orphan edges")
+                raise ValueError("Unsafe rebuild: orphan references; old database preserved")
+            if con.execute("PRAGMA integrity_check").fetchall() != [("ok",)]:
+                raise ValueError("Unsafe rebuild: destination integrity failure; old database preserved")
             report = graph_stats(con)
             if carried:
                 report["code_graph_carried"] = carried
-        os.chmod(temporary, 0o600)
-        os.replace(temporary, DB)
+            con.close()
+            os.chmod(temporary, 0o600)
+            os.replace(temporary, DB)
+    except sqlite3.Error as exc:
+        raise ValueError("Unsafe rebuild: %s; old database preserved" % exc) from exc
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)

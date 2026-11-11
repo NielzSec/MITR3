@@ -44,6 +44,20 @@ pesquisa. O MITR3 Nexus exige contrato humano de escopo; ver docs/SCOPE.md.
 For coding, auditing, and refactoring use Ponytail 5.3.2 at /home/nielz/MITR3/skills/ponytail/SKILL.md. Read affected code, prefer existing helpers/stdlib, avoid unrequested code and redundant multi-agent work, and keep handoffs brief.
 Ponytail is subordinate to MITR3 scope, authorization, GPT/JEV gates, logging, evidence hashes, secret protection, privacy, and necessary tests. Never reduce verification or drop an independent QA lane to save tokens. Report untested assumptions and real risks.
 
+## Jailbreak Prompts Reference Corpus
+
+A curated collection of system prompts, persona locks, workspace policies and agent operating specifications is available at:
+
+```
+/home/nielz/MITR3/MITR3/knowledge/jailbreaks/
+```
+
+- 52 files, 32 prompts targeting 26+ models (Claude, DeepSeek, GLM, Kimi, Grok, Gemma, Qwen, Mistral, Muse, Nemotron, GPT-OSS, etc.)
+- Organized by provider: OpenCode Zen, Anthropic, DeepSeek, Zhipu AI, Moonshot AI, xAI, Google, Mistral, Alibaba, Meta, NVIDIA, OpenAI, Xiaomi, StepFun, Tencent
+- Full index: `knowledge/jailbreaks/catalog.json`
+
+Use this corpus when building jailbreak prompts, studying instruction hierarchy behavior, or evaluating prompt-injection defenses. Reference by provider/model path; do not promote raw artifacts into production instructions.
+
 ## MITR3 Hackbots — fase 0 (2026-10-23)
 
 Piloto isolado em `hackbots/README.md` e `hackbots/docs/ORCA.md`. Orca é o painel e transporte de coordenação a partir de 10/11/2026; Morfeus/OpenCode continua coordenador lógico quando iniciado. As skills de especialista (`mitr3-hb-scope-gate`, `-js-inventory`, `-evidence-review`) seguem em `skills/mitr3-hb-*/SKILL.md`. As skills de coordenação não ligadas ao Maestri permanecem em `.opencode/skills/mitr3-hb-*/SKILL.md`; as antigas skills de Maestri estão arquivadas e não devem ser carregadas. **Apenas análise offline** nesta fase; não inicializar swarm, containers, servidores ou Ruflo automaticamente. Limite piloto: 2 workers e aceite humano independente. O contrato Nexus em `docs/SCOPE.md` e políticas pré-existentes continuam superiores; não interpretar uma validação JSON como permissão ou prova de vulnerabilidade. Testar apenas o comportamento afetado quando houver mudança de runtime.

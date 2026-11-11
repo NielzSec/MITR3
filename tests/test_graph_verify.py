@@ -398,6 +398,131 @@ class EvaluateTests(Base):
         self.assertEqual(self.rows("SELECT count(*) FROM attack_edges WHERE verification_state='FEASIBLE_PATH'"), [(0,)])
 
 
+class RebuildTests(Base):
+    def setUp(self):
+        super().setUp()
+        spec = importlib.util.spec_from_file_location("attack_rebuild_tests", ROOT / "bin/mitr3-attack-graph.py")
+        self.attack = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.attack)
+        patch = mock.patch.object(self.attack, "DB", self.db)
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.bundle = {"objects": [{"type": "attack-pattern", "id": "attack-pattern--00000000-0000-0000-0000-000000000001",
+                                    "name": "fixture", "modified": "2026-11-10T00:00:00Z"}]}
+        self.meta = {"sha256": "a" * 64}
+
+    def rebuild(self):
+        return self.attack.build(self.bundle, self.meta)
+
+    def assert_refused(self, message):
+        before = hashlib.sha256(self.db.read_bytes()).hexdigest()
+        with mock.patch.object(self.attack.os, "replace") as replace:
+            with self.assertRaisesRegex((ValueError, sqlite3.Error), message):
+                self.rebuild()
+            replace.assert_not_called()
+        self.assertEqual(hashlib.sha256(self.db.read_bytes()).hexdigest(), before)
+        self.assertEqual(list(self.root.glob(".attack-*")), [])
+
+    def test_preserves_history_schema_and_snapshot_but_requires_fresh_promotion(self):
+        eid = self.record()["evidence_id"]
+        self.result(write=True)
+        verify.revoke_evidence(eid, "retired", "reviewer", self.db)
+        graph = self.root / "graph.jsonl"
+        records = [json.loads(line) for line in graph.read_text().splitlines()]
+        next(r for r in records if r["id"] == "f")["name"] = "revised finding"
+        graph.write_text("".join(json.dumps(r) + "\n" for r in records))
+        L3.ingest([graph], self.db)
+        self.record(justification="new analysis")
+        self.result(write=True)
+        with closing(L3.connect_rw(self.db)) as con:
+            con.execute("CREATE INDEX evidence_finding ON verification_evidence(finding_id)")
+            con.execute("UPDATE attack_edges SET verification_state='PROVEN' WHERE id='fm'")
+        tables = (*self.attack.CODE_GRAPH_TABLES, *verify.VERIFY_TABLES)
+        before = {t: self.rows("SELECT * FROM " + t + " ORDER BY 1") for t in tables if t != "attack_edges"}
+        schema = self.rows("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN (%s) ORDER BY name" %
+                           ",".join("?" * len(tables)), tables)
+        snapshot = self.result()["graph_snapshot_sha256"]
+        self.assertEqual(len(before["attack_revisions"]), 1)
+        self.assertEqual(len(before["graph_snapshots"]), 2)
+        for _ in range(2):
+            report = self.rebuild()
+            self.assertTrue(set(tables) <= report["code_graph_carried"].keys())
+            self.assertEqual({t: self.rows("SELECT * FROM " + t + " ORDER BY 1") for t in before}, before)
+            self.assertEqual(self.rows("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE tbl_name IN (%s) ORDER BY name" %
+                                      ",".join("?" * len(tables)), tables), schema)
+            self.assertEqual(self.rows("PRAGMA foreign_key_check"), [])
+            self.assertEqual(self.rows("PRAGMA integrity_check"), [("ok",)])
+            self.assertEqual(self.rows("SELECT count(*) FROM attack_edges WHERE verification_state='FEASIBLE_PATH'"), [(0,)])
+            self.assertEqual(self.rows("SELECT verification_state FROM attack_edges WHERE id='fm'"), [("PROVEN",)])
+            self.assertEqual(self.result()["graph_snapshot_sha256"], snapshot)
+        with closing(L3.connect_rw(self.db)) as con:
+            for table in ("verification_evidence", "evidence_revocations", "path_verdicts"):
+                with self.subTest(table=table), self.assertRaisesRegex(sqlite3.IntegrityError, "append-only"):
+                    con.execute("DELETE FROM " + table)
+            with self.assertRaisesRegex(sqlite3.IntegrityError, "verification records"):
+                con.execute("DELETE FROM attack_nodes WHERE id='other-k' OR id='f'")
+        self.assertEqual(self.result(write=True)["written"]["edges_promoted"], 2)
+        self.assertEqual(self.rows("SELECT count(*) FROM entities"), [(1,)])
+
+    def test_missing_artifact_does_not_leave_feasible_edges_after_rebuild(self):
+        self.record()
+        self.result(write=True)
+        self.artifact.unlink()
+        self.rebuild()
+        self.assertEqual(self.rows("SELECT count(*) FROM path_verdicts"), [(1,)])
+        self.assertEqual(self.rows("SELECT count(*) FROM attack_edges WHERE verification_state='FEASIBLE_PATH'"), [(0,)])
+        self.assertEqual(self.chain()["verification_state"], "STRUCTURAL_HYPOTHESIS")
+
+    def test_incomplete_or_unsupported_schemas_fail_before_replace(self):
+        for sql, message in (("UPDATE verify_meta SET value='99'", "unsupported Layer 4"),
+                             ("DROP TABLE verify_meta", "incomplete Layer 4"),
+                             ("DROP TABLE code_graph_meta", "incomplete Layer 3"),
+                             ("DROP TRIGGER verification_evidence_no_delete", "missing Layer 4")):
+            with self.subTest(sql=sql):
+                original = self.db.read_bytes()
+                with closing(sqlite3.connect(self.db)) as con, con:
+                    con.execute(sql)
+                self.assert_refused(message)
+                self.db.write_bytes(original)
+
+    def test_orphan_revocation_fails_before_replace(self):
+        with closing(sqlite3.connect(self.db)) as con, con:
+            con.execute("INSERT INTO evidence_revocations VALUES(?,?,?,?)", ("d" * 64, "bad", "fixture", "now"))
+        self.assert_refused("source database integrity")
+
+    def test_feasible_edges_without_c4_fail_before_replace(self):
+        with closing(sqlite3.connect(self.db)) as con, con:
+            for (name,) in con.execute("SELECT name FROM sqlite_master WHERE type='trigger' AND (tbl_name IN "
+                                      "('verification_evidence','evidence_revocations','path_verdicts') OR name='verify_nodes_delete_guard')").fetchall():
+                con.execute("DROP TRIGGER " + name)
+            for table in reversed(verify.VERIFY_TABLES):
+                con.execute("DROP TABLE " + table)
+            con.execute("UPDATE attack_edges SET verification_state='FEASIBLE_PATH' WHERE id='sf'")
+        self.assert_refused("FEASIBLE_PATH without Layer 4")
+
+    def test_wal_database_is_refused_before_replace(self):
+        with closing(sqlite3.connect(self.db)) as con:
+            con.execute("PRAGMA journal_mode=WAL")
+        self.assert_refused("WAL database")
+
+    def test_destination_schema_failure_is_explicit_and_preserves_old_database(self):
+        with closing(sqlite3.connect(self.db)) as con:
+            con.execute("CREATE INDEX entities_external ON verification_evidence(finding_id)")
+        self.assert_refused("Unsafe rebuild: index entities_external already exists; old database preserved")
+
+    def test_source_writer_lock_is_held_until_replace(self):
+        replace = self.attack.os.replace
+
+        def guarded_replace(source, target):
+            with closing(sqlite3.connect(self.db, timeout=0)) as writer:
+                with self.assertRaisesRegex(sqlite3.OperationalError, "locked"):
+                    writer.execute("BEGIN IMMEDIATE")
+            replace(source, target)
+
+        with mock.patch.object(self.attack.os, "replace", side_effect=guarded_replace):
+            self.rebuild()
+
+
 class ConfidenceTests(unittest.TestCase):
     def test_explicit_weights_and_non_probability_bounds(self):
         for meta, reachable, expected in (({}, False, 0.0), ({}, True, 0.45),
