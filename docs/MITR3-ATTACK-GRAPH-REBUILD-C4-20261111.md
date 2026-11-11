@@ -96,3 +96,22 @@ quinto arquivo, novo. Sem commit, push, checkout ou edição de skills.
   atestação criptográfica de todas as definições SQL.
 - Suites C1/C2 e partes não afetadas de C3/C4 não foram reexecutadas. Banco vivo
   não foi aberto nem migrado. QA independente e aceite humano permanecem pendentes.
+
+---
+
+## Adendo de Custódia e Veredito de QA Independente (2026-11-11)
+
+- **Veredito QA Independente:** **APPROVE** registrado e publicado no Slack `#all-mitr3` (mensagem `p1794367277900039`).
+- **Conformidade Técnica Aprovada:**
+  - Preservação completa das tabelas C3 (`code_graph_meta`, `attack_nodes`, `attack_edges`, `technique_links`, `graph_snapshots`, `attack_revisions`) e C4 (`verify_meta`, `verification_evidence`, `evidence_revocations`, `path_verdicts`) durante rebuild STIX/ATT&CK.
+  - Rebaixamento determinístico de arestas `FEASIBLE_PATH` e restauração exclusiva sob execução explícita de `verify --write`.
+  - Suíte unitária e de reconstrução aprovada com zero regressões; secrets audit com 0 hits.
+- **Hashes SHA-256 Consolidados (origin/master @ 651d0e5):**
+  ```text
+  8ead90f4e5fcdf5d28a97c6de5309032df2464ff5cca198a7d1adca268fe29f0  bin/mitr3-attack-graph.py
+  6502cf5c78703252359b0930cee83aaea55fa8a16e21fbec6b6b732df0a7f0f0  tests/test_code_graph.py
+  62d5080b8dea1f6f13d633c7ea3b7ddc35e1f0da823a2e0bcdb8ee75987e2fe5  tests/test_graph_verify.py
+  ```
+- **Pendência Técnica de Runtime (Bloqueio Pré-Operacional de Verify):**
+  - **C4 Stale-Evidence:** Registrada formalmente como pendência de runtime antes de qualquer utilização de `verify` em ambiente operacional. As evidências da versão 1 continuam ancoradas por IDs (`finding_id`, `mitigation_id`, etc.) sem validação criptográfica de `content_sha256` ou snapshot do grafo na gravação. Em caso de reingestão de dados sob IDs idênticos, evidências históricas prévias poderiam influenciar o veredito sem revisão humana explícita. O uso operacional do motor de verificação exige supervisão humana ativa ou resolução estrutural de runtime.
+- **Nota Operacional:** Fixes integrados na árvore `master` remota no commit `208e460` (ancestral de `origin/master`). Promoção para `origin/main` aguarda liberação explícita do operador dj.

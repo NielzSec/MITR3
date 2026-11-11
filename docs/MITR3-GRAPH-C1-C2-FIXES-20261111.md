@@ -87,3 +87,22 @@ ecd9bfca7a2b219453ee21df4f70e8427993b4ce41a1e409bc4f44076114f221  docs/MITR3-GRA
 ```
 
 O SHA deste relatório é retornado no handoff para evitar autorreferência. Não há hashes de banco operacional porque ele não foi aberto nem copiado.
+
+---
+
+## Adendo de Custódia e Veredito de QA Independente (2026-11-11)
+
+- **Veredito QA Independente:** **APPROVE** registrado e publicado no Slack `#all-mitr3` (mensagem `p1794367431442199`).
+- **Conformidade Técnica Aprovada:**
+  - `materialize_evidence` e mitigação de symlinks validadas com abertura ancorada (`parent_fd`/`directory_fd`, `O_NOFOLLOW`, `O_DIRECTORY`, permissões `0700`/`0600`).
+  - Remoção de `line` em nós `SINK` elimina dependência de ordem na ingestão C3.
+  - Sinks heurísticos (`sink_pattern`/`enclosing_function`) removidos; integridade de endpoints preservada.
+  - Suíte de 36 testes C2 (100% PASS), 25 testes C3 (100% PASS) e 34 testes C4 (100% PASS). Secrets audit com 0 hits.
+- **Hashes SHA-256 Consolidados (origin/master @ 651d0e5):**
+  ```text
+  42304859bb5eb0d4a1f0600cdb551283c1bc15e1497c549fd5e7abbe504e67dc  bin/mitr3-graph-normalizer.py
+  cde72271fea5045f0520318e3ff7d4b053188be0d2da92b3d4e885c8d6d0de07  tests/test_graph_normalizer.py
+  6502cf5c78703252359b0930cee83aaea55fa8a16e21fbec6b6b732df0a7f0f0  tests/test_code_graph.py
+  ecd9bfca7a2b219453ee21df4f70e8427993b4ce41a1e409bc4f44076114f221  docs/MITR3-GRAPH-C1-C2-FIXES-20261111.patch
+  ```
+- **Nota Operacional:** Fixes integrados na árvore `master` remota no commit `208e460` (ancestral de `origin/master`). Aceite humano do operador dj para promoção à release pública (`main`) permanece sob procedimento de custódia formal.
