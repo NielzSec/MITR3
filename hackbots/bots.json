@@ -1,0 +1,191 @@
+{
+  "version": "0.3.0",
+  "coordinator": "morfeus",
+  "canvas": "orca",
+  "max_concurrent_workers": 2,
+  "runtime_policy": "on_demand",
+  "doctrine": "Arcanum Hackbots — Single Narrow Mission, Zero Hallucination, Deterministic Evidence",
+  "agents": [
+    {
+      "id": "morfeus",
+      "name": "Morfeus",
+      "category": "coordinator",
+      "role": "operational-maestro",
+      "purpose": "Orquestracao operacional, decomposicao de missoes, alocacao estrita e cobranca de evidencias deterministicas",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "opencode"
+    },
+    {
+      "id": "specter",
+      "name": "Specter",
+      "category": "web",
+      "role": "sqli-specialist",
+      "purpose": "Injecao SQL (in-band, error-based, boolean, time-based, out-of-band) e extracao de evidencias com diffs comprovados",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["mitr3-burp-qa.py", "curl", "requests", "mitr3-web-api"]
+    },
+    {
+      "id": "glyph",
+      "name": "Glyph",
+      "category": "web",
+      "role": "javascript-recon-specialist",
+      "purpose": "Inventario de superficie JS, rotas de API ocultas, parametros, sourcemaps e segredos expostos no front-end",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["chrome-devtools-mcp", "playwright-mcp", "mitr3-js-lab.py", "semgrep", "ripgrep"]
+    },
+    {
+      "id": "prism",
+      "name": "Prism",
+      "category": "web",
+      "role": "dom-xss-specialist",
+      "purpose": "Rastreamento Source-to-Sink no DOM, Client-Side Path Traversal, postMessage e injecoes no navegador",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["chrome-devtools-mcp", "playwright-mcp", "semgrep", "mitr3-web-api"]
+    },
+    {
+      "id": "cipher",
+      "name": "Cipher",
+      "category": "web",
+      "role": "auth-session-specialist",
+      "purpose": "Autenticacao, JWT, SameSite/HttpOnly cookies, fluxos OAuth/OIDC, CSRF e session fixation",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["mitr3-twosession.py", "mitr3-burp-qa.py", "jwt-analyzers", "curl"]
+    },
+    {
+      "id": "ward",
+      "name": "Ward",
+      "category": "web",
+      "role": "api-bola-specialist",
+      "purpose": "Seguranca de APIs REST/GraphQL, BOLA/IDOR, BFLA, mass assignment e tenant isolation",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["apisec-ng-mcp", "mitr3-web-api", "openapi-parsers", "curl"]
+    },
+    {
+      "id": "relay",
+      "name": "Relay",
+      "category": "web",
+      "role": "ssrf-cloud-specialist",
+      "purpose": "Server-Side Request Forgery, acesso a metadata de nuvem (169.254.169.254), webhooks e bypass de rede interna",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["mitr3-web-api", "semgrep", "codeql", "nmap", "tshark", "curl"]
+    },
+    {
+      "id": "obsidian",
+      "name": "Obsidian",
+      "category": "reverse",
+      "role": "native-binary-specialist",
+      "purpose": "Engenharia reversa nativa (ELF, PE, Mach-O), descompilacao, checksec, vulnerabilidades de memoria e rotinas criticas",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "antigravity_cli",
+      "tools": ["rea-mcp-full-207-tools", "ghidra", "rizin", "r2", "gdb", "checksec", "afl-fuzz"]
+    },
+    {
+      "id": "quill",
+      "name": "Quill",
+      "category": "reverse",
+      "role": "mobile-android-specialist",
+      "purpose": "Engenharia reversa Android (APK, DEX), analise de manifesto, components exportados, JNI/native hooks e Frida",
+      "default_state": "dormant",
+      "can_issue_network": false,
+      "backend": "antigravity_cli",
+      "tools": ["rea-mcp-android-tools", "jadx", "apktool", "frida", "mitr3-reverse-lowlevel"]
+    },
+    {
+      "id": "nexa",
+      "name": "Nexa",
+      "category": "business",
+      "role": "product-marketing-gtm",
+      "purpose": "Go-To-Market, empacotamento de ofertas de ciberseguranca, propostas comerciais, copys B2B e posicionamento de produto",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["markdown", "copys-b2b", "proposals", "composio-linkedin-read"]
+    },
+    {
+      "id": "aura",
+      "name": "Aura",
+      "category": "design",
+      "role": "deliverables-uiux-designer",
+      "purpose": "Design e diagramacao de relatorios executivos para C-Level, infograficos Mermaid/HTML/PDF, apresentacoes visuais e identidade da marca",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "antigravity_cli",
+      "tools": ["mermaid", "html-tailwind-pdf", "image-generator", "report-templates"]
+    },
+    {
+      "id": "hunter",
+      "name": "Hunter",
+      "category": "business",
+      "role": "leadgen-bounty-dealflow",
+      "purpose": "Monitoramento de escopos de Bug Bounty com alto payout e prospeccao de alvos B2B com superficie de ataque exposta",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["mitr3-recon.sh", "mitr3-osint.py", "bounty-crawler", "notion-pipeline"]
+    },
+    {
+      "id": "scribe",
+      "name": "Scribe",
+      "category": "business",
+      "role": "executive-proposal-writer",
+      "purpose": "Redacao de propostas comerciais de alto impacto, matriz de risco financeiro/LGPD e relatorios executivos formais para decisores",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "opencode",
+      "tools": ["proposal-generator", "risk-matrices", "executive-summaries", "notion-writer"]
+    }
+  ],
+  "auxiliary_support": {
+    "research": {
+      "agent": "hermes",
+      "role": "Curadoria de conhecimento e pesquisa em staging"
+    },
+    "qa_review": {
+      "agent": "codex_cli",
+      "role": "Revisao independente de evidencias, checagem de hashes e falsos positivos"
+    },
+    "deep_audit": {
+      "agent": "antigravity_cli",
+      "role": "VANTA — Supervisao de arquitetura, analise profunda de baixo nivel e browser"
+    }
+  },
+  "backends": {
+    "opencode": {
+      "role": "lead_and_web_specialists",
+      "model_access": "api_provider_keys",
+      "start": "manual",
+      "models": "DeepSeek V4 Flash / MiniMax M2.7 / GLM 5.3"
+    },
+    "codex_cli": {
+      "role": "independent_evidence_reviewer",
+      "model_access": "own_cli_account_or_selected_auth",
+      "start": "manual",
+      "models": "subscription_access_subject_to_plan_limits"
+    },
+    "antigravity_cli": {
+      "role": "reverse_and_browser_specialist",
+      "model_access": "own_cli_account_or_selected_auth",
+      "start": "manual",
+      "models": "subscription_access_subject_to_plan_limits"
+    },
+    "groq": {
+      "role": "disabled",
+      "status": "deactivated_by_operator",
+      "reason": "non_functional"
+    }
+  }
+}
