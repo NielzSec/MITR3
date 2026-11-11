@@ -1,0 +1,135 @@
+{
+  "schema_version": "mitr3_ctf_state_graph_v1",
+  "lab_target": {
+    "network_interface": "tun0",
+    "local_vpn_ip": "192.168.148.45/18",
+    "machine_ip": "10.66.153.164",
+    "initial_credentials": {
+      "username": "ubuntu",
+      "password": "tryhackme"
+    },
+    "status": "TARGET_ACQUIRED"
+  },
+  "current_state": "PREPARATION",
+  "states": {
+    "PREPARATION": {
+      "order": 0,
+      "status": "IN_PROGRESS",
+      "description": "Lab provisionado na VPN tun0, aguardando MACHINE_IP do TryHackMe.",
+      "required_evidence": [],
+      "unlocked_at": "2026-11-11T18:37:39Z",
+      "completed_at": null
+    },
+    "INITIAL_ACCESS_SSH": {
+      "order": 1,
+      "status": "PENDING",
+      "description": "Acesso inicial SSH autenticado com credenciais ubuntu:tryhackme.",
+      "required_evidence": [
+        "ssh_connection_log",
+        "initial_id_whoami"
+      ],
+      "unlocked_at": null,
+      "completed_at": null
+    },
+    "VERSION_CVE_RECON": {
+      "order": 2,
+      "status": "PENDING",
+      "description": "Enumeração de versões de SO, Kernel, pacotes instalados e mapeamento de CVEs.",
+      "required_evidence": [
+        "os_release_kernel",
+        "installed_packages_or_services"
+      ],
+      "unlocked_at": null,
+      "completed_at": null
+    },
+    "SURFACE_IDENTIFICATION": {
+      "order": 3,
+      "status": "PENDING",
+      "description": "Identificação de superfície de ataque local (sudo, SUID, capabilities, crons, listening ports).",
+      "required_evidence": [
+        "surface_audit_summary",
+        "vector_candidate"
+      ],
+      "unlocked_at": null,
+      "completed_at": null
+    },
+    "USER_FLAG": {
+      "order": 4,
+      "status": "PENDING",
+      "description": "Localização, captura e cálculo de integridade SHA256 da flag de usuário (user.txt).",
+      "required_evidence": [
+        "user_flag_content",
+        "user_flag_sha256"
+      ],
+      "unlocked_at": null,
+      "completed_at": null
+    },
+    "PRIVILEGE_ESCALATION": {
+      "order": 5,
+      "status": "PENDING",
+      "description": "Execução bem-sucedida do vetor de elevação de privilégios para root (uid=0).",
+      "required_evidence": [
+        "privesc_execution_proof",
+        "root_id_whoami"
+      ],
+      "unlocked_at": null,
+      "completed_at": null
+    },
+    "ROOT_FLAG": {
+      "order": 6,
+      "status": "PENDING",
+      "description": "Localização, captura e cálculo de integridade SHA256 da flag de root (root.txt).",
+      "required_evidence": [
+        "root_flag_content",
+        "root_flag_sha256"
+      ],
+      "unlocked_at": null,
+      "completed_at": null
+    }
+  },
+  "transitions": [
+    {
+      "from": "PREPARATION",
+      "to": "INITIAL_ACCESS_SSH",
+      "trigger": "SSH_LOGIN_SUCCESS",
+      "description": "Conexão SSH estabelecida com sucesso no MACHINE_IP."
+    },
+    {
+      "from": "INITIAL_ACCESS_SSH",
+      "to": "VERSION_CVE_RECON",
+      "trigger": "SYSTEM_INFO_COLLECTED",
+      "description": "Versões de SO/kernel e serviços extraídos e persistidos."
+    },
+    {
+      "from": "VERSION_CVE_RECON",
+      "to": "SURFACE_IDENTIFICATION",
+      "trigger": "ATTACK_SURFACE_AUDITED",
+      "description": "Sudo, binários SUID e serviços locais auditados."
+    },
+    {
+      "from": "SURFACE_IDENTIFICATION",
+      "to": "USER_FLAG",
+      "trigger": "USER_FLAG_RETRIEVED",
+      "description": "Arquivo user.txt lido e hash de evidência registrado."
+    },
+    {
+      "from": "SURFACE_IDENTIFICATION",
+      "to": "PRIVILEGE_ESCALATION",
+      "trigger": "PRIVESC_VECTOR_EXECUTED",
+      "description": "Exploit ou vetor de escalação executado obtendo uid=0."
+    },
+    {
+      "from": "USER_FLAG",
+      "to": "PRIVILEGE_ESCALATION",
+      "trigger": "PRIVESC_VECTOR_EXECUTED",
+      "description": "Transição para escalação com user flag já consolidada."
+    },
+    {
+      "from": "PRIVILEGE_ESCALATION",
+      "to": "ROOT_FLAG",
+      "trigger": "ROOT_FLAG_RETRIEVED",
+      "description": "Arquivo root.txt lido com permissão de superusuário e hash validado."
+    }
+  ],
+  "evidence_ledger_ref": "evidence/ctf/ledger.json"
+}

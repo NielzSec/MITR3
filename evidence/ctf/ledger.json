@@ -1,0 +1,51 @@
+{
+  "schema_version": "MITR3_Evidence_CTF_v1",
+  "lab_id": "tryhackme_ctf_preparation",
+  "updated_at": "2026-11-11T19:16:19.782674+00:00",
+  "target": {
+    "interface": "tun0",
+    "local_ip": "192.168.148.45/18",
+    "machine_ip": "10.66.153.164",
+    "initial_user": "ubuntu"
+  },
+  "summary": {
+    "total_evidences": 3,
+    "current_stage": "PREPARATION",
+    "flags_captured": {
+      "user": false,
+      "root": false
+    }
+  },
+  "evidences": [
+    {
+      "evidence_id": "EV-CTF-0001",
+      "stage": "PREPARATION",
+      "timestamp": "2026-11-11T18:37:39Z",
+      "source_tool": "ip_route / tun0_audit",
+      "claim": "Interface VPN tun0 ativa com IP 192.168.148.45/18 na rota para laboratórios TryHackMe. Aguardando MACHINE_IP.",
+      "raw_artifact": "tun0 UP 192.168.148.45/18 fe80::5405:829d:9806:fada/64",
+      "evidence_sha256": "9b12a2a074094a6142cce427db95f70bb0ff645e7e0e7a2569505f013dce79f8",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0002",
+      "stage": "USER_FLAG",
+      "timestamp": "2026-11-11T19:15:40.254265+00:00",
+      "source_tool": "web-recon-php",
+      "claim": "Login efetuado no painel /dashboard.php com invite code forjado via quebra de semente MT_RAND; flag de painel capturada",
+      "raw_artifact": "THM{CryptographyPwn007}",
+      "evidence_sha256": "2fd412d926ef1cb02ba003c920d49469f1e89f55f8f8f1ee6a66011480fa3a97",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0003",
+      "stage": "ROOT_FLAG",
+      "timestamp": "2026-11-11T19:16:19.782661+00:00",
+      "source_tool": "padding-oracle-padre",
+      "claim": "Execucao de comando remoto (RCE) via Padding Oracle Attack no parametro date de dashboard.php; leitura de /home/ubuntu/flag.txt capturada",
+      "raw_artifact": "THM{GOT_COMMAND_EXECUTION001}",
+      "evidence_sha256": "ffec5e95120439a8108fc193aef5f9582cc7bda1b2d09336fba4cec1ccdf2417",
+      "confidence": "HIGH"
+    }
+  ]
+}
