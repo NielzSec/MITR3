@@ -148,6 +148,18 @@
       "can_issue_network": false,
       "backend": "opencode",
       "tools": ["proposal-generator", "risk-matrices", "executive-summaries", "notion-writer"]
+    },
+    {
+      "id": "cliper",
+      "name": "Cliper",
+      "category": "intelligence",
+      "role": "search-and-slack-curator",
+      "purpose": "Buscas estruturadas na web, CVEs, Reddit, dark web e advisories, com sintese de inteligencia e publicacao de alertas no Slack via Composio",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "antigravity_cli",
+      "model": "gemini-flash",
+      "tools": ["search_web", "gemini-research", "COMPOSIO_SEARCH_TOOLS", "COMPOSIO_MULTI_EXECUTE_TOOL", "SLACK_SEND_MESSAGE"]
     }
   ],
   "auxiliary_support": {
