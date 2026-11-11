@@ -1,0 +1,436 @@
+{
+  "metadata": {
+    "mission": "GLYPH-STAGING-JS-RECON-01",
+    "description": "Reconhecimento e inventário de superfície JavaScript em staging (Missão Glyph)",
+    "timestamp_utc": "2026-11-11T04:39:22.436989+00:00",
+    "operator": "dj",
+    "agent": "VANTA (doutrina GLYPH - MITR3 Hackbots)",
+    "mode": "offline",
+    "network_egress": "0_bytes (enforced: bwrap + libseccomp EPERM deny-all sockets)",
+    "schema_version": "mitr3-js-recon-v1"
+  },
+  "js_lab_execution": {
+    "tool": "bin/mitr3-js-lab.py",
+    "tool_sha256": "9bec1f4293e0cdec51d7e1469fb589b4aaa17746ca6cc23aa510d6a2e10df6c8",
+    "sandbox_helper": "tools/js_lab_sandbox.py",
+    "sandbox_sha256": "53554c007edad5faac2c91d32dfe85e829af978bd3d4819ff992b0d620a24bdb",
+    "command": "python3 bin/mitr3-js-lab.py import-har tests/fixtures/js-lab/demo.har.json --scope tests/fixtures/js-lab/scope.example.json --out reports/js-lab-staging-evidence --maps",
+    "verification_command": "python3 bin/mitr3-js-lab.py verify reports/js-lab-staging-evidence/evidence",
+    "run_id": "126a841c6d884fa4836b1d55f5512e1e",
+    "status": "complete-within-v0.2-limits",
+    "verification_result": "PASS (package-integrity-only)",
+    "isolation": "bwrap+seccomp-offline",
+    "audit_head_sha256": "bf0e5bda6528770be3575c2c1fde671a0647725b2fbcfc5b227abc5ce287fc08",
+    "manifest_sha256": "de52e06727e9c36247ebf8556489b272d029fd96d051635af58fc4b32aed209f",
+    "sha256sums_sha256": "c6e0bb863cc6ab2f52b6786701a61e10cece3d844a87067fad50fe1deb3e66c2"
+  },
+  "artifacts_inventory": [
+    {
+      "path": "tests/fixtures/js-lab/demo.har.json",
+      "category": "js_lab_fixture_input",
+      "size_bytes": 1510,
+      "sha256": "972ae0fc95a28fbaa1556d2964c2423660e8c5c4a1612e9ef920346e726a1ada",
+      "description": "HAR de fixture sintética contendo entradas para app.js, lazy.mjs e app.js.map"
+    },
+    {
+      "path": "tests/fixtures/js-lab/scope.example.json",
+      "category": "js_lab_fixture_input",
+      "size_bytes": 424,
+      "sha256": "0707c971f5734e299b372927f5565cb4103c8e26a53c102e87356bfb09eb4197",
+      "description": "Contrato de escopo delimitando origin fixture.invalid e caminhos permitidos"
+    },
+    {
+      "path": "reports/js-lab-staging-evidence/evidence/raw/script-0001-69091283efb5813e.js",
+      "category": "js_lab_extracted_raw",
+      "size_bytes": 140,
+      "sha256": "69091283efb5813e68f79b2a35ba7f67644affca67ed48757961edc03d1e15a3",
+      "description": "Script extraído app.js (contém import lazy, gsap.timeline, ScrollTrigger)"
+    },
+    {
+      "path": "reports/js-lab-staging-evidence/evidence/raw/map-0002-cfd0742893e7d8f5.js.map",
+      "category": "js_lab_extracted_raw",
+      "size_bytes": 187,
+      "sha256": "cfd0742893e7d8f5ce93d776939a897401cb9a81f82f133c7033e41f35f8b0f5",
+      "description": "Source map v3 extraído mapeando app.js para src/animation.js"
+    },
+    {
+      "path": "reports/js-lab-staging-evidence/evidence/derived/original-0003-c6a6ec7739451c53.js.txt",
+      "category": "js_lab_extracted_derived",
+      "size_bytes": 93,
+      "sha256": "c6a6ec7739451c5337e640b8c57494f8e71762f3b5ba7625dad21324b9ff8b57",
+      "description": "Código-fonte original recuperado de sourcesContent (src/animation.js)"
+    },
+    {
+      "path": "reports/js-lab-staging-evidence/evidence/raw/script-0004-b539418cac327089.js",
+      "category": "js_lab_extracted_raw",
+      "size_bytes": 37,
+      "sha256": "b539418cac327089327e129f7add817c5998f63aab4d7bbb511e5814bae50d12",
+      "description": "Módulo lazy.mjs importado dinamicamente"
+    },
+    {
+      "path": "hackbots/examples/dom-sample.js",
+      "category": "staging_sample",
+      "size_bytes": 246,
+      "sha256": "06621d4bdd31adb8af67f569eb3d81b325b66db0804e5cabf02a7b6cf5d9c713",
+      "description": "Amostra sintética de laboratório para análise de DOM-XSS e sinks"
+    },
+    {
+      "path": "hackbots/examples/adversarial-sample.js",
+      "category": "staging_sample",
+      "size_bytes": 473,
+      "sha256": "24b6cca5b720d7391be79f6907cf5102e56db4adfbef9e8500a1ddeebfffb8d5",
+      "description": "Amostra sintética adversarial com prompt injection e chamadas fetch/axios"
+    },
+    {
+      "path": "hackbots/examples/sample.js",
+      "category": "staging_sample",
+      "size_bytes": 122,
+      "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9",
+      "description": "Amostra sintética de inventário determinístico com rota e fetch"
+    },
+    {
+      "path": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "category": "staging_bundle",
+      "size_bytes": 1687686,
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "description": "Bundle principal SPA de homologação/staging (1.68 MB)"
+    },
+    {
+      "path": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-monitoring.js",
+      "category": "staging_bundle",
+      "size_bytes": 10943,
+      "sha256": "759fccd5bb7d69c1b76d65f78d99f01664f4c72bfdb05f64f5e3509facaf8caa",
+      "description": "Chunk de telemetria/monitoramento Sentry v10.50.0 de staging"
+    }
+  ],
+  "api_routes": [
+    {
+      "route": "https://fixture.invalid/app.js?v=1",
+      "method": "GET",
+      "client": "har_entry",
+      "source_file": "tests/fixtures/js-lab/demo.har.json",
+      "sha256": "972ae0fc95a28fbaa1556d2964c2423660e8c5c4a1612e9ef920346e726a1ada",
+      "locator": "entry[0]",
+      "classification": "fixture_entrypoint"
+    },
+    {
+      "route": "https://fixture.invalid/lazy.mjs",
+      "method": "GET",
+      "client": "dynamic_import",
+      "source_file": "reports/js-lab-staging-evidence/evidence/raw/script-0001-69091283efb5813e.js",
+      "sha256": "69091283efb5813e68f79b2a35ba7f67644affca67ed48757961edc03d1e15a3",
+      "locator": "linha 1: import('./lazy.mjs')",
+      "classification": "module_dependency"
+    },
+    {
+      "route": "/api/v1/example",
+      "method": "GET",
+      "client": "fetch",
+      "source_file": "hackbots/examples/sample.js",
+      "sha256": "96c7f474d17a4ca2733946368439ee93025e28c0531117c4a4e7cd46dfbb70c9",
+      "locator": "linha 2 (const reference) / linha 3 (fetch)",
+      "classification": "literal_api_endpoint"
+    },
+    {
+      "route": "/api/v2/telemetry",
+      "method": "GET",
+      "client": "fetch",
+      "source_file": "hackbots/examples/adversarial-sample.js",
+      "sha256": "24b6cca5b720d7391be79f6907cf5102e56db4adfbef9e8500a1ddeebfffb8d5",
+      "locator": "linha 8 (targetEndpoint) / linha 9 (fetch)",
+      "classification": "literal_api_endpoint"
+    },
+    {
+      "route": "/api/v2/auth/token",
+      "method": "POST",
+      "client": "axios.post",
+      "source_file": "hackbots/examples/adversarial-sample.js",
+      "sha256": "24b6cca5b720d7391be79f6907cf5102e56db4adfbef9e8500a1ddeebfffb8d5",
+      "locator": "linha 10 (axios.post)",
+      "classification": "authentication_endpoint"
+    },
+    {
+      "route": "/api/gemini/dashboard-insight",
+      "method": "POST",
+      "client": "fetch",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: linha 308 (proxy first-party)",
+      "classification": "ai_proxy_endpoint"
+    },
+    {
+      "route": "/api/gemini/one-on-one",
+      "method": "POST",
+      "client": "fetch",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: linha 308 (supervisor one-on-one)",
+      "classification": "ai_proxy_endpoint"
+    },
+    {
+      "route": "/api/gemini/page-summary",
+      "method": "POST",
+      "client": "fetch",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: linha 308 (page summary)",
+      "classification": "ai_proxy_endpoint"
+    },
+    {
+      "route": "/api/broadcast",
+      "method": "WS_UPGRADE",
+      "client": "supabase_realtime",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: linha 287",
+      "classification": "realtime_websocket_endpoint"
+    },
+    {
+      "route": "/debug",
+      "method": "ROUTER_PATH",
+      "client": "react_router",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: offset ~1656100",
+      "classification": "debug_staging_route"
+    },
+    {
+      "route": "/debug/diagnosis",
+      "method": "ROUTER_PATH",
+      "client": "react_router",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: offset ~1656180",
+      "classification": "debug_staging_route"
+    },
+    {
+      "route": "/debug/bonificacao-hybrid",
+      "method": "ROUTER_PATH",
+      "client": "react_router",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: offset ~1656240",
+      "classification": "debug_staging_route"
+    },
+    {
+      "route": "/debug/bonificacao-nova-test",
+      "method": "ROUTER_PATH",
+      "client": "react_router",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: offset ~1656300",
+      "classification": "debug_staging_route"
+    },
+    {
+      "route": "/debug/zapi",
+      "method": "ROUTER_PATH",
+      "client": "react_router",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js: offset ~1656360",
+      "classification": "debug_staging_route"
+    }
+  ],
+  "sensitive_parameters": [
+    {
+      "parameter": "v",
+      "source_file": "tests/fixtures/js-lab/demo.har.json",
+      "sha256": "972ae0fc95a28fbaa1556d2964c2423660e8c5c4a1612e9ef920346e726a1ada",
+      "locator": "app.js?v=1",
+      "category": "cache_busting_parameter",
+      "observation": "Parâmetro v=1 de cache-busting em requisição HAR sintética"
+    },
+    {
+      "parameter": "search",
+      "source_file": "hackbots/examples/dom-sample.js",
+      "sha256": "06621d4bdd31adb8af67f569eb3d81b325b66db0804e5cabf02a7b6cf5d9c713",
+      "locator": "linha 2: params.get('search')",
+      "category": "user_controlled_query_param",
+      "observation": "Extraído via URLSearchParams a partir de window.location.search; fonte não sanitizada"
+    },
+    {
+      "parameter": "token",
+      "source_file": "hackbots/examples/adversarial-sample.js",
+      "sha256": "24b6cca5b720d7391be79f6907cf5102e56db4adfbef9e8500a1ddeebfffb8d5",
+      "locator": "linha 10: /api/v2/auth/token",
+      "category": "auth_endpoint_parameter",
+      "observation": "Sufixo de rota de autenticação consumido por cliente HTTP axios.post"
+    },
+    {
+      "parameter": "key=secret",
+      "source_file": "hackbots/examples/adversarial-sample.js",
+      "sha256": "24b6cca5b720d7391be79f6907cf5102e56db4adfbef9e8500a1ddeebfffb8d5",
+      "locator": "linha 5 (comentário injetado)",
+      "category": "adversarial_payload_exfiltration",
+      "observation": "Tentativa de injeção adversarial em comentário contendo falso token exfil; tratado estritamente como dado inerte"
+    },
+    {
+      "parameter": "Authorization: Bearer ${access_token}",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "linha 308 (supabase.auth.getSession)",
+      "category": "jwt_session_token",
+      "observation": "Header de autorização dinâmico obtido da sessão local do Supabase para chamadas proxy /api/gemini/*"
+    },
+    {
+      "parameter": "apikey / anon_key",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "linha 308",
+      "category": "public_frontend_key",
+      "observation": "Chave anon pública padrão do Supabase de frontend (JWT com role anon, exp 2071); não constitui credencial privada"
+    },
+    {
+      "parameter": "storageKey: sb-{ref}-auth-token",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "linha 308",
+      "category": "local_storage_session_key",
+      "observation": "Chave de armazenamento local de token de autenticação GoTrue"
+    }
+  ],
+  "dom_sinks": [
+    {
+      "sink": "element.innerHTML = 'Resultado para: ' + query",
+      "sink_type": "innerHTML assignment (DOM-XSS)",
+      "source_file": "hackbots/examples/dom-sample.js",
+      "sha256": "06621d4bdd31adb8af67f569eb3d81b325b66db0804e5cabf02a7b6cf5d9c713",
+      "locator": "linha 4: document.getElementById('output').innerHTML = ...",
+      "severity": "CRITICAL_SINK_PATTERN",
+      "observation": "Fluxo direto de fonte controlada pelo usuário (URLSearchParams.get('search')) para o sink innerHTML sem sanitização"
+    },
+    {
+      "sink": "gsap.timeline().to('.demo', {x:100, duration:1})",
+      "sink_type": "DOM selector / element manipulation",
+      "source_file": "reports/js-lab-staging-evidence/evidence/raw/script-0001-69091283efb5813e.js",
+      "sha256": "69091283efb5813e68f79b2a35ba7f67644affca67ed48757961edc03d1e15a3",
+      "locator": "linha 1, offset 21",
+      "severity": "INFORMATIONAL",
+      "observation": "Consulta e manipulação estática de nó DOM via classe seletora '.demo'"
+    },
+    {
+      "sink": "ScrollTrigger.create({trigger: '.demo'})",
+      "sink_type": "DOM scroll trigger registration",
+      "source_file": "reports/js-lab-staging-evidence/evidence/raw/script-0001-69091283efb5813e.js",
+      "sha256": "69091283efb5813e68f79b2a35ba7f67644affca67ed48757961edc03d1e15a3",
+      "locator": "linha 1, offset 68",
+      "severity": "INFORMATIONAL",
+      "observation": "Registro de gatilho de rolagem associado ao elemento seletor '.demo'"
+    },
+    {
+      "sink": "gsap.timeline().to('.demo', ...)",
+      "sink_type": "DOM selector / animation sink (source recovery)",
+      "source_file": "reports/js-lab-staging-evidence/evidence/derived/original-0003-c6a6ec7739451c53.js.txt",
+      "sha256": "c6a6ec7739451c5337e640b8c57494f8e71762f3b5ba7625dad21324b9ff8b57",
+      "locator": "linha 2 (src/animation.js)",
+      "severity": "INFORMATIONAL",
+      "observation": "Cópia não-minificada recuperada de sourcesContent comprovando o seletor '.demo'"
+    },
+    {
+      "sink": "window.location.href = '/debug/diagnosis'",
+      "sink_type": "location.href redirect sink",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "byte ~1200700 (Error boundary Diagnóstico button)",
+      "severity": "LOW_REDIRECT_SINK",
+      "observation": "Navegação client-side fixa direcionando para rota de diagnóstico /debug/diagnosis"
+    },
+    {
+      "sink": "16 ocorrências de innerHTML",
+      "sink_type": "innerHTML assignment (bundle React/vendor)",
+      "source_file": "hackbots/cases/CL-RECON-01/artifacts/scan-20261026/homolog-index.js",
+      "sha256": "00a7d1fcc94a58a8a8574dcaf4385ba94a51075fadb8f6c9dd098faf08555fc9",
+      "locator": "homolog-index.js (múltiplas linhas)",
+      "severity": "MEDIUM_NEEDS_TAINT_VERIFICATION",
+      "observation": "Ocorrências de innerHTML no bundle minificado (majoritariamente em bibliotecas de visualização e wrappers defensivos)"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E1",
+      "source": "tests/fixtures/js-lab/demo.har.json",
+      "sha256": "972ae0fc95a28fbaa1556d2964c2423660e8c5c4a1612e9ef920346e726a1ada",
+      "locator": "entries[0..2]",
+      "observation": "HAR sintético de entrada contendo 3 transações GET 200 (app.js com sourcemap, lazy.mjs, app.js.map). SHA256 confere com o manifesto."
+    },
+    {
+      "id": "E2",
+      "source": "tests/fixtures/js-lab/scope.example.json",
+      "sha256": "0707c971f5734e299b372927f5565cb4103c8e26a53c102e87356bfb09eb4197",
+      "locator": "case_id: js-lab-synthetic-demo",
+      "observation": "Contrato de escopo delimitado à origem https://fixture.invalid com permissão explícita para source maps (allow_source_maps: true)."
+    },
+    {
+      "id": "E3",
+      "source": "reports/js-lab-staging-evidence/evidence/manifest.json",
+      "sha256": "de52e06727e9c36247ebf8556489b272d029fd96d051635af58fc4b32aed209f",
+      "locator": "run_id 126a841c6d884fa4836b1d55f5512e1e",
+      "observation": "Manifesto oficial emitido pelo mitr3-js-lab v0.2.0 atestando 4 artefatos recuperados, 0 gaps, status complete-within-v0.2-limits e 0 conexões de rede."
+    },
+    {
+      "id": "E4",
+      "source": "reports/js-lab-staging-evidence/evidence/SHA256SUMS",
+      "sha256": "c6e0bb863cc6ab2f52b6786701a61e10cece3d844a87067fad50fe1deb3e66c2",
+      "locator": "7 arquivos certificados",
+      "observation": "Cadeia de integridade com hashes de todos os artefatos raw e derived, report.txt, manifest.json e audit.jsonl com sincronização fsync."
+    },
+    {
+      "id": "E5",
+      "source": "hackbots/examples/dom-sample.js",
+      "sha256": "06621d4bdd31adb8af67f569eb3d81b325b66db0804e5cabf02a7b6cf5d9c713",
+      "locator": "linhas 1-5",
+      "observation": "Amostra sintética de DOM-XSS contendo extração de parâmetro 'search' via URLSearchParams e injeção direta em innerHTML."
+    },
+    {
+      "id": "E6",
+      "source": "hackbots/examples/adversarial-sample.js",
+      "sha256": "24b6cca5b720d7391be79f6907cf5102e56db4adfbef9e8500a1ddeebfffb8d5",
+      "locator": "linhas 1-10",
+      "observation": "Amostra adversarial com 2 rotas (/api/v2/telemetry e /api/v2/auth/token) e tentativa de prompt injection em comentários; tratada como dado inerte."
+    }
+  ],
+  "claims": [
+    {
+      "text": "A ferramenta bin/mitr3-js-lab.py executou com sucesso sob contenção bwrap + libseccomp em modo offline, processando tests/fixtures/js-lab/demo.har.json e recuperando 4 artefatos (2 scripts JS, 1 map v3 e 1 fonte original descompactada) com verificação íntegra e 0 requisições de rede externas.",
+      "evidence_ids": [
+        "E1",
+        "E2",
+        "E3",
+        "E4"
+      ]
+    },
+    {
+      "text": "Foram identificadas e mapeadas rotas de API em staging incluindo dependências de módulos estáticos, endpoints em clientes fetch/axios e rotas desprotegidas no router (/debug/*), destacando-se rotas first-party e de autenticação.",
+      "evidence_ids": [
+        "E1",
+        "E3",
+        "E6"
+      ]
+    },
+    {
+      "text": "Amostras de laboratório revelaram sink crítico de DOM-XSS via innerHTML com fonte em URLSearchParams (dom-sample.js), enquanto o bundle principal de staging apresenta 16 ocorrências de innerHTML e redirecionamentos via location.href.",
+      "evidence_ids": [
+        "E5"
+      ]
+    },
+    {
+      "text": "Parâmetros sensíveis mapeados incluem tokens JWT de sessão, parâmetros de consulta desanitizados e rotas de autenticação, sendo as chaves Supabase anon públicas de cliente e não credenciais vazadas.",
+      "evidence_ids": [
+        "E1",
+        "E5",
+        "E6"
+      ]
+    }
+  ],
+  "limitations": [
+    "Análise puramente estática e heurística sem execução dinâmica de JavaScript.",
+    "A presença de uma rota ou endpoint no código cliente não comprova sua existência, atividade ou vulnerabilidade no servidor.",
+    "Correspondência por expressões regulares pode omitir rotas construídas por templates complexos ou clientes HTTP não reconhecidos.",
+    "Modo 100% offline: zero tráfego de rede emitido; políticas de isolamento bwrap e seccomp mantidas ativas.",
+    "Dados e comentários adversariais foram processados estritamente como sequências de bytes inertes, sem execução de instruções."
+  ],
+  "review": {
+    "decision": "pending",
+    "reviewer": null
+  }
+}

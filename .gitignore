@@ -19,6 +19,7 @@ knowledge/reference-datasets/cache/
 *.pyc
 __pycache__/
 reports/osint/
+reports/js-lab-staging-evidence/
 response.json
 # Resultados locais do CodeQL: podem conter trechos e caminhos sensíveis.
 # Separate ATT&CK graph (derived from its own cached STIX bundle)
@@ -31,3 +32,8 @@ state/public-rag-mcp-qa.json
 state/public-rag-mcp-receipts.json
 state/public-rag.sqlite3
 state/shared-secret-check-latest.json
+
+# Credenciais locais de OSINT (nunca versionar)
+*.env
+Secrets.txt
+secrets.txt

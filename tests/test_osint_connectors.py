@@ -287,5 +287,44 @@ class OsintConnectorTests(unittest.TestCase):
         self.open.assert_not_called()
 
 
+    def test_extended_sources_register_and_never_echo_keys(self):
+        expected = {'censys-platform', 'otx', 'fofa', 'zoomeye', 'leakix', 'ipinfo',
+                    'abuseipdb', 'whoisxmlapi', 'bevigil', 'github'}
+        self.assertTrue(expected <= osint.CATALOG.keys())
+        for ident in expected:
+            self.assertTrue(osint.CATALOG[ident]['keys'])
+            self.assertEqual(osint.resolve(ident)[0], ident)
+        self.assertEqual(osint.resolve('alienvault')[0], 'otx')
+        os.environ['MITR3_OSINT_FOFA_KEY'] = 'fofa-fixture-key'
+        listing = osint.sources()
+        self.assertTrue(next(r for r in listing if r['id'] == 'fofa')['key_configured'])
+        self.assertNotIn('fofa-fixture-key', json.dumps(listing))
+
+    def test_extended_requests_place_auth_correctly_and_redact(self):
+        cases = (
+            ('censys-platform', 'domain', 'example.org', 'POST',
+             'https://api.platform.censys.io/v3/global/search/query', 'Authorization', 'Bearer '),
+            ('zoomeye', 'ip', '192.0.2.1', 'POST', 'https://api.zoomeye.ai/v2/search', 'API-KEY', ''),
+            ('leakix', 'domain', 'example.org', 'GET', 'https://leakix.net/search', 'api-key', ''),
+            ('abuseipdb', 'ip', '192.0.2.1', 'GET', 'https://api.abuseipdb.com/api/v2/check', 'Key', ''),
+            ('bevigil', 'domain', 'example.org', 'GET',
+             'https://osint.bevigil.com/api/example.org/subdomains/', 'X-Access-Token', ''),
+        )
+        for ident, kind, value, method, url, header, prefix in cases:
+            with self.subTest(source=ident):
+                for name, _ in osint.CATALOG[ident]['keys']:
+                    os.environ[name] = 'fixture-' + ident
+                self.respond(url, {'ok': True})
+                result = osint.query(ident, kind, value, 'authorized lab validation', allow_send=True)
+                request = self.open.call_args.args[0]
+                self.assertEqual(request.get_method(), method)
+                self.assertTrue(request.full_url.startswith(url))
+                sent = {name.lower(): value for name, value in request.headers.items()}
+                self.assertEqual(sent[header.lower()], prefix + 'fixture-' + ident)
+                self.assertNotIn('fixture-' + ident, json.dumps(result))
+                self.assertNotIn('fixture-' + ident, Path(result['report']).read_text())
+                self.open.reset_mock()
+
+
 if __name__ == '__main__':
     unittest.main()

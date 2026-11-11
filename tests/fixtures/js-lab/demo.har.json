@@ -1,0 +1,41 @@
+{
+  "log": {
+    "version": "1.2",
+    "creator": {"name": "MITR3 synthetic fixture", "version": "0.1.0"},
+    "entries": [
+      {
+        "request": {"method": "GET", "url": "https://fixture.invalid/app.js?v=1", "headers": [], "cookies": []},
+        "response": {
+          "status": 200,
+          "headers": [],
+          "cookies": [],
+          "content": {
+            "mimeType": "application/javascript",
+            "text": "import('./lazy.mjs');gsap.timeline().to('.demo',{x:100,duration:1});ScrollTrigger.create({trigger:'.demo'});\n//# sourceMappingURL=app.js.map"
+          }
+        }
+      },
+      {
+        "request": {"method": "GET", "url": "https://fixture.invalid/lazy.mjs", "headers": [], "cookies": []},
+        "response": {
+          "status": 200,
+          "headers": [],
+          "cookies": [],
+          "content": {"mimeType": "application/javascript", "text": "export const lazy = 'synthetic demo';"}
+        }
+      },
+      {
+        "request": {"method": "GET", "url": "https://fixture.invalid/app.js.map", "headers": [], "cookies": []},
+        "response": {
+          "status": 200,
+          "headers": [],
+          "cookies": [],
+          "content": {
+            "mimeType": "application/json",
+            "text": "{\"version\":3,\"sources\":[\"src/animation.js\"],\"sourcesContent\":[\"export function animate() {\\n  return gsap.timeline().to('.demo', { x: 100, duration: 1 });\\n}\\n\"],\"names\":[],\"mappings\":\"\"}"
+          }
+        }
+      }
+    ]
+  }
+}

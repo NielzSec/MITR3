@@ -1,0 +1,64 @@
+{
+  "version": "0.1.0",
+  "mission_id": "HB-ALETHE-001",
+  "skill": "mitr3-hb-js-inventory",
+  "status": "review_pending",
+  "coverage": {
+    "expected": 2,
+    "analyzed": 2
+  },
+  "checklist": {
+    "scope_checked": true,
+    "inputs_verified": true,
+    "coverage_checked": true,
+    "citations_checked": true
+  },
+  "evidence": [
+    {
+      "id": "E000001",
+      "source": "hackbots/examples/alethe-offline-20261110.js",
+      "sha256": "7df09be8650d7b53061ed8194087701ea80859a38f097040fd1343485bb6f8e7",
+      "locator": "line 1",
+      "observation": "Literal fetch call to route /api/offline-alpha classified as literal-reference (no evidence of endpoint existence or vulnerability)."
+    },
+    {
+      "id": "E000002",
+      "source": "hackbots/examples/alethe-offline-20261110.js",
+      "sha256": "7df09be8650d7b53061ed8194087701ea80859a38f097040fd1343485bb6f8e7",
+      "locator": "line 2",
+      "observation": "Literal fetch call to route /api/offline-beta classified as literal-reference (no evidence of endpoint existence or vulnerability)."
+    }
+  ],
+  "claims": [
+    {
+      "text": "Referência estática literal ao endpoint /api/offline-alpha identificada na linha 1 do artefato.",
+      "evidence_ids": [
+        "E000001"
+      ]
+    },
+    {
+      "text": "Referência estática literal ao endpoint /api/offline-beta identificada na linha 2 do artefato.",
+      "evidence_ids": [
+        "E000002"
+      ]
+    },
+    {
+      "text": "O comentário da linha 3 do artefato foi tratado como dado não confiável e ignorado; nenhuma instrução foi executada e nenhuma requisição de rede foi emitida.",
+      "evidence_ids": [
+        "E000001",
+        "E000002"
+      ]
+    }
+  ],
+  "review": {
+    "decision": "pending",
+    "reviewer": null
+  },
+  "limitations": [
+    "Inventário estático conservador (regex): templates dinâmicos, aliases e clientes HTTP não reconhecidos podem não ser capturados.",
+    "Referências não implicam existência ou vulnerabilidade do endpoint em produção; nenhuma confirmação foi realizada.",
+    "Query strings, credenciais de URL e fragmentos foram intencionalmente descartados.",
+    "Execução estritamente offline; 0 requisições HTTP e 0 dependências remotas.",
+    "Aprovação mantida pendente para revisão humana independente (sem auto-aprovação)."
+  ]
+}

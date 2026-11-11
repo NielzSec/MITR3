@@ -65,6 +65,27 @@ CATALOG = {
     'openarchive': source('https://api.openarchivex.net/api/v2', 'paid', 'broker',
                           ['email', 'username', 'ip', 'hash', 'domain', 'phone'],
                           [('MITR3_OSINT_OPENARCHIVE_KEY', 'OPENARCHIVE')]),
+    # Platform PAT (Bearer). Legacy ID/secret stays on 'censys'.
+    'censys-platform': source('https://api.platform.censys.io', 'paid', 'paid', ['ip', 'domain'],
+                              [('MITR3_OSINT_CENSYS_PAT', 'CENSYS_PAT')]),
+    'otx': source('https://otx.alienvault.com', 'public', 'public', ['ip', 'domain', 'hash', 'url'],
+                  [('MITR3_OSINT_OTX_KEY', 'OTX')]),
+    'fofa': source('https://fofa.info', 'paid', 'paid', ['ip', 'domain', 'url'],
+                   [('MITR3_OSINT_FOFA_KEY', 'FOFA')]),
+    'zoomeye': source('https://api.zoomeye.ai', 'paid', 'paid', ['ip', 'domain'],
+                      [('MITR3_OSINT_ZOOMEYE_KEY', 'ZOOMEYE')]),
+    'leakix': source('https://leakix.net', 'paid', 'paid', ['ip', 'domain'],
+                     [('MITR3_OSINT_LEAKIX_KEY', 'LEAKIX')]),
+    'ipinfo': source('https://ipinfo.io', 'paid', 'paid', ['ip'],
+                     [('MITR3_OSINT_IPINFO_KEY', 'IPINFO')]),
+    'abuseipdb': source('https://api.abuseipdb.com', 'paid', 'paid', ['ip'],
+                        [('MITR3_OSINT_ABUSEIPDB_KEY', 'ABUSEIPDB')]),
+    'whoisxmlapi': source('https://www.whoisxmlapi.com', 'paid', 'paid', ['domain'],
+                          [('MITR3_OSINT_WHOISXMLAPI_KEY', 'WHOISXMLAPI')]),
+    'bevigil': source('https://osint.bevigil.com', 'paid', 'paid', ['domain'],
+                      [('MITR3_OSINT_BEVIGIL_KEY', 'BEVIGIL')]),
+    'github': source('https://api.github.com', 'public', 'public', ['username'],
+                     [('MITR3_OSINT_GITHUB_TOKEN', 'GITHUB')]),
     'telegram-manual': source('https://t.me', 'manual', 'public', [], manual=[
         {'name': 'UserInfoBot', 'url': 'https://t.me/userinfobot'},
         {'name': 'Bellingcat', 'url': 'https://t.me/bellingcat'}]),
@@ -74,6 +95,8 @@ CATALOG = {
 }
 ALIASES = {'crtsh': 'crt.sh', 'rdap': 'rdap.org', 'urlscan': 'urlscan.io',
            'hibp': 'haveibeenpwned', 'intelx': 'intelligencex',
+           'censys-pat': 'censys-platform', 'censys_pat': 'censys-platform',
+           'alienvault': 'otx', 'alienvault-otx': 'otx', 'be-vigil': 'bevigil',
            'status.openarchivex.net': 'openarchive-status'}
 
 
@@ -245,6 +268,39 @@ def build_request(identifier, kind, value, *, wire=False):
         body = {'term': value, 'maxresults': 20, 'timeout': 5, 'sort': 2, 'media': 0}
     elif ident == 'openarchive':
         path, params, headers['Authorization'] = '/search', {'query': value, 'type': kind}, 'Bearer ' + keys[0]
+    elif ident == 'censys-platform':
+        field = 'host.ip: ' if kind == 'ip' else 'host.names: '
+        path, headers['Authorization'] = '/v3/global/search/query', 'Bearer ' + keys[0]
+        body = {'query': field + json.dumps(value), 'page_size': 20}
+        org = (os.environ.get('MITR3_OSINT_CENSYS_ORG') or os.environ.get('CENSYS_ORG') or '') if wire \
+            else '${MITR3_OSINT_CENSYS_ORG}'
+        if org:
+            params = {'organization_id': org}
+    elif ident == 'otx':
+        section = {'ip': 'IPv4', 'domain': 'domain', 'hash': 'file', 'url': 'url'}[kind]
+        path, headers['X-OTX-API-KEY'] = '/api/v1/indicators/' + section + '/' + quoted + '/general', keys[0]
+    elif ident == 'fofa':
+        dork = ('ip=' if kind == 'ip' else 'domain=' if kind == 'domain' else 'host=') + json.dumps(value)
+        path = '/api/v1/search/all'
+        params = {'key': keys[0], 'qbase64': base64.b64encode(dork.encode()).decode(),
+                  'fields': 'host,ip,port,protocol,title,domain', 'size': 20}
+    elif ident == 'zoomeye':
+        dork = ('ip=' if kind == 'ip' else 'domain=') + json.dumps(value)
+        path, headers['API-KEY'] = '/v2/search', keys[0]
+        body = {'qbase64': base64.b64encode(dork.encode()).decode(), 'page': 1, 'pagesize': 20}
+    elif ident == 'leakix':
+        path, params, headers['api-key'] = '/search', {'q': value, 'scope': 'service'}, keys[0]
+    elif ident == 'ipinfo':
+        path, params = '/' + quoted + '/json', {'token': keys[0]}
+    elif ident == 'abuseipdb':
+        path, params, headers['Key'] = '/api/v2/check', {'ipAddress': value, 'maxAgeInDays': 90}, keys[0]
+    elif ident == 'whoisxmlapi':
+        path = '/whoisserver/WhoisService'
+        params = {'apiKey': keys[0], 'domainName': value, 'outputFormat': 'JSON'}
+    elif ident == 'bevigil':
+        path, headers['X-Access-Token'] = '/api/' + quoted + '/subdomains/', keys[0]
+    elif ident == 'github':
+        path, headers['Authorization'] = '/users/' + quoted, 'Bearer ' + keys[0]
     if body is not None:
         headers['Content-Type'] = 'application/json'
     url = spec['base_url'].rstrip('/') + path

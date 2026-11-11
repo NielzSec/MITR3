@@ -1,0 +1,25 @@
+{
+  "mission_id": "HB-ALETHE-001",
+  "orchestration_id": "20261110-182931-mitr3-offline-opencode-deepseek-pilot",
+  "worker_id": "opencode-deepseek-offline",
+  "model_route": "dahl3/deepseek-ai/DeepSeek-V4-Flash-0731",
+  "status": "inconclusive",
+  "failure_reason": "worker_timed_out",
+  "exit_code": 130,
+  "duration_seconds": 299.863,
+  "transport_error": "Transport: ECONNRESET: The socket connection was closed unexpectedly",
+  "verification": {
+    "files_accessed": [
+      "hackbots/examples/mission-alethe-offline-20261110.json",
+      "hackbots/contracts/result.schema.json",
+      "skills/mitr3-hb-js-inventory/SKILL.md",
+      "hackbots/examples/alethe-offline-20261110.js"
+    ],
+    "sha256_verified_by_worker": {
+      "hackbots/examples/alethe-offline-20261110.js": "7df09be8650d7b53061ed8194087701ea80859a38f097040fd1343485bb6f8e7",
+      "hackbots/examples/mission-alethe-offline-20261110.json": "0d8bdd2582876a74cc4472c41109b6ef40f727b8789ae42adf05354bb3631c6d"
+    },
+    "output_artifact_generated": false
+  },
+  "verdict": "Piloto offline inconclusivo por timeout e instabilidade de socket no provedor OpenCode/Dahl3 DeepSeek. Limites e orçamentos do Alethe contiveram a execução dentro dos 300s sem estouro de chamadas ou recursos."
+}

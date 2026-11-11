@@ -1,0 +1,16 @@
+{
+  "case_id": "js-lab-synthetic-demo",
+  "operator": "synthetic-fixture-only",
+  "expires_at": "2030-01-01T00:00:00Z",
+  "allowed_origins": ["https://fixture.invalid"],
+  "allowed_paths": {"https://fixture.invalid": ["/"]},
+  "allow_source_maps": true,
+  "retention_days": 7,
+  "limits": {
+    "max_requests": 8,
+    "max_file_bytes": 1048576,
+    "max_bytes": 4194304,
+    "max_artifacts": 32,
+    "max_seconds": 30
+  }
+}

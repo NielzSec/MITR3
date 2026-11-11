@@ -1,0 +1,305 @@
+{
+  "schema": "mitr3-api-contract-audit/v1",
+  "mission": "Ward — validação e auditoria de contratos de API e regras de BOLA/IDOR em staging",
+  "generated_at_utc": "2026-11-11T04:36:09Z",
+  "offline_only": true,
+  "network_calls_observed": 0,
+  "target_network_touched": false,
+  "operator": "Kai",
+  "method": "static analysis of local artifacts only; no live requests, no discovery, no credential access",
+  "evidence_deterministic": true,
+  "evidence_note": "Every hash, line reference, test result and probe outcome below is reproducible from the local filesystem with the commands recorded in deterministic_checks. generated_at_utc is the only non-deterministic field.",
+  "artifacts": {
+    "named_in_mission": [
+      {
+        "path": "bin/mitr3-web-api.py",
+        "exists": false,
+        "sha256": null,
+        "size_bytes": null,
+        "finding": "F-001",
+        "search_evidence": [
+          "find / -xdev -name 'mitr3-web-api.py' 2>/dev/null | wc -l -> 0",
+          "git -C /home/nielz/MITR3/MITR3 log --all --oneline -- bin/mitr3-web-api.py -> empty",
+          "git -C /home/nielz/MITR3/MITR3 log --all --oneline --diff-filter=D -- '*web-api*' -> empty",
+          "absent from /home/nielz/MITR3/bin, /home/nielz/MITR3-GITHUB-STAGING/bin, /home/nielz/orca/workspaces/MITR3/graph-c1-c2-fixes/bin, /home/nielz/orca/workspaces/MITR3/graph-c4-rebuild-fix/bin"
+        ]
+      },
+      {
+        "path": "bin/mitr3-h1-validator.py",
+        "resolved_path": "/home/nielz/MITR3/bin/mitr3-h1-validator.py",
+        "exists": true,
+        "sha256": "121ee3b27abc38b0b42055176ab7d86209392a9a42bd0d918e1cbfb942a815c3",
+        "size_bytes": 5297
+      }
+    ],
+    "staging_contract": [
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/C1_comprador-A-le-pedido.req", "sha256": "2aadaee593c9c0b46ccd8b955c80fd8451036403e6adcdf482e2286d56bc3586"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/C2_vendedor-C-le-venda.req", "sha256": "893b2f82620cd573cdcd77e958bd4379fb3701f004284464a6ad1ccab45b6e6d"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/X1_terceiro-B-le-pedido-de-A.req", "sha256": "b6044998b42ea624f89de00985ed30172ad267dc2610f63f96d5eb4f89368537"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/C1_shipments_comprador-A.req", "sha256": "51dd01c62f1d0f257907f9f67700b33cf29254ceffeccd800f465961c45f59e3"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/C2_shipments_vendedor-C.req", "sha256": "01486dfc44d321ccd05a8c3dea9578444536587c8fc7eb7b684e6cb6b8162e0a"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/X1_shipments_terceiro-B-pedido-A.req", "sha256": "97f06c57653eee93656ae6f1b9b7cd0393585881eb971da61a90359cef343e91"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/C1_billing_info_comprador-A.req", "sha256": "8880f28496a9eb50ced7fe65dca3bcd3dd75a6368a924d46f144293d7065bf0f"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/C2_billing_info_vendedor-C.req", "sha256": "e4444b5ba12edb2d1e2a0dc2de8e52c069a63cb784a11c7136fda94e1003fe70"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/templates/X1_billing_info_terceiro-B-pedido-A.req", "sha256": "2ae41e79f3d7e7a55ccc87df4170e9dc2f93de13c1f247d9ea3a6ebe27d9375a"},
+      {"path": "/home/nielz/MITR3/engagements/burp_lane/h1_meli_onda10/README.md", "sha256": "018f0bf1068f1347da9e375264bc6cda958a5c96f5c0b5110737f7e173404abf"}
+    ],
+    "supporting": [
+      {"path": "/home/nielz/MITR3/bin/mitr3-onda10-exec.py", "sha256": "8089eb8b5a42e8e5714cd3102c36da513ee5304d7f610e2e9af8b20a5690461c", "size_bytes": 14375},
+      {"path": "/home/nielz/MITR3/reviews/gpt6/h1_meli_onda10/staging_gate.py", "sha256": "d3b25a24d4d28fa83688594cd8cad136481619ffeb343bf7c76042fc6e7e484c", "size_bytes": 7531},
+      {"path": "/home/nielz/MITR3/docs/H1-MELI-SPEC-V10.md", "sha256": "437ede737cdeadc500f506b67cd8bdcc2d26c82dbd2613b83eb42fddc567e07c", "size_bytes": 3149},
+      {"path": "/home/nielz/MITR3/tests/test_h1_validator.py", "sha256": null, "note": "test harness for the validator; executed offline"}
+    ]
+  },
+  "deterministic_checks": {
+    "validator_unit_tests": {
+      "command": "cd /home/nielz/MITR3 && python3 -m unittest tests.test_h1_validator -v",
+      "result": "OK",
+      "tests_run": 6,
+      "failures": 0,
+      "errors": 0,
+      "network_calls": 0
+    },
+    "staging_gate": {
+      "command": "cd /home/nielz/MITR3 && python3 reviews/gpt6/h1_meli_onda10/staging_gate.py",
+      "result": "PASS_STRUCTURAL_ONLY",
+      "errors": 0,
+      "warnings": 0,
+      "network_calls": 0,
+      "exit": 0
+    },
+    "validator_dry_run": {
+      "command": "cd /home/nielz/MITR3 && python3 bin/mitr3-h1-validator.py --session-a /nonexistent/a --session-b /nonexistent/b --resource-id 123 --endpoint 'https://www.mercadolivre.com.br/addresses/extra-info-details/{resource_id}'",
+      "stdout": "{\"mode\": \"dry_run\", \"method\": \"GET\", \"max_requests\": 2, \"credentials_read\": false}",
+      "exit": 0,
+      "network_calls": 0
+    },
+    "route_integrity_probe": {
+      "method": "importlib load of bin/mitr3-h1-validator.py; call target() with hostile and valid inputs",
+      "hostile_endpoints_rejected": 6,
+      "hostile_resource_ids_rejected": 5,
+      "valid_endpoint_accepted": true,
+      "valid_resolved_url": "https://www.mercadolivre.com.br/addresses/extra-info-details/123",
+      "cases": [
+        {"input": "http://www.mercadolivre.com.br/addresses/extra-info-details/{resource_id}", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "https://evil.test/addresses/extra-info-details/{resource_id}", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "https://www.mercadolivre.com.br/addresses/extra-info-details/{resource_id}?x=1", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "https://www.mercadolivre.com.br/gz/checkout/start/api/init", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "https://user@www.mercadolivre.com.br/addresses/extra-info-details/{resource_id}", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "https://WWW.MERCADOLIVRE.COM.BR/addresses/extra-info-details/{resource_id}", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "resource_id='abc'", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "resource_id='12a'", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "resource_id=';DROP'", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "resource_id='111111111111111111111111111111111' (33 digits)", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"},
+        {"input": "resource_id=''", "accepted": false, "code": "READ_ONLY_ENDPOINT_REQUIRED"}
+      ]
+    }
+  },
+  "rule_audit": {
+    "mitr3-h1-validator.py": {
+      "route_parameter_integrity": {
+        "verdict": "PASS",
+        "evidence": [
+          "bin/mitr3-h1-validator.py:20-21 — HOST and TEMPLATE are fixed constants; no caller-supplied host or path",
+          "bin/mitr3-h1-validator.py:37-40 — scheme must be https, hostname must equal HOST, port must be None or 443, userinfo/query/fragment forbidden, path must equal TEMPLATE exactly, netloc must equal HOST exactly (case-sensitive, rejects uppercase host)",
+          "bin/mitr3-h1-validator.py:41 — resource_id must fullmatch [0-9]{1,32}",
+          "bin/mitr3-h1-validator.py:45 — substitution uses quote(resource_id, safe=''); digits-only input makes encoding a no-op",
+          "bin/mitr3-h1-validator.py:29-31 — NoRedirect refuses all redirects",
+          "bin/mitr3-h1-validator.py:74 — ProxyHandler({}) disables proxy pickup",
+          "bin/mitr3-h1-validator.py:75 — GET only"
+        ]
+      },
+      "tenant_isolation": {
+        "verdict": "NOT_MODELED",
+        "evidence": [
+          "bin/mitr3-h1-validator.py:20-21 — single fixed host and single fixed path; no tenant segment, no tenant header",
+          "bin/mitr3-h1-validator.py:75 — request carries only Cookie and Accept; no tenant identifier",
+          "bin/mitr3-h1-validator.py:86-103 — contrast() distinguishes only control vs test session; it cannot distinguish tenant A from tenant B"
+        ],
+        "impact": "Cross-tenant IDOR is indistinguishable from cross-user IDOR in this contract. A tenant-confusion case cannot be expressed or detected."
+      },
+      "bola_idor_rules": {
+        "verdict": "PARTIAL",
+        "evidence": [
+          "bin/mitr3-h1-validator.py:90 — proof_of_bola hardcoded False; the tool never claims proof",
+          "bin/mitr3-h1-validator.py:91-93 — control must be 200 or the run stops (CONTROL_NOT_200_STOP)",
+          "bin/mitr3-h1-validator.py:94 — 1s serial interval, no retry",
+          "bin/mitr3-h1-validator.py:97-98 — 403/404 -> EXPECTED_DENIAL",
+          "bin/mitr3-h1-validator.py:99-100 — 200 -> BOLA_CANDIDATE with code CONTENT_AND_IDENTITY_REVIEW_REQUIRED (content review deferred to human)",
+          "bin/mitr3-h1-validator.py:102 — any other status -> UNEXPECTED_STATUS_STOP"
+        ],
+        "gap": "Verdict is status-only. A 200 with a generic empty shell is reported as BOLA_CANDIDATE; docs/H1-MELI-SPEC-V10.md:50 states 'HTTP 200 com casca genérica não é achado'. The content-aware discrimination exists only in bin/mitr3-onda10-exec.py:249-251 (NEGATIVE_SHELL)."
+      },
+      "transport_safety": {
+        "verdict": "PASS",
+        "evidence": [
+          "bin/mitr3-h1-validator.py:73-83 — fetch() returns status only; body is never read, logged, parsed or followed",
+          "bin/mitr3-h1-validator.py:29-31,74-75 — no redirects, no proxy, GET only"
+        ]
+      },
+      "session_handling": {
+        "verdict": "PASS",
+        "evidence": [
+          "bin/mitr3-h1-validator.py:49 — O_RDONLY|O_NOFOLLOW|O_NONBLOCK; symlink refused",
+          "bin/mitr3-h1-validator.py:51-54 — regular file, owner uid, exact 0600 mode",
+          "bin/mitr3-h1-validator.py:55-57 — 65536-byte cap enforced by reading 65537 bytes",
+          "bin/mitr3-h1-validator.py:58-70 — origin pinned to https://www.mercadolivre.com.br; cookie name/value charset restricted",
+          "bin/mitr3-h1-validator.py:123 — distinct sessions required (a != b)"
+        ]
+      },
+      "authorization_gates": {
+        "verdict": "PASS",
+        "evidence": [
+          "bin/mitr3-h1-validator.py:117 — dry-run is the default; prints mode only",
+          "bin/mitr3-h1-validator.py:120-121 — live execution requires --execute AND --authorized-test-users",
+          "bin/mitr3-h1-validator.py:128 — errors return verdict INCONCLUSIVE with a code, never a partial success"
+        ]
+      },
+      "defects": [
+        {
+          "id": "F-004",
+          "severity": "LOW",
+          "title": "RESOURCE_ID_INVALID error code is dead",
+          "evidence": "bin/mitr3-h1-validator.py:25 declares ValidationError(ValueError); line 42 raises ValidationError('RESOURCE_ID_INVALID'); lines 43-44 catch ValueError and re-raise ValidationError('READ_ONLY_ENDPOINT_REQUIRED'). The specific code can never surface.",
+          "observed": "route_integrity_probe: resource_id='abc' returned READ_ONLY_ENDPOINT_REQUIRED, not RESOURCE_ID_INVALID",
+          "impact": "Auditability only; rejection behaviour is correct."
+        }
+      ]
+    },
+    "staging_contract": {
+      "scope": "H1-MELI Onda 10 order API (api.mercadolivre.com), 9 request templates",
+      "identity_binding": {
+        "verdict": "PASS (per-actor bearer)",
+        "evidence": [
+          "templates line 5 — Authorization: Bearer $AUTH_TOKEN_{A|B|C}",
+          "templates line 2 — Host: api.mercadolivre.com (fixed)",
+          "templates line 3 — User-Agent fixed and identical across C1/C2/X1",
+          "templates line 4 — Accept: application/json"
+        ]
+      },
+      "tenant_isolation": {
+        "verdict": "NOT_MODELED",
+        "evidence": [
+          "templates lines 1-5 — no tenant header, no tenant path segment; identity is bearer-only",
+          "staging_gate.py:29 — HEADER_NAMES allowlist is host, user-agent, accept, authorization only"
+        ],
+        "impact": "The X1 case tests cross-user access (third party B), not cross-tenant access. Tenant confusion is out of contract."
+      },
+      "route_parameter_integrity": {
+        "verdict": "PASS (structural)",
+        "evidence": [
+          "staging_gate.py:41 — 4096-byte cap",
+          "staging_gate.py:43 — control-byte rejection",
+          "staging_gate.py:45-48 — exclusive CRLF framing and final empty line",
+          "staging_gate.py:49 — comments forbidden",
+          "staging_gate.py:51-53 — placeholder allowlist: only $ORDER_ID and $AUTH_TOKEN_<actor>",
+          "staging_gate.py:55 — ASCII wire",
+          "staging_gate.py:63 — exactly one $ORDER_ID",
+          "staging_gate.py:65 — exactly one $AUTH_TOKEN_",
+          "staging_gate.py:67 — exact 7-line framing",
+          "staging_gate.py:82-89 — header allowlist, host, accept, bearer, user-agent checks",
+          "staging_gate.py:124-132 — UA and path must be identical across cases"
+        ],
+        "gap": "$ORDER_ID value integrity is not validated offline (placeholder by design); response-side order-id ownership is checked at runtime by bin/mitr3-onda10-exec.py:232."
+      },
+      "bola_idor_rules": {
+        "verdict": "PASS (content-aware, in runner not validator)",
+        "evidence": [
+          "bin/mitr3-onda10-exec.py:228-233 — ownership: response order id must equal requested order_id; buyer must equal identity A; seller must equal identity B (swap) or C",
+          "bin/mitr3-onda10-exec.py:235-243 — C1/C2 positive controls must be 200, owned and values present; C2 must agree with C1 baseline",
+          "bin/mitr3-onda10-exec.py:244-246 — X1 with matched baseline values -> BOLA_CANDIDATE",
+          "bin/mitr3-onda10-exec.py:247-248 — safe denial (403/404, no values, not owned) -> NEGATIVE",
+          "bin/mitr3-onda10-exec.py:249-251 — known empty/metadata shell -> NEGATIVE_SHELL",
+          "bin/mitr3-onda10-exec.py:221-224 — 429/5xx/3xx, WAF/charge markers -> HTTP_SAFETY_STOP / WAF_OR_CHARGE_STOP",
+          "bin/mitr3-onda10-exec.py:204-216 — single verified-TLS request, exact staged bytes, no proxy/retry/redirect"
+        ]
+      },
+      "tenant_isolation_note": "No tenant dimension exists in the order API contract. Tenant isolation, if present, is server-side and unverifiable offline."
+    }
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "severity": "HIGH",
+      "title": "Named audit target bin/mitr3-web-api.py does not exist",
+      "evidence": "find / -xdev -name 'mitr3-web-api.py' -> 0 hits; no git history in /home/nielz/MITR3/MITR3; absent from staging repo and both worktrees",
+      "impact": "The API-contract validation artifact named in the mission cannot be reviewed. The audit of API-contract tooling is incomplete by construction.",
+      "remediation": "Provide the artifact or confirm the intended path. If it is meant to be built, scope it separately; do not substitute a different file silently."
+    },
+    {
+      "id": "F-002",
+      "severity": "MEDIUM",
+      "title": "Tenant isolation is not modeled in the validator or the staging contract",
+      "evidence": "bin/mitr3-h1-validator.py:20-21,75,86-103; templates lines 1-5; staging_gate.py:29",
+      "impact": "Cross-tenant IDOR cannot be distinguished from cross-user IDOR offline. A tenant-confusion case passes all structural gates.",
+      "remediation": "Add a tenant binding (header or path segment) and a tenant-confusion case (T1/T2) to both the validator contract and the staging matrix."
+    },
+    {
+      "id": "F-003",
+      "severity": "MEDIUM",
+      "title": "Validator route family does not cover the staging order API",
+      "evidence": "bin/mitr3-h1-validator.py:20-21 (/addresses/extra-info-details/{resource_id} on www.mercadolivre.com.br) vs templates line 1 (/orders/$ORDER_ID[/shipments|/billing_info] on api.mercadolivre.com)",
+      "impact": "The BOLA/IDOR rules for the Onda 10 order route live in bin/mitr3-onda10-exec.py, not in the validator. The validator alone is insufficient to audit the staging order contract.",
+      "remediation": "Reconcile: either extend the validator to the order route family or document that onda10-exec.py is the order-route rule engine and the validator is address-route only."
+    },
+    {
+      "id": "F-004",
+      "severity": "LOW",
+      "title": "RESOURCE_ID_INVALID error code is masked by the ValueError handler",
+      "evidence": "bin/mitr3-h1-validator.py:25,41-44; probe: resource_id='abc' -> READ_ONLY_ENDPOINT_REQUIRED",
+      "impact": "Auditability only; rejection behaviour is correct.",
+      "remediation": "Raise a non-ValueError sentinel for endpoint errors, or reorder the checks so RESOURCE_ID_INVALID is raised outside the try."
+    },
+    {
+      "id": "F-005",
+      "severity": "LOW",
+      "title": "Validator BOLA verdict is status-only and cannot discriminate a generic 200 shell",
+      "evidence": "bin/mitr3-h1-validator.py:99-100; docs/H1-MELI-SPEC-V10.md:50; content-aware alternative at bin/mitr3-onda10-exec.py:249-251",
+      "impact": "Over-reporting of BOLA_CANDIDATE; human content review required on every 200.",
+      "remediation": "Add a content-shape check (empty/metadata shell -> NEGATIVE_SHELL) mirroring onda10-exec.py."
+    },
+    {
+      "id": "F-006",
+      "severity": "INFO",
+      "title": "Route parameter integrity is strong in the validator",
+      "evidence": "bin/mitr3-h1-validator.py:37-45; route_integrity_probe: 6/6 hostile endpoints and 5/5 hostile resource_ids rejected",
+      "impact": "Positive finding; path manipulation, host confusion, query/fragment injection and non-numeric ids are all refused."
+    },
+    {
+      "id": "F-007",
+      "severity": "INFO",
+      "title": "Staging template structural integrity is strong",
+      "evidence": "staging_gate.py:41-92,124-132; deterministic_checks.staging_gate: PASS_STRUCTURAL_ONLY, 0 errors, 0 warnings, 0 network calls",
+      "impact": "Positive finding; framing, placeholder, host and identity-allowlist gates hold."
+    },
+    {
+      "id": "F-008",
+      "severity": "INFO",
+      "title": "proof_of_bola is hardcoded False",
+      "evidence": "bin/mitr3-h1-validator.py:90",
+      "impact": "Positive finding; the tool never asserts proof, only candidacy."
+    },
+    {
+      "id": "F-009",
+      "severity": "LOW",
+      "title": "Validator has no request budget or rate-limit handling beyond a 1s sleep",
+      "evidence": "bin/mitr3-h1-validator.py:94; contrast is capped at 2 requests by design",
+      "impact": "Low risk at current scope (2 requests); a broader run could exceed 60/host/h.",
+      "remediation": "Add an explicit budget/rate guard if the validator is extended beyond 2 requests."
+    }
+  ],
+  "compliance": {
+    "named_artifact_presence": "FAIL",
+    "tenant_isolation": "FAIL",
+    "route_parameter_integrity": "PASS",
+    "bola_idor_rules": "PARTIAL",
+    "deterministic_evidence": "PASS",
+    "offline_only": "PASS",
+    "overall": "NON_COMPLIANT",
+    "blocking_conditions": [
+      "F-001: bin/mitr3-web-api.py is absent; the mission's primary audit target cannot be reviewed.",
+      "F-002: tenant isolation is not modeled; the compliance question cannot be answered affirmatively."
+    ],
+    "author_note": "Static analysis only. No live authorization or vulnerability claim is made. All evidence is reproducible from the local filesystem."
+  }
+}

@@ -30,12 +30,24 @@ Padrao: REDIRECT_BLOCKED em qualquer 3xx (`NoRedirect`, opner dedicado por reque
 | `leakcheck` | paid | broker | email, username | `MITR3_OSINT_LEAKCHECK_KEY` |
 | `intelligencex` | paid | broker | email, domain, ip | `MITR3_OSINT_INTELX_KEY` |
 | `openarchive` | paid | broker | email, username, ip, hash, domain, phone | `MITR3_OSINT_OPENARCHIVE_KEY` |
+| `censys-platform` | paid | paid | ip, domain | `MITR3_OSINT_CENSYS_PAT` (Bearer PAT, API v3) |
+| `otx` | public | public | ip, domain, hash, url | `MITR3_OSINT_OTX_KEY` (AlienVault OTX) |
+| `fofa` | paid | paid | ip, domain, url | `MITR3_OSINT_FOFA_KEY` |
+| `zoomeye` | paid | paid | ip, domain | `MITR3_OSINT_ZOOMEYE_KEY` |
+| `leakix` | paid | paid | ip, domain | `MITR3_OSINT_LEAKIX_KEY` |
+| `ipinfo` | paid | paid | ip | `MITR3_OSINT_IPINFO_KEY` |
+| `abuseipdb` | paid | paid | ip | `MITR3_OSINT_ABUSEIPDB_KEY` |
+| `whoisxmlapi` | paid | paid | domain | `MITR3_OSINT_WHOISXMLAPI_KEY` |
+| `bevigil` | paid | paid | domain | `MITR3_OSINT_BEVIGIL_KEY` |
+| `github` | public | public | username | `MITR3_OSINT_GITHUB_TOKEN` |
 | `telegram-manual` | manual | public | listar somente | nenhuma |
 | `forums-manual` | manual | public | listar somente | nenhuma |
 
 Também são aceitos os aliases de env `URLSCAN`, `VIRUSTOTAL`, `SHODAN`,
 `CENSYS_ID`, `CENSYS_SECRET`, `GREYNOISE`, `HIBP`, `DEHASHED`, `LEAKCHECK`,
-`INTELX`, `OPENARCHIVE`; o nome com prefixo MITR3 tem prioridade. O CLI mostra
+`INTELX`, `OPENARCHIVE`, `CENSYS_PAT`, `OTX`, `FOFA`, `ZOOMEYE`, `LEAKIX`,
+`IPINFO`, `ABUSEIPDB`, `WHOISXMLAPI`, `BEVIGIL`, `GITHUB`; o nome com prefixo
+MITR3 tem prioridade. O CLI mostra
 somente se as credenciais necessárias estão configuradas, nunca seus valores.
 Credenciais vêm do ambiente, sem arquivo de configuração ou chave no repositório.
 Não cole chaves no comando de consulta ou no purpose.
@@ -89,6 +101,15 @@ bin/mitr3-osint.py query haveibeenpwned --type email --value john@domain.com \
   `https://status.openarchivex.net/`. O alias `status.openarchivex.net` também
   funciona. Chaves nunca são anexadas. Outros IDs retornam `HEALTH_UNAVAILABLE`;
   o status não oferece `query`. As duas listas manuais recusam API com `MANUAL_ONLY`.
+
+## Recorte de recon por tipo de seletor
+
+Um domínio puxa `crt.sh`, `rdap.org`, `urlscan.io`, `virustotal`, `censys-platform`,
+`otx`, `fofa`, `zoomeye`, `leakix`, `bevigil` e `whoisxmlapi`. Um IP puxa
+`ipinfo`, `abuseipdb`, `virustotal`, `shodan`, `greynoise`, `censys-platform`,
+`otx`, `fofa`, `zoomeye`, `leakix` e `urlscan.io`. Cada uma continua sendo uma
+requisição separada, com `--allow-send`, purpose e relatório próprio; não há fan-out
+automático nem correlação entre fontes dentro do script.
 
 ## Redação, relatórios e limite de confiança
 
