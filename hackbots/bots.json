@@ -160,6 +160,18 @@
       "backend": "antigravity_cli",
       "model": "gemini-flash",
       "tools": ["search_web", "gemini-research", "COMPOSIO_SEARCH_TOOLS", "COMPOSIO_MULTI_EXECUTE_TOOL", "SLACK_SEND_MESSAGE"]
+    },
+    {
+      "id": "blackops",
+      "name": "BlackOps",
+      "category": "opsec",
+      "role": "operational-security-specialist",
+      "purpose": "OPSEC do time, garantia de anonimidade, rotacao de identidades, prevencao de vazamento de segredos e verificacao previa do Slack antes de qualquer execucao",
+      "default_state": "active",
+      "can_issue_network": false,
+      "backend": "hermes",
+      "model": "MiniMaxAI/MiniMax-M2.7",
+      "tools": ["opsec-scanner", "secrets-guard", "tor-routing", "slack-auditor"]
     }
   ],
   "auxiliary_support": {
