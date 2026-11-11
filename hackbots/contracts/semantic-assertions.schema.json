@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "result_sha256",
+    "mission_sha256",
+    "assertions"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "result_sha256": {
+      "type": "string",
+      "pattern": "[a-f0-9]{64}"
+    },
+    "mission_sha256": {
+      "type": "string",
+      "pattern": "[a-f0-9]{64}"
+    },
+    "assertions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_index",
+          "predicate",
+          "evidence_ids",
+          "parameters"
+        ],
+        "properties": {
+          "claim_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "predicate": {
+            "type": "string",
+            "enum": [
+              "jwt_unsigned_accepted",
+              "session_theft_confirmed",
+              "csrf_confirmed",
+              "http_request_executed",
+              "sqli_confirmed",
+              "endpoint_exists",
+              "browser_xss_confirmed",
+              "server_ssrf_confirmed",
+              "binary_analyzed",
+              "tool_executed",
+              "analysis_complete",
+              "text_span",
+              "json_equals",
+              "jwt_alg_none",
+              "jwt_exp_absent",
+              "jwt_unlimited_lifetime",
+              "cookie_http_only_disabled",
+              "cookie_cross_site_sent",
+              "openapi_security_absent",
+              "http_200_declared",
+              "cookie_transport_exposure",
+              "openapi_components_security_schemes_key_absent"
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "parameters": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MITR3 typed semantic assertions v1; text entailment requires independent review"
+}

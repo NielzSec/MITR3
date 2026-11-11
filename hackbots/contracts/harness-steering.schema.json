@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MITR3 AI Vulnerability Harness Steering Contract v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "harness_id",
+    "target_codebase",
+    "consensus_rules",
+    "ast_gate",
+    "iac_context",
+    "review"
+  ],
+  "properties": {
+    "version": {
+      "const": "1.0.0"
+    },
+    "harness_id": {
+      "type": "string",
+      "pattern": "^HARNESS-[A-Z0-9-]{3,40}$"
+    },
+    "target_codebase": {
+      "type": "object",
+      "required": ["root_path", "sha256_manifest"],
+      "additionalProperties": false,
+      "properties": {
+        "root_path": {"type": "string", "minLength": 1},
+        "sha256_manifest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "consensus_rules": {
+      "type": "object",
+      "required": ["min_ensemble_tools", "single_tool_quarantine"],
+      "additionalProperties": false,
+      "properties": {
+        "min_ensemble_tools": {"type": "integer", "minimum": 2},
+        "single_tool_quarantine": {"type": "boolean"}
+      }
+    },
+    "ast_gate": {
+      "type": "object",
+      "required": ["enforce_exact_line", "reject_comments_and_dead_code"],
+      "additionalProperties": false,
+      "properties": {
+        "enforce_exact_line": {"type": "boolean"},
+        "reject_comments_and_dead_code": {"type": "boolean"}
+      }
+    },
+    "iac_context": {
+      "type": "object",
+      "required": ["scan_terraform", "scan_cloudformation", "multipliers_enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "scan_terraform": {"type": "boolean"},
+        "scan_cloudformation": {"type": "boolean"},
+        "multipliers_enabled": {"type": "boolean"}
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["decision", "reviewer", "independent_audit_required"],
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": ["pending", "approved", "rejected"]
+        },
+        "reviewer": {
+          "type": ["string", "null"]
+        },
+        "independent_audit_required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

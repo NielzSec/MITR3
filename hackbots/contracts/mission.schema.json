@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MITR3 Hackbot Mission v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "mission_id",
+    "skill",
+    "mode",
+    "artifact",
+    "requirements"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1.0"
+    },
+    "mission_id": {
+      "type": "string",
+      "pattern": "^HB-[A-Z0-9-]{3,40}$"
+    },
+    "skill": {
+      "type": "string",
+      "pattern": "^mitr3-hb-[a-z0-9-]+$"
+    },
+    "mode": {
+      "const": "offline"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "scope_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}
