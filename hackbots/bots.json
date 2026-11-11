@@ -112,7 +112,8 @@
       "purpose": "Go-To-Market, empacotamento de ofertas de ciberseguranca, propostas comerciais, copys B2B e posicionamento de produto",
       "default_state": "active",
       "can_issue_network": false,
-      "backend": "opencode",
+      "backend": "claude",
+      "model": "claude-3-5-sonnet",
       "tools": ["markdown", "copys-b2b", "proposals", "composio-linkedin-read"]
     },
     {
