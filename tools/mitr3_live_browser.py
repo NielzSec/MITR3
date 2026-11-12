@@ -532,6 +532,11 @@ class LiveBrowserFeedSession:
         self.indicators = []
         self.blocked_events = []
 
+        # Phase 3: intercept (CDP Fetch domain) — hold/modify/forward with scope enforcement
+        self.intercept_mode = None  # None | 'observe' | 'hold'
+        self.held = {}          # fetch_id -> full paused request (operator lane only)
+        self.held_order = []
+
         # Ensure directory permissions are 0700
         os.makedirs(self.out_dir, mode=0o700, exist_ok=True)
         try:
@@ -798,6 +803,99 @@ class LiveBrowserFeedSession:
             }
             self._write_agent_feed(feed_event)
 
+        elif method == 'Fetch.requestPaused':
+            self._on_fetch_paused(params)
+
+    def intercept_enable(self, mode: str = "observe", url_pattern: str = "*"):
+        if mode not in ("observe", "hold"):
+            raise ValueError("intercept mode must be 'observe' or 'hold'")
+        self.ws.call('Fetch.enable', {'patterns': [{'urlPattern': url_pattern, 'requestStage': 'Request'}]})
+        self.intercept_mode = mode
+
+    def intercept_disable(self):
+        try:
+            self.ws.call('Fetch.disable')
+        except Exception:
+            pass
+        self.intercept_mode = None
+
+    @staticmethod
+    def _build_continue_params(fetch_id, url=None, method=None, headers=None, post_data=None):
+        params = {'requestId': fetch_id}
+        if url:
+            params['url'] = url
+        if method:
+            params['method'] = method
+        if headers is not None:
+            params['headers'] = headers
+        if post_data is not None:
+            params['postData'] = post_data
+        return params
+
+    def _on_fetch_paused(self, params: dict):
+        fetch_id = str(params.get('requestId'))
+        req = params.get('request', {})
+        raw_url = req.get('url', '')
+        is_allowed, scope_reason = self.scope.is_allowed(raw_url)
+        self.held[fetch_id] = {
+            'fetch_id': fetch_id,
+            'network_id': params.get('networkId'),
+            'url': raw_url,
+            'method': req.get('method', 'GET'),
+            'headers': dict(req.get('headers', {})),
+            'post_data': req.get('postData'),
+            'resource_type': params.get('resourceType', 'Other'),
+            'scope_allowed': is_allowed,
+            'scope_reason': scope_reason,
+            'held_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+            'released': False,
+        }
+        self.held_order.append(fetch_id)
+        origin, path, param_names = EventSanitizer.sanitize_url(raw_url)
+        self._write_agent_feed({
+            'event': 'intercepted', 'fetch_id': fetch_id, 'timestamp_utc': self.held[fetch_id]['held_at'],
+            'method': self.held[fetch_id]['method'], 'origin': origin, 'path': path,
+            'param_names': param_names, 'resource_type': self.held[fetch_id]['resource_type'],
+            'scope_allowed': is_allowed, 'mode': self.intercept_mode,
+        })
+        if not is_allowed:
+            self.intercept_drop(fetch_id, reason=scope_reason)
+            self.blocked_events.append({'fetch_id': fetch_id, 'origin': origin, 'path': path, 'reason': scope_reason})
+            return
+        if self.intercept_mode == 'observe':
+            self.intercept_release(fetch_id)
+
+    def intercept_release(self, fetch_id, url=None, method=None, headers=None, post_data=None):
+        h = self.held.get(fetch_id)
+        if not h or h.get('released'):
+            raise KeyError(f"fetch_id not held: {fetch_id}")
+        merged_headers = dict(h['headers'])
+        if headers:
+            merged_headers.update(headers)
+        if url:
+            ok, reason = self.scope.is_allowed(url)
+            if not ok:
+                raise PermissionError(f"Modified URL blocked by scope: {reason}")
+        params = self._build_continue_params(fetch_id, url=url, method=method,
+                                             headers=merged_headers if (url or method or headers or post_data is not None) else None,
+                                             post_data=post_data)
+        self.ws.call('Fetch.continueRequest', params)
+        h['released'] = True
+        if url:
+            h['url'] = url
+
+    def intercept_drop(self, fetch_id, reason="blocked_by_scope"):
+        h = self.held.get(fetch_id)
+        if h and h.get('released'):
+            return
+        self.ws.call('Fetch.failRequest', {'requestId': fetch_id, 'errorReason': 'BlockedByClient'})
+        if h:
+            h['released'] = True
+            h['drop_reason'] = reason
+
+    def held_summary(self):
+        return [self.held[f] for f in self.held_order if f in self.held and not self.held[f].get('released')]
+
     def _write_agent_feed(self, entry: dict):
         try:
             line = json.dumps(entry, ensure_ascii=False) + "\n"
@@ -893,6 +991,8 @@ class LiveBrowserFeedSession:
 
     def stop(self):
         self.running = False
+        if self.intercept_mode:
+            self.intercept_disable()
         self.registry.end(self.session_id, self.agent, self._flight_reqs,
                           len(self.indicators), status="closed")
         summary = self.export_sealed_summary()
@@ -1397,6 +1497,78 @@ def tail_feed(feed_path: str, lines: int = 50):
                 print(raw.strip())
 
 
+def _parse_mod(rest: str) -> dict:
+    # mod <id> url=<u> header=Name:Value body=<text> — one or more, header values may contain spaces
+    parts = rest.split(None, 1)
+    kwargs = {"fetch_id": parts[0]}
+    tokens = re.split(r'(?<!\S)(url|header|body)=(?=\S)', parts[1] if len(parts) > 1 else "")
+    it = iter(tokens[1:])
+    headers, body, url = {}, None, None
+    for key, val in zip(it, it):
+        val = val.rstrip()
+        if key == "url":
+            url = val
+        elif key == "body":
+            body = val
+        elif key == "header":
+            name, _, value = val.partition(":")
+            headers[name.strip()] = value.strip()
+    if url:
+        kwargs["url"] = url
+    if body is not None:
+        kwargs["post_data"] = body
+    if headers:
+        kwargs["headers"] = headers
+    return kwargs
+
+
+def _intercept_shell(session):
+    mode = session.intercept_mode
+    print(f"[INTERCEPT {mode.upper()}] Feed: {session.feed_path}")
+    print("Commands: held | fwd <id> | mod <id> url=<u>|header=N:V|body=<text> | drop <id> | mode hold|observe | exit")
+    while True:
+        try:
+            line = input("mitr3-intercept> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not line:
+            continue
+        parts = line.split(None, 1)
+        cmd, rest = parts[0].lower(), parts[1] if len(parts) > 1 else ""
+        try:
+            if cmd in ("exit", "quit"):
+                break
+            elif cmd == "held":
+                held = session.held_summary()
+                if not held:
+                    print("  (none held)")
+                for h in held:
+                    flag = "" if h["scope_allowed"] else f"  [SCOPE: {h['scope_reason']}]"
+                    print(f"  {h['fetch_id']}  {h['method']} {h['url']}{flag}")
+            elif cmd == "fwd":
+                session.intercept_release(rest.strip())
+                print(f"  released {rest.strip()}")
+            elif cmd == "mod":
+                kwargs = _parse_mod(rest)
+                fid = kwargs.pop("fetch_id")
+                session.intercept_release(fid, **kwargs)
+                print(f"  modified + released {fid}")
+            elif cmd == "drop":
+                session.intercept_drop(rest.strip())
+                print(f"  dropped {rest.strip()}")
+            elif cmd == "mode":
+                rest = rest.strip().lower()
+                if rest in ("observe", "hold"):
+                    session.intercept_mode = rest
+                    print(f"  mode -> {rest}")
+                else:
+                    print("  usage: mode observe|hold")
+            else:
+                print("  unknown command (held|fwd|mod|drop|mode|exit)")
+        except Exception as e:
+            print(f"  error: {e}")
+
+
 def main():
     # Dispatch subcommands if provided: probe, replay, inspect, tail, candidates, or default to capture
     argv = sys.argv[1:]
@@ -1464,6 +1636,8 @@ def main():
     parser.add_argument("--quiet", action="store_true", help="Suppress console logging")
     parser.add_argument("--agent", default=None,
                         help="Agent identity for flight control (env: MITR3_AGENT)")
+    parser.add_argument("--intercept", choices=("observe", "hold"), default=None,
+                        help="Phase 3 intercept (CDP Fetch): observe = record + pass through; hold = queue requests for operator decision")
     args = parser.parse_args(argv)
 
     # Default allowlist includes localhost / loopback if none provided
@@ -1487,7 +1661,11 @@ def main():
         if args.url and args.url != "about:blank":
             session.navigate(args.url)
 
-        if args.timeout > 0:
+        if args.intercept:
+            session.intercept_enable(args.intercept)
+            print(f"[MITR3 LIVE BROWSER] Intercept {args.intercept} enabled — out-of-scope requests are dropped automatically.")
+            _intercept_shell(session)
+        elif args.timeout > 0:
             time.sleep(args.timeout)
         else:
             print(f"[MITR3 LIVE BROWSER] Running. Feed: {session.feed_path}. Press Enter to finish...")

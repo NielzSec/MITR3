@@ -27,6 +27,7 @@ from tools.mitr3_live_browser import (
     run_replay,
     _write_phase2_evidence,
     _preflight_phase2_evidence,
+    _parse_mod,
 )
 
 
@@ -577,6 +578,118 @@ class TestPhase2ReplayAndProbe(unittest.TestCase):
             capture.write_text("{}\n", encoding="utf-8")
             with self.assertRaises(PermissionError):
                 _preflight_phase2_evidence(str(capture))
+
+
+class TestPhase3Intercept(unittest.TestCase):
+    """Phase 3: CDP Fetch intercept — hold/modify/forward with scope enforcement. Offline only."""
+
+    class FakeWs:
+        def __init__(self):
+            self.calls = []
+
+        def call(self, method, params=None, timeout=10.0):
+            self.calls.append((method, params))
+            return {}
+
+    def _session(self, tmpdir, mode=None):
+        session = LiveBrowserFeedSession(
+            allowed_origins=["https://target.local"],
+            out_dir=tmpdir,
+            human_raw_capture=False,
+            quiet=True,
+        )
+        session.ws = self.FakeWs()
+        if mode:
+            session.intercept_enable(mode)
+        return session
+
+    def _paused(self, fetch_id, url, method="GET", headers=None, post_data=None):
+        params = {"requestId": fetch_id, "request": {"url": url, "method": method, "headers": headers or {}},
+                  "resourceType": "Document"}
+        if post_data is not None:
+            params["request"]["postData"] = post_data
+        return {"method": "Fetch.requestPaused", "params": params}
+
+    def test_build_continue_params_minimal_and_full(self):
+        self.assertEqual(LiveBrowserFeedSession._build_continue_params("f1"), {"requestId": "f1"})
+        full = LiveBrowserFeedSession._build_continue_params(
+            "f2", url="https://x.local/", method="POST",
+            headers={"X-A": "1"}, post_data="a=1")
+        self.assertEqual(full, {"requestId": "f2", "url": "https://x.local/", "method": "POST",
+                                "headers": {"X-A": "1"}, "postData": "a=1"})
+
+    def test_observe_mode_records_and_auto_continues(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="observe")
+            session._on_cdp_event(self._paused("f1", "https://target.local/page?q=1"))
+            self.assertEqual(session.ws.calls[-1], ("Fetch.continueRequest", {"requestId": "f1"}))
+            self.assertTrue(session.held["f1"]["released"])
+            self.assertEqual(session.held_summary(), [])
+
+    def test_hold_mode_queues_until_released(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/admin", method="POST",
+                                               post_data="user=admin"))
+            self.assertFalse(session.held["f1"]["released"])
+            self.assertEqual(len(session.held_summary()), 1)
+            # no CDP call must have been made for the held request
+            self.assertNotIn("Fetch.continueRequest", [c[0] for c in session.ws.calls])
+            session.intercept_release("f1")
+            self.assertEqual(session.held_summary(), [])
+            self.assertEqual(session.ws.calls[-1], ("Fetch.continueRequest", {"requestId": "f1"}))
+
+    def test_out_of_scope_paused_request_dropped_not_continued(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f9", "https://evil.tracker.com/beacon"))
+            self.assertEqual(session.ws.calls[-1], ("Fetch.failRequest",
+                                                    {"requestId": "f9", "errorReason": "BlockedByClient"}))
+            self.assertTrue(session.held["f9"]["released"])
+            self.assertEqual(len(session.blocked_events), 1)
+
+    def test_modified_url_revalidates_scope(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/"))
+            with self.assertRaises(PermissionError):
+                session.intercept_release("f1", url="https://evil.tracker.com/x")
+            # still held after failed modification
+            self.assertFalse(session.held["f1"]["released"])
+
+    def test_modified_release_merges_headers_and_body(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/login",
+                                               method="POST", headers={"Content-Type": "application/json"}))
+            session.intercept_release("f1", post_data='{"user":"x"}', headers={"X-Injected": "1"})
+            method, params = session.ws.calls[-1]
+            self.assertEqual(method, "Fetch.continueRequest")
+            self.assertEqual(params["postData"], '{"user":"x"}')
+            self.assertEqual(params["headers"], {"Content-Type": "application/json", "X-Injected": "1"})
+
+    def test_double_release_raises(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/"))
+            session.intercept_release("f1")
+            with self.assertRaises(KeyError):
+                session.intercept_release("f1")
+
+    def test_parse_mod_tokens(self):
+        kwargs = _parse_mod("f3 url=https://t.local/a header=X-A: val ue header=X-B: 2 body=a=1")
+        self.assertEqual(kwargs["fetch_id"], "f3")
+        self.assertEqual(kwargs["url"], "https://t.local/a")
+        self.assertEqual(kwargs["headers"], {"X-A": "val ue", "X-B": "2"})
+        self.assertEqual(kwargs["post_data"], "a=1")
+        self.assertEqual(_parse_mod("f7"), {"fetch_id": "f7"})
+
+    def test_intercept_disable_clears_mode_and_stop_is_safe(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session.intercept_disable()
+            self.assertIsNone(session.intercept_mode)
+            self.assertIn("Fetch.disable", [c[0] for c in session.ws.calls])
 
 
 if __name__ == "__main__":
