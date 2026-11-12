@@ -1029,6 +1029,21 @@ class TestPhase4Intruder(unittest.TestCase):
             run_intruder(self._request(url="https://target.local/s?other=1"),
                          self._scope(), "q", "rce", payload_db=self._db(n=1))
 
+    def test_canary_required_for_any_kind_with_canary_payload(self):
+        db = {"rce": [{"id": "rce_oob", "value": "; curl {canary}", "detects": []}]}
+        # no canary_url at all: engine must refuse, whatever the kind
+        with self.assertRaises(ValueError):
+            run_intruder(self._request(), self._scope(), "q", "rce", payload_db=db)
+        # approved canary on a separate allowlisted origin: run proceeds
+        scope = ScopePolicy(allowed_origins=["https://target.local", "https://canary.example.com"])
+        transport = self._transport()
+        result = run_intruder(self._request(), scope, "q", "rce", canary_url="https://canary.example.com/hook",
+                              transport=transport, payload_db=db)
+        self.assertEqual(result["probes_sent"], 1)
+        self.assertTrue(result["canary_correlation"])
+        # probe stays on the target origin; the canary URL travels inside the parameter value
+        self.assertTrue(transport.calls[0]["url"].startswith("https://target.local/"))
+
 
 class TestAntiFalsePositives(unittest.TestCase):
     """BlackOps: negative anti-FP validation for candidate parameters and benign bodies."""

@@ -1290,12 +1290,14 @@ def run_intruder(request: dict, scope: ScopePolicy, parameter: str, kind: str,
         raise ValueError("Invalid parameter name")
     delay = min(max(float(delay), 0.1), 60.0)
     max_probes = min(max(int(max_probes), 1), 200)
-    if kind == "ssrf":
-        canary = _validate_ssrf_canary(canary_url, scope, url)
     db = payload_db if payload_db is not None else load_intruder_payloads()
     payloads = db.get(kind) or []
     if not payloads:
         raise ValueError(f"No intruder payloads available for kind '{kind}'")
+    # any family using {canary} needs the approved canary, not just the ssrf family
+    needs_canary = any("{canary}" in spec["value"] for spec in payloads)
+    if needs_canary:
+        canary = _validate_ssrf_canary(canary_url, scope, url)
 
     token = secrets.token_hex(8)
     marker = f"MITR3_{token}"
@@ -1342,7 +1344,7 @@ def run_intruder(request: dict, scope: ScopePolicy, parameter: str, kind: str,
         "event": "intruder_result", "kind": kind, "request_id": request.get("request_id"),
         "method": method, "origin": origin, "path": path, "parameter": parameter,
         "probes_sent": sent, "probe_limit": max_probes, "delay_seconds": delay,
-        "canary_correlation": token if kind == "ssrf" else None,
+        "canary_correlation": token if (kind == "ssrf" or needs_canary) else None,
         "results": results, "hit_probe_ids": hits,
     }
 
