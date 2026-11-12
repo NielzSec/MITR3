@@ -11,6 +11,7 @@ import stat
 import tempfile
 import unittest
 import unittest.mock
+import secrets
 import urllib.parse
 from pathlib import Path
 
@@ -32,6 +33,8 @@ from tools.mitr3_live_browser import (
     load_intruder_payloads,
     run_intruder,
     _NoRedirectHandler,
+    CanaryListener,
+    _validate_ssrf_canary,
 )
 
 
@@ -1073,6 +1076,97 @@ class TestAntiFalsePositives(unittest.TestCase):
         for body in self.BENIGN_BODIES:
             self.assertEqual(IndicatorDetector.check_response_diagnostics(body), [],
                              f"false positive on: {body[:50]}")
+
+
+class TestPhase5SelfHostedCanary(unittest.TestCase):
+    """M5: self-hosted OOB canary — callbacks observed on our own listener. Loopback only."""
+
+    def setUp(self):
+        self.scope = ScopePolicy(allowed_origins=["https://target.example", "https://oast.example"])
+        self.request = {
+            "raw_event": "request", "request_id": "req.1", "method": "GET",
+            "url": "https://target.example/fetch?url=x", "headers": {}
+        }
+
+    def test_canary_listener_records_and_matches_hits(self):
+        listener = CanaryListener(port=0)
+        listener.start()
+        try:
+            secret = secrets.token_hex(8)
+            url = listener.canary_url(secret)
+            with urllib.request.urlopen(url + "?probe=1", timeout=5) as resp:
+                self.assertEqual(resp.read(), b"mitr3-canary-ok")
+            hits = listener.wait_hits(secret, timeout=2)
+            self.assertEqual(len(hits), 1)
+            self.assertEqual(hits[0]["source_ip"], "127.0.0.1")
+            self.assertEqual(hits[0]["method"], "GET")
+            self.assertIn(secret, hits[0]["path"])
+            self.assertEqual(listener.wait_hits("no-such-token", timeout=0.2), [])
+        finally:
+            listener.stop()
+
+    def test_canary_listener_stop_closes_port(self):
+        listener = CanaryListener(port=0)
+        listener.start()
+        port = listener.port
+        listener.stop()
+        with self.assertRaises(Exception):
+            urllib.request.urlopen(f"http://127.0.0.1:{port}/x/", timeout=2)
+
+    def test_self_hosted_canary_accepts_private_http_and_validates_scope(self):
+        # private http canary accepted in self-hosted mode when its origin is allowlisted
+        scope = ScopePolicy(allowed_origins=["http://10.66.0.9:8993", "https://target.example"])
+        parsed = _validate_ssrf_canary("http://10.66.0.9:8993/abc/", scope, "https://target.example/fetch",
+                                       self_hosted=True)
+        self.assertEqual(parsed.hostname, "10.66.0.9")
+        # public mode still rejects the same URL (private IP)
+        with self.assertRaises(ValueError):
+            _validate_ssrf_canary("http://10.66.0.9:8993/abc/", scope, "https://target.example/fetch")
+        # self-hosted still rejects credentials
+        with self.assertRaises(ValueError):
+            _validate_ssrf_canary("http://user:pw@10.66.0.9:8993/", scope, "https://target.example/fetch",
+                                  self_hosted=True)
+        # and still rejects the target's own origin (different scheme, same host = out of scope -> PermissionError)
+        with self.assertRaises(PermissionError):
+            _validate_ssrf_canary("http://target.example/x", scope, "https://target.example/fetch",
+                                  self_hosted=True)
+        # true same-origin (allowlisted canary, same origin as target) -> separate-origin ValueError
+        with self.assertRaises(ValueError):
+            _validate_ssrf_canary("https://target.example/canary", scope, "https://target.example/fetch",
+                                  self_hosted=True)
+
+    def test_probe_self_hosted_oob_end_to_end(self):
+        listener = CanaryListener(port=0)
+        listener.start()
+        try:
+            secret = secrets.token_hex(8)
+            canary = listener.canary_url(secret)
+            scope = ScopePolicy(allowed_origins=["https://target.example", f"http://127.0.0.1:{listener.port}"])
+
+            def transport(url, method, headers):
+                value = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)["url"][0]
+                if "127.0.0.1" in value:
+                    # "vulnerable" target performs the SSRF callback for real, on loopback
+                    urllib.request.urlopen(value, timeout=5).read()
+                return {"status": 200, "content_type": "text/plain", "body_bytes": 0,
+                        "body_sha256": "f" * 64, "body": ""}
+
+            result = run_probe(self.request, scope, "ssrf", "url", canary,
+                               transport=transport, self_hosted=True)
+            self.assertIsNotNone(result["canary_correlation"])
+            hits = listener.wait_hits(secret, timeout=3)
+            self.assertEqual(len(hits), 1)
+            self.assertIn("mitr3_probe", hits[0]["query"])
+        finally:
+            listener.stop()
+
+    def test_intruder_self_hosted_mode_flag_reaches_validation(self):
+        # private http canary rejected in public mode even with kind=ssrf (flag not set)
+        calls = []
+        with self.assertRaises(ValueError):
+            run_intruder(self.request, self.scope, "url", "ssrf", canary_url="http://127.0.0.1:8993/x/",
+                         transport=lambda *a: calls.append(a))
+        self.assertEqual(calls, [])
 
 
 if __name__ == "__main__":

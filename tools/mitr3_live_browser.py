@@ -16,6 +16,7 @@ Phase 1 Scope & Architecture:
 import argparse
 import base64
 import hashlib
+import http.server
 import ipaddress
 import json
 import os
@@ -1097,21 +1098,29 @@ def _validate_replay_request(request: dict, scope: ScopePolicy) -> tuple[str, st
     return method, url
 
 
-def _validate_ssrf_canary(canary_url: str, scope: ScopePolicy, target_url: str) -> urllib.parse.SplitResult:
-    """Shared SSRF canary validation; public HTTPS, no credentials, separate allowlisted origin."""
+def _validate_ssrf_canary(canary_url: str, scope: ScopePolicy, target_url: str,
+                          self_hosted: bool = False) -> urllib.parse.SplitResult:
+    """Shared SSRF canary validation. Public mode: HTTPS, no credentials, public IP, separate origin.
+    Self-hosted mode (M5): the canary is OUR listener — http allowed, private IP allowed; still no
+    credentials and still a separate allowlisted origin."""
     if not isinstance(canary_url, str):
         raise ValueError("SSRF probes require an explicitly scoped HTTPS canary URL")
     canary = urllib.parse.urlsplit(canary_url)
     canary_host = (canary.hostname or "").lower()
-    if (canary.scheme != "https" or canary.username or canary.password or canary.fragment
-            or not canary_host or canary_host.endswith((".localhost", ".local", ".internal", ".invalid"))):
-        raise ValueError("SSRF canary must be a public HTTPS URL without credentials or fragment")
-    try:
-        ip = ipaddress.ip_address(canary_host)
-    except ValueError:
-        ip = None
-    if ip is not None and not ip.is_global:
-        raise ValueError("SSRF canary cannot use a private or reserved IP address")
+    if self_hosted:
+        if (canary.scheme not in ("http", "https") or not canary_host
+                or canary.username or canary.password or canary.fragment):
+            raise ValueError("Self-hosted canary must be a plain http(s) URL without credentials or fragment")
+    else:
+        if (canary.scheme != "https" or canary.username or canary.password or canary.fragment
+                or not canary_host or canary_host.endswith((".localhost", ".local", ".internal", ".invalid"))):
+            raise ValueError("SSRF canary must be a public HTTPS URL without credentials or fragment")
+        try:
+            ip = ipaddress.ip_address(canary_host)
+        except ValueError:
+            ip = None
+        if ip is not None and not ip.is_global:
+            raise ValueError("SSRF canary cannot use a private or reserved IP address")
     canary_origin, _, _ = _scoped_origin(canary_url, scope)
     target_origin, _, _ = _scoped_origin(target_url, scope)
     if canary_origin == target_origin:
@@ -1120,7 +1129,7 @@ def _validate_ssrf_canary(canary_url: str, scope: ScopePolicy, target_url: str) 
 
 
 def _probe_pair(request: dict, scope: ScopePolicy, probe_type: str, parameter: str,
-                canary_url: str = None) -> tuple[dict, dict, str]:
+                canary_url: str = None, self_hosted: bool = False) -> tuple[dict, dict, str]:
     method, url = _validate_replay_request(request, scope)
     if not re.fullmatch(r"[A-Za-z0-9_.-]{1,128}", parameter):
         raise ValueError("Invalid parameter name")
@@ -1144,7 +1153,7 @@ def _probe_pair(request: dict, scope: ScopePolicy, probe_type: str, parameter: s
         # Fixed printf canary: no user-supplied command, file access, or network action.
         probe_value = f";printf '%s' '{marker}';#"
     else:
-        canary = _validate_ssrf_canary(canary_url, scope, url)
+        canary = _validate_ssrf_canary(canary_url, scope, url, self_hosted=self_hosted)
         cpairs = urllib.parse.parse_qsl(canary.query, keep_blank_values=True)
         cpairs.append(("mitr3_probe", token))
         probe_value = urllib.parse.urlunsplit((canary.scheme, canary.netloc, canary.path or "/",
@@ -1206,6 +1215,67 @@ def _public_diff(before: dict, after: dict, marker: str = "") -> dict:
     }
 
 
+class CanaryListener:
+    """M5 self-hosted OOB canary: records HTTP callbacks on our own infra, so SSRF/RFI/RCE-oob
+    hits are observed locally instead of on a third-party OAST service. Loopback-safe by default."""
+
+    def __init__(self, host: str = "127.0.0.1", advertise: str = None, port: int = 8993):
+        self.host = host
+        self.advertise = advertise or host
+        self.port = port
+        self.hits = []
+        self._server = None
+        self._thread = None
+
+    def start(self):
+        listener = self
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def _record(self):
+                parsed = urllib.parse.urlsplit(self.path)
+                listener.hits.append({
+                    "ts": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                    "method": self.command,
+                    "path": urllib.parse.unquote(parsed.path),
+                    "query": parsed.query,
+                    "source_ip": self.client_address[0],
+                    "user_agent": self.headers.get("User-Agent", ""),
+                })
+                body = b"mitr3-canary-ok"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            do_GET = do_POST = do_HEAD = _record
+
+            def log_message(self, fmt, *args):
+                pass
+
+        self._server = http.server.ThreadingHTTPServer((self.host, self.port), Handler)
+        self.port = self._server.server_address[1]
+        self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
+        self._thread.start()
+
+    def canary_url(self, secret: str) -> str:
+        return f"http://{self.advertise}:{self.port}/{secret}/"
+
+    def wait_hits(self, secret: str, timeout: float = 5.0) -> list:
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if any(secret in h["path"] for h in self.hits):
+                break
+            time.sleep(0.1)
+        return [h for h in self.hits if secret in h["path"]]
+
+    def stop(self):
+        if self._server:
+            self._server.shutdown()
+            self._server.server_close()
+            self._server = None
+
+
 def run_replay(request: dict, scope: ScopePolicy, transport=_http_response) -> dict:
     method, url = _validate_replay_request(request, scope)
     response = transport(url, method, request.get("headers", {}))
@@ -1221,8 +1291,9 @@ def run_replay(request: dict, scope: ScopePolicy, transport=_http_response) -> d
 
 
 def run_probe(request: dict, scope: ScopePolicy, probe_type: str, parameter: str,
-              canary_url: str = None, transport=_http_response) -> dict:
-    base_request, probe_request, marker = _probe_pair(request, scope, probe_type, parameter, canary_url)
+              canary_url: str = None, transport=_http_response, self_hosted: bool = False) -> dict:
+    base_request, probe_request, marker = _probe_pair(request, scope, probe_type, parameter, canary_url,
+                                                      self_hosted=self_hosted)
     method, _ = _validate_replay_request(request, scope)
     baseline = transport(base_request["url"], method, request.get("headers", {}))
     result = transport(probe_request["url"], method, request.get("headers", {}))
@@ -1281,7 +1352,7 @@ def load_intruder_payloads(path: str = None) -> dict:
 
 def run_intruder(request: dict, scope: ScopePolicy, parameter: str, kind: str,
                  canary_url: str = None, transport=_http_response, delay: float = 1.0,
-                 max_probes: int = 30, payload_db: dict = None) -> dict:
+                 max_probes: int = 30, payload_db: dict = None, self_hosted: bool = False) -> dict:
     """Phase 4 intruder-lite: inject diagnostic payloads into one query parameter, rate-limited and scope-confined."""
     method, url = _validate_replay_request(request, scope)
     if method not in ("GET", "HEAD"):
@@ -1297,7 +1368,7 @@ def run_intruder(request: dict, scope: ScopePolicy, parameter: str, kind: str,
     # any family using {canary} needs the approved canary, not just the ssrf family
     needs_canary = any("{canary}" in spec["value"] for spec in payloads)
     if needs_canary:
-        canary = _validate_ssrf_canary(canary_url, scope, url)
+        canary = _validate_ssrf_canary(canary_url, scope, url, self_hosted=self_hosted)
 
     token = secrets.token_hex(8)
     marker = f"MITR3_{token}"
@@ -1448,16 +1519,32 @@ def phase2_cli(action: str, argv: list[str]) -> int:
         parser.add_argument("--canary-url", help="Required for SSRF; HTTPS origin must also be allowlisted")
         parser.add_argument("--delay", type=float, default=1.0, help="Seconds between probes (0.1-60, default 1.0)")
         parser.add_argument("--max-probes", type=int, default=30, help="Probe cap (1-200, default 30)")
+    if action in ("PROBE", "INTRUDER"):
+        parser.add_argument("--self-canary", action="store_true", default=False,
+                            help="M5: self-host the OOB canary on a local listener instead of an external OAST URL")
+        parser.add_argument("--canary-advertise", default="127.0.0.1",
+                            help="IP/hostname targets will reach the canary on (e.g. the VPN IP); also allowlist http://<ip>:<canary-port>")
+        parser.add_argument("--canary-port", type=int, default=8993, help="Canary listener port (default 8993)")
+        parser.add_argument("--canary-wait", type=float, default=5.0, help="Seconds to wait for OOB callbacks after probes")
     args = parser.parse_args(argv)
+    listener = None
     try:
         request = load_human_request(args.capture, args.request_id)
         scope = ScopePolicy(allowed_origins=args.allow_origin)
         _validate_replay_request(request, scope)
+        canary_url, oob_secret = None, None
+        if action in ("PROBE", "INTRUDER") and getattr(args, "self_canary", False):
+            listener = CanaryListener(advertise=args.canary_advertise, port=args.canary_port)
+            listener.start()
+            oob_secret = secrets.token_hex(8)
+            canary_url = listener.canary_url(oob_secret)
+        else:
+            canary_url = getattr(args, "canary_url", None)
         max_requests = None
         if action == "PROBE":
-            if args.kind == "ssrf" and not args.canary_url:
-                raise ValueError("SSRF probes require --canary-url")
-            _probe_pair(request, scope, args.kind, args.param, getattr(args, "canary_url", None))
+            if args.kind == "ssrf" and not canary_url:
+                raise ValueError("SSRF probes require --canary-url or --self-canary")
+            _probe_pair(request, scope, args.kind, args.param, canary_url, self_hosted=bool(listener))
             max_requests = 2
         if action == "INTRUDER":
             payloads = load_intruder_payloads().get(args.kind) or []
@@ -1467,18 +1554,24 @@ def phase2_cli(action: str, argv: list[str]) -> int:
         if not _confirm_phase2(action, request, max_requests=max_requests):
             raise PermissionError("Operator confirmation did not match")
         if action == "PROBE":
-            result = run_probe(request, scope, args.kind, args.param, args.canary_url)
+            result = run_probe(request, scope, args.kind, args.param, canary_url, self_hosted=bool(listener))
         elif action == "INTRUDER":
-            result = run_intruder(request, scope, args.param, args.kind, args.canary_url,
-                                  delay=args.delay, max_probes=args.max_probes)
+            result = run_intruder(request, scope, args.param, args.kind, canary_url,
+                                  delay=args.delay, max_probes=args.max_probes, self_hosted=bool(listener))
         else:
             result = run_replay(request, scope)
+        if listener:
+            result["oob_hits"] = listener.wait_hits(oob_secret, timeout=args.canary_wait)
+            result["oob_hit_count"] = len(result["oob_hits"])
         evidence_path, digest = _write_phase2_evidence(args.capture, result)
         print(json.dumps(dict(result, evidence_file=evidence_path, evidence_sha256=digest), sort_keys=True))
         return 0
     except Exception as exc:
         print(f"[{action} BLOCKED/FAILED] {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
+    finally:
+        if listener:
+            listener.stop()
 
 def find_latest_session(search_dir: str) -> tuple[str, str]:
     """Returns (feed_path, summary_path) of the latest session in search_dir."""
