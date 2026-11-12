@@ -6,8 +6,9 @@ MITR3 não é apenas CTF. É uma equipe de inteligência, pesquisa, engenharia r
 
 ## Funções
 - Hermes: pesquisa e documentação usando MegaBrain e fontes verificáveis.
-- OpenCode: executor único para testes ativos dentro das regras do engajamento.
-- Codex: code review, QA e testes de reprodutibilidade.
+- OpenCode: executor de testes ativos dentro das regras do engajamento (lane de execução).
+- BlackOps (Hermes/DeepSeek-V4 destravado): execução de testes ativos e OPSEC (lane de execução, junto com OpenCode).
+- Codex, Morfeus e demais modelos do squad (MiniMax, Gemma, DeepSeek V4.1, etc.): pesquisa e validação de código/evidências — não emitem tráfego ativo nem executam payloads.
 - Antigravity: arquitetura, código, RE e desenvolvimento de ferramentas.
 - JEV: avaliação shadow de qualidade/custo; não autoriza operações.
 - Coordenador: backlog, escopo, evidências, prioridades e postmortem.
@@ -38,7 +39,7 @@ Regra do time: agentes MITR3 podem criar, usar e executar malware durante um pen
 1. **Autorização:** a palavra explícita de dj a um agente do time autoriza — basta dj dizer o que ele quer (família, alvo em escopo legítimo, janela). O contrato/ROE escrito continua válido como alternativa e como registro preferido quando houver cliente. Alvos de terceiros sem contrato externo ou programa público de bug bounty continuam bloqueados. O contrato Nexus por SHA256 permanece como registro de roteamento de artefatos; a palavra de dj substitui o TTY como gate quando ela vem primeiro.
 2. **Contrato por artefato:** cada binário/payload recebe contrato Nexus por SHA256 (`authorize_scope.py`, TTY, `AUTORIZO <12 hex>`), mesmo fluxo de RE. Rebuild = novo hash = novo contrato.
 3. **Criação:** qualquer agente pode criar (Hermes pesquisa e TTPs, Antigravity arquitetura e código, OpenCode desenvolvimento). Artefato hash-pinned em `evidence/` do case.
-4. **Execução:** SOMENTE OpenCode, executor único de testes ativos. Somente contra ativos do escopo do contrato, em ambiente isolado (VM/lab de detonação) ou alvo contratado. Nenhum outro agente executa; nenhum agente executa fora da janela.
+4. **Execução:** lane de execução = OpenCode e BlackOps (Hermes/DeepSeek-V4 destravado pelo vetor). Somente contra ativos do escopo do contrato, em ambiente isolado (VM/lab de detonação) ou alvo contratado. Modelos de pesquisa/validação (Codex, Morfeus e demais) não executam payloads nem emitem tráfego ativo; nenhum agente executa fora da janela.
 5. **Controles obrigatórios:** sem autopropagação além dos ativos do escopo; sem persistência além da janela do contrato; credenciais/dados coletados ficam no case, nunca em RAG, repos compartilhados ou logs; BlackOps valida OPSEC antes da execução (rotina prévia, canais, anonimidade).
 6. **QA independente:** Codex revisa que o artefato confina ao escopo (alvos, famílias, mecanismos de propagação/persistência) antes de cada detonação. Detonação sem esse gate = violação da regra.
 7. **Evidência e encerramento:** logs de detonação com timestamps, hashes, IOCs gerados e TTPs observados no case; limpeza/remoção pós-janela registrada; IOCs e comportamento vão no relatório final.
