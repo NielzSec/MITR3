@@ -1097,6 +1097,28 @@ def _validate_replay_request(request: dict, scope: ScopePolicy) -> tuple[str, st
     return method, url
 
 
+def _validate_ssrf_canary(canary_url: str, scope: ScopePolicy, target_url: str) -> urllib.parse.SplitResult:
+    """Shared SSRF canary validation; public HTTPS, no credentials, separate allowlisted origin."""
+    if not isinstance(canary_url, str):
+        raise ValueError("SSRF probes require an explicitly scoped HTTPS canary URL")
+    canary = urllib.parse.urlsplit(canary_url)
+    canary_host = (canary.hostname or "").lower()
+    if (canary.scheme != "https" or canary.username or canary.password or canary.fragment
+            or not canary_host or canary_host.endswith((".localhost", ".local", ".internal", ".invalid"))):
+        raise ValueError("SSRF canary must be a public HTTPS URL without credentials or fragment")
+    try:
+        ip = ipaddress.ip_address(canary_host)
+    except ValueError:
+        ip = None
+    if ip is not None and not ip.is_global:
+        raise ValueError("SSRF canary cannot use a private or reserved IP address")
+    canary_origin, _, _ = _scoped_origin(canary_url, scope)
+    target_origin, _, _ = _scoped_origin(target_url, scope)
+    if canary_origin == target_origin:
+        raise ValueError("SSRF canary must use a separate allowlisted origin")
+    return canary
+
+
 def _probe_pair(request: dict, scope: ScopePolicy, probe_type: str, parameter: str,
                 canary_url: str = None) -> tuple[dict, dict, str]:
     method, url = _validate_replay_request(request, scope)
@@ -1122,23 +1144,7 @@ def _probe_pair(request: dict, scope: ScopePolicy, probe_type: str, parameter: s
         # Fixed printf canary: no user-supplied command, file access, or network action.
         probe_value = f";printf '%s' '{marker}';#"
     else:
-        if not isinstance(canary_url, str):
-            raise ValueError("SSRF probes require an explicitly scoped HTTPS canary URL")
-        canary = urllib.parse.urlsplit(canary_url)
-        canary_host = (canary.hostname or "").lower()
-        if (canary.scheme != "https" or canary.username or canary.password or canary.fragment
-                or not canary_host or canary_host.endswith((".localhost", ".local", ".internal", ".invalid"))):
-            raise ValueError("SSRF canary must be a public HTTPS URL without credentials or fragment")
-        try:
-            ip = ipaddress.ip_address(canary_host)
-        except ValueError:
-            ip = None
-        if ip is not None and not ip.is_global:
-            raise ValueError("SSRF canary cannot use a private or reserved IP address")
-        canary_origin, _, _ = _scoped_origin(canary_url, scope)
-        target_origin, _, _ = _scoped_origin(url, scope)
-        if canary_origin == target_origin:
-            raise ValueError("SSRF canary must use a separate allowlisted origin")
+        canary = _validate_ssrf_canary(canary_url, scope, url)
         cpairs = urllib.parse.parse_qsl(canary.query, keep_blank_values=True)
         cpairs.append(("mitr3_probe", token))
         probe_value = urllib.parse.urlunsplit((canary.scheme, canary.netloc, canary.path or "/",
@@ -1234,6 +1240,113 @@ def run_probe(request: dict, scope: ScopePolicy, probe_type: str, parameter: str
     }
 
 
+def load_intruder_payloads(path: str = None) -> dict:
+    """Loads per-category intruder payloads from the operator-approved diagnostic catalog."""
+    path = path or IndicatorDetector.SIGNATURE_DB_PATH
+    try:
+        db = json.load(open(path, encoding="utf-8"))
+    except (OSError, ValueError):
+        db = {}
+    merged = {}
+    for kind, items in (db.get("intruder_payloads") or {}).items():
+        entries = []
+        for item in items:
+            try:
+                entries.append({"id": str(item["id"]), "value": str(item["value"]),
+                                "detects": list(item.get("detects", []))})
+            except (KeyError, TypeError):
+                continue  # a bad payload entry never disables the rest
+        if entries:
+            merged[kind] = entries
+    # declarative lite catalog (knowledge/intruder_payloads_lite.json) merges after the db;
+    # db entries keep precedence on id collision
+    lite_path = Path(IndicatorDetector.SIGNATURE_DB_PATH).parent / "intruder_payloads_lite.json"
+    try:
+        lite = json.load(open(lite_path, encoding="utf-8"))
+    except (OSError, ValueError):
+        lite = {}
+    for kind, items in (lite.get("intruder_payloads") or {}).items():
+        known = {e["id"] for e in merged.get(kind, [])}
+        for item in items:
+            try:
+                entry = {"id": str(item["id"]), "value": str(item["value"]),
+                         "detects": list(item.get("detects", []))}
+            except (KeyError, TypeError):
+                continue
+            if entry["id"] not in known:
+                merged.setdefault(kind, []).append(entry)
+                known.add(entry["id"])
+    return merged
+
+
+def run_intruder(request: dict, scope: ScopePolicy, parameter: str, kind: str,
+                 canary_url: str = None, transport=_http_response, delay: float = 1.0,
+                 max_probes: int = 30, payload_db: dict = None) -> dict:
+    """Phase 4 intruder-lite: inject diagnostic payloads into one query parameter, rate-limited and scope-confined."""
+    method, url = _validate_replay_request(request, scope)
+    if method not in ("GET", "HEAD"):
+        raise PermissionError("Intruder probes support GET and HEAD only")
+    if not re.fullmatch(r"[A-Za-z0-9_.-]{1,128}", parameter):
+        raise ValueError("Invalid parameter name")
+    delay = min(max(float(delay), 0.1), 60.0)
+    max_probes = min(max(int(max_probes), 1), 200)
+    if kind == "ssrf":
+        canary = _validate_ssrf_canary(canary_url, scope, url)
+    db = payload_db if payload_db is not None else load_intruder_payloads()
+    payloads = db.get(kind) or []
+    if not payloads:
+        raise ValueError(f"No intruder payloads available for kind '{kind}'")
+
+    token = secrets.token_hex(8)
+    marker = f"MITR3_{token}"
+    parsed = urllib.parse.urlsplit(url)
+    pairs = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    positions = [i for i, (key, _) in enumerate(pairs) if key == parameter]
+    if len(positions) != 1:
+        raise ValueError("Parameter to fuzz must appear exactly once in the captured URL")
+
+    results, hits = [], []
+    sent = 0
+    for spec in payloads:
+        if sent >= max_probes:
+            break
+        value = spec["value"].replace("{token}", token)
+        if "{canary}" in value:
+            value = value.replace("{canary}", canary.geturl())
+        trial = list(pairs)
+        trial[positions[0]] = (parameter, value)
+        probe_url = urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, parsed.path,
+                                             urllib.parse.urlencode(trial), ""))
+        # every probe URL is revalidated: a payload must never move the request out of scope
+        ok, reason = scope.is_allowed(probe_url)
+        if not ok:
+            raise PermissionError(f"Intruder probe URL rejected by scope: {reason}")
+        if sent:
+            time.sleep(delay)
+        response = transport(probe_url, method, request.get("headers", {}))
+        sent += 1
+        body = response.get("body", "")
+        indicators = IndicatorDetector.check_response_diagnostics(body)
+        entry = {
+            "probe_id": spec["id"], "position": sent - 1, "detects": spec.get("detects", []),
+            "status": response["status"], "content_type": response["content_type"],
+            "body_bytes": response["body_bytes"], "body_sha256": response["body_sha256"],
+            "marker_observed": marker in body,
+            "indicators": indicators,
+        }
+        results.append(entry)
+        if indicators or entry["marker_observed"]:
+            hits.append(spec["id"])
+    origin, path, _ = _scoped_origin(url, scope)
+    return {
+        "event": "intruder_result", "kind": kind, "request_id": request.get("request_id"),
+        "method": method, "origin": origin, "path": path, "parameter": parameter,
+        "probes_sent": sent, "probe_limit": max_probes, "delay_seconds": delay,
+        "canary_correlation": token if kind == "ssrf" else None,
+        "results": results, "hit_probe_ids": hits,
+    }
+
+
 def _preflight_phase2_evidence(capture_path: str) -> None:
     parent = Path(capture_path).parent
     try:
@@ -1306,13 +1419,15 @@ def _write_phase2_evidence(capture_path: str, result: dict) -> tuple[str, str]:
         os.close(parent_fd)
 
 
-def _confirm_phase2(action: str, request: dict) -> bool:
+def _confirm_phase2(action: str, request: dict, max_requests: int = None) -> bool:
     if not sys.stdin.isatty():
         raise PermissionError("Active replay requires an interactive operator terminal")
     method, url = str(request.get("method", "")).upper(), request.get("url", "")
     parsed = urllib.parse.urlsplit(url)
     expected = f"{action} {request.get('request_id')}"
-    print(f"{action}: {method} {parsed.scheme}://{parsed.netloc}{parsed.path or '/'}; redirects off; max requests {2 if action == 'PROBE' else 1}.")
+    if max_requests is None:
+        max_requests = 2 if action == "PROBE" else 1
+    print(f"{action}: {method} {parsed.scheme}://{parsed.netloc}{parsed.path or '/'}; redirects off; max requests {max_requests}.")
     return input(f"Type {expected} to authorize this scoped operation: ") == expected
 
 
@@ -1325,21 +1440,37 @@ def phase2_cli(action: str, argv: list[str]) -> int:
         parser.add_argument("--kind", choices=("rce", "ssrf"), required=True)
         parser.add_argument("--param", required=True, help="One query parameter to replace")
         parser.add_argument("--canary-url", help="Required for SSRF; HTTPS origin must also be allowlisted")
+    if action == "INTRUDER":
+        parser.add_argument("--kind", choices=("rce", "lfi", "ssrf"), required=True)
+        parser.add_argument("--param", required=True, help="One query parameter to fuzz")
+        parser.add_argument("--canary-url", help="Required for SSRF; HTTPS origin must also be allowlisted")
+        parser.add_argument("--delay", type=float, default=1.0, help="Seconds between probes (0.1-60, default 1.0)")
+        parser.add_argument("--max-probes", type=int, default=30, help="Probe cap (1-200, default 30)")
     args = parser.parse_args(argv)
     try:
         request = load_human_request(args.capture, args.request_id)
         scope = ScopePolicy(allowed_origins=args.allow_origin)
         _validate_replay_request(request, scope)
+        max_requests = None
         if action == "PROBE":
             if args.kind == "ssrf" and not args.canary_url:
                 raise ValueError("SSRF probes require --canary-url")
             _probe_pair(request, scope, args.kind, args.param, getattr(args, "canary_url", None))
+            max_requests = 2
+        if action == "INTRUDER":
+            payloads = load_intruder_payloads().get(args.kind) or []
+            max_requests = min(len(payloads), min(max(args.max_probes, 1), 200))
         # Preflight evidence directory before any network transport or confirmation
         _preflight_phase2_evidence(args.capture)
-        if not _confirm_phase2(action, request):
+        if not _confirm_phase2(action, request, max_requests=max_requests):
             raise PermissionError("Operator confirmation did not match")
-        result = (run_probe(request, scope, args.kind, args.param, args.canary_url)
-                  if action == "PROBE" else run_replay(request, scope))
+        if action == "PROBE":
+            result = run_probe(request, scope, args.kind, args.param, args.canary_url)
+        elif action == "INTRUDER":
+            result = run_intruder(request, scope, args.param, args.kind, args.canary_url,
+                                  delay=args.delay, max_probes=args.max_probes)
+        else:
+            result = run_replay(request, scope)
         evidence_path, digest = _write_phase2_evidence(args.capture, result)
         print(json.dumps(dict(result, evidence_file=evidence_path, evidence_sha256=digest), sort_keys=True))
         return 0
@@ -1574,7 +1705,7 @@ def main():
     argv = sys.argv[1:]
     subcmd = argv[0] if argv and not argv[0].startswith("-") else None
 
-    if subcmd in ("probe", "replay"):
+    if subcmd in ("probe", "replay", "intruder"):
         return phase2_cli(subcmd.upper(), argv[1:])
 
     if subcmd == "inspect":

