@@ -1956,12 +1956,13 @@ def main():
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
-
-
 # knowledge db: static base patterns first, then the versioned catalog (high precision = HIGH severity)
+# MUST bind before main() runs — as a script, sys.exit(main()) executes before later bindings (PIP catch)
 _DIAGNOSTIC_DB_PATTERNS, _DIAGNOSTIC_PARAM_REGEXES = IndicatorDetector.load_signature_db()
 _DIAGNOSTIC_IDS = {i for (_, i, _, _) in _DIAGNOSTIC_DB_PATTERNS}
 _STATIC_IDS = {i for (_, i, _) in DIAGNOSTIC_BODY_PATTERNS}
 DIAGNOSTIC_BODY_PATTERNS_DB = ([(p, i, d, "medium") for (p, i, d) in DIAGNOSTIC_BODY_PATTERNS if i not in _DIAGNOSTIC_IDS] + _DIAGNOSTIC_DB_PATTERNS)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

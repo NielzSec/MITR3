@@ -13,6 +13,7 @@ import unittest
 import unittest.mock
 import secrets
 import urllib.parse
+import urllib.request
 from pathlib import Path
 
 from tools.mitr3_live_browser import (
@@ -1258,6 +1259,54 @@ class TestCanaryHardening(unittest.TestCase):
                 listener.stop()
             self.assertTrue(os.path.exists(log + ".1"))  # tiny cap forces rotation
             self.assertTrue(os.path.exists(log))
+
+
+class TestCanaryLogEvidence(unittest.TestCase):
+    """M5 hardening: canary JSONL evidence log — per-hit write and rotation at max_log_bytes. Loopback only."""
+
+    def _listener(self, tmpdir, **kw):
+        listener = CanaryListener(host="127.0.0.1", port=0,
+                                  log_file=str(Path(tmpdir) / "probes" / "canary_hits.jsonl"), **kw)
+        listener.start()
+        self.addCleanup(listener.stop)
+        return listener
+
+    @staticmethod
+    def _get(url):
+        try:
+            with urllib.request.urlopen(url, timeout=5) as resp:
+                return resp.status, resp.read()
+        except urllib.error.HTTPError as err:
+            return err.code, err.read()
+
+    def test_hit_written_as_sealed_jsonl_line(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            listener = self._listener(tmpdir)
+            secret = secrets.token_hex(8)
+            listener.accept_path = secret
+            status, body = self._get(listener.canary_url(secret))
+            self.assertEqual(status, 200)
+            log_path = Path(tmpdir) / "probes" / "canary_hits.jsonl"
+            lines = log_path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 1)
+            hit = json.loads(lines[0])
+            self.assertTrue(hit["matched"])
+            self.assertIn(secret, hit["path"])
+            self.assertIn("ts", hit)
+            self.assertIn("source_ip", hit)
+
+    def test_log_rotates_at_max_bytes(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            listener = self._listener(tmpdir, max_log_bytes=1)
+            secret = secrets.token_hex(8)
+            listener.accept_path = secret  # both requests are logged, only the secret gets 200
+            self._get(listener.canary_url(secret))
+            self._get(f"http://127.0.0.1:{listener.port}/other-path/")
+            log_path = Path(tmpdir) / "probes" / "canary_hits.jsonl"
+            rotated = Path(str(log_path) + ".1")
+            self.assertEqual(len(rotated.read_text(encoding="utf-8").splitlines()), 1)  # 1st hit
+            self.assertEqual(len(log_path.read_text(encoding="utf-8").splitlines()), 1)  # 2nd hit
+            self.assertTrue(json.loads(rotated.read_text(encoding="utf-8").splitlines()[0])["matched"])
 
 
 if __name__ == "__main__":
