@@ -1,1 +1,2 @@
-THM{GOT_COMMAND_EXECUTION001}
+Concatenated chunks: QU9DMjAyNHtUaW55X1RpbnlfVGlueV9TaDNsbF9jYW5fRW5jcnlwVF9iVXRfaXRfSXNfTjB0X0YwMGxwcm8wZn0=
+Base64 Decoded: AOC2024{Tiny_Tiny_Tiny_Sh3ll_can_EncrypT_bUt_it_Is_N0t_F00lpro0f}

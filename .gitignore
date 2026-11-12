@@ -44,3 +44,17 @@ secrets.txt
 !.dev.vars.example
 .env*
 !.env.example
+
+# Engagements, pentest reports and target evidence (strictly confidential, local only)
+docs/engagements/
+docs/evidence/
+reports/
+evidence/phase2-*
+evidence/ctf/aoc_sq_1.zip
+evidence/ctf/aoc_sq_1/
+state/*.jsonl
+state/evidence/
+acct_*.json
+signup_*.json
+graf_swagger.*
+

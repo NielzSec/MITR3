@@ -1,15 +1,15 @@
 {
   "schema_version": "MITR3_Evidence_CTF_v1",
   "lab_id": "tryhackme_ctf_preparation",
-  "updated_at": "2026-11-11T19:16:19.782674+00:00",
+  "updated_at": "2026-11-11T21:36:26.913423+00:00",
   "target": {
     "interface": "tun0",
     "local_ip": "192.168.148.45/18",
-    "machine_ip": "10.66.153.164",
+    "machine_ip": "10.66.144.48",
     "initial_user": "ubuntu"
   },
   "summary": {
-    "total_evidences": 3,
+    "total_evidences": 15,
     "current_stage": "PREPARATION",
     "flags_captured": {
       "user": false,
@@ -30,21 +30,141 @@
     {
       "evidence_id": "EV-CTF-0002",
       "stage": "USER_FLAG",
-      "timestamp": "2026-11-11T19:15:40.254265+00:00",
-      "source_tool": "web-recon-php",
-      "claim": "Login efetuado no painel /dashboard.php com invite code forjado via quebra de semente MT_RAND; flag de painel capturada",
-      "raw_artifact": "THM{CryptographyPwn007}",
-      "evidence_sha256": "2fd412d926ef1cb02ba003c920d49469f1e89f55f8f8f1ee6a66011480fa3a97",
+      "timestamp": "2026-11-11T20:24:52.000691+00:00",
+      "source_tool": "forensic_pcap_analysis",
+      "claim": "Advent of Cyber 2024 Side Quest 1 4 questions solved: Q1=QU9DMjAyNHtUaW55X1R, Q2=pbnlfVGlueV9TaDNsbF, Q3=9jYW5fRW5jcnlwVF9iVXR, Q4=faXRfSXNfTjB0X0YwMGxwcm8wZn0=",
+      "raw_artifact": "Q1 (Attacker register password): QU9DMjAyNHtUaW55X1R (19 chars)\nQ2 (Captured password): pbnlfVGlueV9TaDNsbF (19 chars)\nQ3 (Zip file password transferred): 9jYW5fRW5jcnlwVF9iVXR (21 chars)\nQ4 (McSkidy database password): faXRfSXNfTjB0X0YwMGxwcm8wZn0= (29 chars)",
+      "evidence_sha256": "4d59eaf25772e448c9e7d554cd815cfbb0a6ab8a338bc15f780ca74b653fb00a",
       "confidence": "HIGH"
     },
     {
       "evidence_id": "EV-CTF-0003",
       "stage": "ROOT_FLAG",
-      "timestamp": "2026-11-11T19:16:19.782661+00:00",
-      "source_tool": "padding-oracle-padre",
-      "claim": "Execucao de comando remoto (RCE) via Padding Oracle Attack no parametro date de dashboard.php; leitura de /home/ubuntu/flag.txt capturada",
-      "raw_artifact": "THM{GOT_COMMAND_EXECUTION001}",
-      "evidence_sha256": "ffec5e95120439a8108fc193aef5f9582cc7bda1b2d09336fba4cec1ccdf2417",
+      "timestamp": "2026-11-11T20:25:24.250895+00:00",
+      "source_tool": "base64_concatenation_reconstruction",
+      "claim": "Reconstructed full master flag: AOC2024{Tiny_Tiny_Tiny_Sh3ll_can_EncrypT_bUt_it_Is_N0t_F00lpro0f}",
+      "raw_artifact": "Concatenated chunks: QU9DMjAyNHtUaW55X1RpbnlfVGlueV9TaDNsbF9jYW5fRW5jcnlwVF9iVXRfaXRfSXNfTjB0X0YwMGxwcm8wZn0=\nBase64 Decoded: AOC2024{Tiny_Tiny_Tiny_Sh3ll_can_EncrypT_bUt_it_Is_N0t_F00lpro0f}",
+      "evidence_sha256": "71f57a16e181b5237b824e92faadf2686782f321acbc3acf9ab7eb49d0ec8f25",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0004",
+      "stage": "USER_FLAG",
+      "timestamp": "2026-11-11T20:59:01.832808+00:00",
+      "source_tool": "ros_service_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 2: YIN flag obtained via ROS inter-robot communication service inspection",
+      "raw_artifact": "Flag for YIN: THM{Yin.cannot.exist.without.a.little.bit.of.Yang}",
+      "evidence_sha256": "b04ff55cf6349021f6ed377ad0f607002f512d1184ddae83c773b2309cd4a4e7",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0005",
+      "stage": "ROOT_FLAG",
+      "timestamp": "2026-11-11T20:59:21.534176+00:00",
+      "source_tool": "ros_service_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 2: YANG flag obtained via ROS inter-robot communication service inspection",
+      "raw_artifact": "Flag for YANG: THM{Yang.also.needs.Yin.to.survive}",
+      "evidence_sha256": "71783763cac20bc8bb8086035e922ab29f2e022e7f9454d621f8450a24b7cf20",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0006",
+      "stage": "SURFACE_IDENTIFICATION",
+      "timestamp": "2026-11-11T21:10:11.409419+00:00",
+      "source_tool": "cve_heap_permit_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 3: foothold.txt extracted from construction permit service",
+      "raw_artifact": "foothold.txt content: THM{th1s-1s-jusT-th3-B3g1nn1ng}",
+      "evidence_sha256": "f7a9352b505baab64136ae7c322ac704311a6f920d1a3c37ddb2c6c11a6f56fb",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0007",
+      "stage": "USER_FLAG",
+      "timestamp": "2026-11-11T21:10:38.611182+00:00",
+      "source_tool": "cve_heap_permit_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 3: user.txt extracted via glibc heap overflow on permit server",
+      "raw_artifact": "user.txt content: THM{h4v1ng-fun-w1th-a-g00d-old-heap-overflowww-in-a-l4t3st-gl1bc}",
+      "evidence_sha256": "7cb7ff1538418b00e121fb879837683070f8303ee7e16dbaf4b3b328481b2335",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0008",
+      "stage": "ROOT_FLAG",
+      "timestamp": "2026-11-11T21:10:58.819413+00:00",
+      "source_tool": "cve_heap_permit_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 3: root.txt extracted via privilege escalation on mayor permits binary",
+      "raw_artifact": "root.txt content: THM{w00t-w00t-y0u-escap3-the-may0r-permits}",
+      "evidence_sha256": "b79c0bc0daf9edf340554c98181050562e14aa0958219448d5e528b6219abf03",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0009",
+      "stage": "SURFACE_IDENTIFICATION",
+      "timestamp": "2026-11-11T21:25:38.236250+00:00",
+      "source_tool": "ad_cctv_sqli_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 4: flag.txt obtained via SQL injection on CCTV/Active Directory portal",
+      "raw_artifact": "flag.txt content: THM{unlock_the_door_to_darkness_0nly_f0r_the_brave}",
+      "evidence_sha256": "e03ecb344e67bfda77aca387a79275d6b791e7e46bbd70a91ad0643da243f09c",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0010",
+      "stage": "USER_FLAG",
+      "timestamp": "2026-11-11T21:25:49.631276+00:00",
+      "source_tool": "ad_cctv_sqli_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 4: user.txt obtained via initial Foothold on Active Directory server",
+      "raw_artifact": "user.txt content: THM{krampus5_h00ked_y0ur_l00t}",
+      "evidence_sha256": "c07953231fb29cad2d58666326cc83bb45b4a279b44c2a43e5abbb83ebde8801",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0011",
+      "stage": "ROOT_FLAG",
+      "timestamp": "2026-11-11T21:26:09.900787+00:00",
+      "source_tool": "efspotato_privesc_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 4: root.txt obtained via privilege escalation to SYSTEM using EfsPotato (SeImpersonatePrivilege)",
+      "raw_artifact": "root.txt content: THM{krampu5_&_p0tat0_5alad}",
+      "evidence_sha256": "2229e00bfbc3252e15a7d7b81507ee25eadd8949ad8aab9e0e2fd7c46e9d978f",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0012",
+      "stage": "SURFACE_IDENTIFICATION",
+      "timestamp": "2026-11-11T21:35:29.184269+00:00",
+      "source_tool": "web_app_avalanche_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 5: Flag 1 extracted from first compromised web app",
+      "raw_artifact": "Flag 1 content: THM{09a3f8918a32ea38a2c833c98214336a}",
+      "evidence_sha256": "e65ebc8549937317a7bb57fbbbe146f8289ee78921822df9003ffe070648dc36",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0013",
+      "stage": "VERSION_CVE_RECON",
+      "timestamp": "2026-11-11T21:35:44.809523+00:00",
+      "source_tool": "web_app_avalanche_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 5: Flag 2 extracted from second compromised web app",
+      "raw_artifact": "Flag 2 content: THM{647aff4143b04972ba816f040e9b81c2}",
+      "evidence_sha256": "b1d6725d12fca3758da6e1b9f99bf13989401852afd90543ce0c593136528a85",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0014",
+      "stage": "USER_FLAG",
+      "timestamp": "2026-11-11T21:36:10.478932+00:00",
+      "source_tool": "web_app_avalanche_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 5: Flag 3 extracted from third compromised web app",
+      "raw_artifact": "Flag 3 content: THM{ff2e079bc7bc3eb925478aa5bc2466a6}",
+      "evidence_sha256": "c6459d1360c1596c8ed87e7ecef2852a75e44402d8f92c42698a6bdaeb087937",
+      "confidence": "HIGH"
+    },
+    {
+      "evidence_id": "EV-CTF-0015",
+      "stage": "ROOT_FLAG",
+      "timestamp": "2026-11-11T21:36:26.913410+00:00",
+      "source_tool": "web_app_avalanche_reconstruction",
+      "claim": "Advent of Cyber 2024 Side Quest 5: Flag 4 extracted from root privilege escalation",
+      "raw_artifact": "Flag 4 content: THM{05a830d2f52649c96318cce20c562b63}",
+      "evidence_sha256": "6274357b90a81144fff8e5f9979636bdaf1243e9a858afd87b86d103f730d78d",
       "confidence": "HIGH"
     }
   ]

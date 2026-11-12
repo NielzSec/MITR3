@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "3",
+  "name": "mitr3-web",
   "compatibility_date": "2026-11-10",
   "observability": {
     "enabled": true

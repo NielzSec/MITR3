@@ -403,8 +403,8 @@
       "id": "aws_imds_meta_keys",
       "category": "ssrf_response",
       "precision": "high",
-      "regex": "\\b(?:ami-id|instance-id|instance-type|local-ipv4|local-hostname|iam/security-credentials/)\\b",
-      "notes": "IMDSv1 plain-text metadata keys echoed back — requires independent verification"
+      "regex": "(?<![\\w-])\\b(?:ami-id|instance-id|instance-type|local-ipv4|local-hostname|iam/security-credentials/)\\b",
+      "notes": "IMDSv1 plain-text metadata keys echoed back — requires independent verification (lookbehind added to prevent false positives on kebab-cased identifiers such as instance-id in client script bundles)"
     },
     {
       "id": "gcp_metadata_header",

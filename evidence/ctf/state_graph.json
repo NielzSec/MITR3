@@ -3,7 +3,7 @@
   "lab_target": {
     "network_interface": "tun0",
     "local_vpn_ip": "192.168.148.45/18",
-    "machine_ip": "10.66.153.164",
+    "machine_ip": "10.66.144.48",
     "initial_credentials": {
       "username": "ubuntu",
       "password": "tryhackme"

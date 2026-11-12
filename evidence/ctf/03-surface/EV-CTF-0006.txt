@@ -1,0 +1,1 @@
+foothold.txt content: THM{th1s-1s-jusT-th3-B3g1nn1ng}

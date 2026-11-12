@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# MITR3 / Robin — monitor diário passivo das 3 fontes (rotina 09:30)
-# uso: ~/MITR3/bin/darkweb-monitor.sh   (3 GETs, ≤50 s cada, sem login/paralelismo)
+# MITR3 / Robin — monitor diário passivo das fontes (rotina 09:30)
+# uso: ~/MITR3/bin/darkweb-monitor.sh   (1 GET por fonte, ≤50 s cada, sem login/paralelismo)
+# fontes: ~/MITR3/docs/monitor/sources.conf (name|url por linha) — Robin só adiciona linha com .onion verificado
 set -uo pipefail
 export LC_ALL=C
 Q=/tmp/opencode/darkquarantine
@@ -11,11 +12,22 @@ MAN="$LOGDIR/MANIFEST.sha256"
 UA="Mozilla/5.0 (Windows NT 10.0; rv:115.0) Gecko/20100101 Firefox/115.0"
 TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-targets=(
-  "wgruul|http://wgruul6cmayc2k2i7gx4nucia2fxgm3kqq4wsapt3pnaqz2x7azcx3yd.onion/"
-  "archive-db|http://e3y5vky4v7snefqyhbn6kcmyl5fo4cnk3a2irh2ttvwua46ww5ubl6qd.onion/"
-  "dread-current|http://dreadytu5e57d2xyx2fdgpvqnaf7zxhwr65k5vozpfbotulgv46lc7id.onion/"
-)
+CONF="$LOGDIR/sources.conf"
+if [ ! -f "$CONF" ]; then
+  printf '%s\n' \
+    "wgruul|http://wgruul6cmayc2k2i7gx4nucia2fxgm3kqq4wsapt3pnaqz2x7azcx3yd.onion/" \
+    "archive-db|http://e3y5vky4v7snefqyhbn6kcmyl5fo4cnk3a2irh2ttvwua46ww5ubl6qd.onion/" \
+    "dread-current|http://dreadytu5e57d2xyx2fdgpvqnaf7zxhwr65k5vozpfbotulgv46lc7id.onion/" > "$CONF"
+  printf '# seed inicial; edite com fontes .onion verificadas (nome|url)\n' >> "$CONF"
+fi
+targets=()
+while IFS= read -r line; do
+  line="${line%%#*}"
+  [ -n "${line//[[:space:]]/}" ] || continue
+  case "$line" in *.onion/*) ;; *) printf 'fonte inválida (não é .onion): %s\n' "$line" >&2; exit 2 ;; esac
+  targets+=("$line")
+done < "$CONF"
+[ ${#targets[@]} -gt 0 ] || { echo "sources.conf vazio" >&2; exit 2; }
 
 [ -f "$LOG" ] || printf 'timestamp\tname\thttp\trc\ttime_s\tsize\ttitle\tsha256\n' >> "$LOG"
 printf '# monitor run %s\n' "$TS"

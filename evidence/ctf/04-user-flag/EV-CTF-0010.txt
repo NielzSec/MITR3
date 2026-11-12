@@ -1,0 +1,1 @@
+user.txt content: THM{krampus5_h00ked_y0ur_l00t}

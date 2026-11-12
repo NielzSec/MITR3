@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+# language: Python 3, file: mitr3-flight-control, target: operator flight-control dashboard for mitr3-live-browser sessions
+# Reads the append-only flight registry (JSONL) and renders the operator view:
+# who (agent) is where (target/current URL), request/alert counters, scope status,
+# and a per-session sitemap in detail mode. stdlib only; never blocks sessions.
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.parse
+
+REGISTRY = os.environ.get(
+    "MITR3_FLIGHT_REGISTRY",
+    "/home/nielz/MITR3/MITR3/docs/evidence/live-browser/flight_registry.jsonl")
+
+STALE_SECONDS = 15 * 60
+
+C = {"reset": "\033[0m", "bold": "\033[1m", "dim": "\033[2m",
+     "green": "\033[32m", "yellow": "\033[33m", "red": "\033[31m", "cyan": "\033[36m"}
+
+
+def load_states(registry_path=REGISTRY):
+    """Replays the registry JSONL into per-session state dicts."""
+    states = {}
+    try:
+        with open(registry_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    e = json.loads(line)
+                except ValueError:
+                    continue
+                sid = e.get("session_id")
+                if not sid:
+                    continue
+                ev = e.get("event")
+                if ev == "session_start":
+                    states[sid] = {
+                        "session_id": sid, "agent": e.get("agent", "?"),
+                        "target": e.get("target"), "scope_allows": e.get("scope_allows_target"),
+                        "feed": e.get("feed"), "pid": e.get("pid"),
+                        "status": "running", "started": e.get("ts"),
+                        "last_seen": e.get("ts"), "current_url": e.get("target"),
+                        "req_count": 0, "alert_count": 0,
+                    }
+                elif ev == "heartbeat" and sid in states:
+                    s = states[sid]
+                    s.update(current_url=e.get("current_url"),
+                             req_count=e.get("req_count", s["req_count"]),
+                             alert_count=e.get("alert_count", s["alert_count"]),
+                             last_seen=e.get("ts"))
+                elif ev == "session_end" and sid in states:
+                    s = states[sid]
+                    s.update(status=e.get("status", "closed"),
+                             req_count=e.get("req_count", s["req_count"]),
+                             alert_count=e.get("alert_count", s["alert_count"]),
+                             last_seen=e.get("ts"))
+    except OSError:
+        pass
+    return states
+
+
+def is_live(state):
+    if state["status"] != "running":
+        return False
+    try:
+        last = time.mktime(time.strptime(state["last_seen"], "%Y-%m-%dT%H:%M:%SZ"))
+        return (time.time() - last) < STALE_SECONDS
+    except (ValueError, TypeError):
+        return True  # unknown timestamp: assume live rather than hide a session
+
+
+def fmt_age(ts):
+    try:
+        t = time.mktime(time.strptime(ts, "%Y-%m-%dT%H:%M:%SZ"))
+        d = int(time.time() - t)
+        return f"{d // 3600}h{d % 3600 // 60:02d}m" if d >= 3600 else f"{d // 60}m{(d % 60):02d}s"
+    except (ValueError, TypeError):
+        return "?"
+    return "?"
+
+
+def render_table(states):
+    live = {k: v for k, v in states.items() if is_live(v)}
+    closed = {k: v for k, v in states.items() if not is_live(v)}
+    out = []
+    out.append(f'{C["bold"]}MITR3 FLIGHT CONTROL — sessões de browser ao vivo{C["reset"]}')
+    out.append(f'{C["dim"]}registry: {REGISTRY}{C["reset"]}')
+    out.append("")
+    if not live:
+        out.append(f'{C["yellow"]}nenhuma sessão ativa{C["reset"]}')
+    else:
+        hdr = f'{C["bold"]}{"SESSÃO":<28}{"AGENTE":<16}{"ALVO":<34}{"URL ATUAL":<40}{"REQS":>6}{"ALERTS":>8}  SCOPE  IDADE{C["reset"]}'
+        out.append(hdr)
+        for sid, s in sorted(live.items(), key=lambda kv: kv[1]["started"] or ""):
+            scope = (C["green"] + "ok" + C["reset"]) if s["scope_allows"] else (C["red"] + "out" + C["reset"])
+            alerts = (C["red"] + str(s["alert_count"]) + C["reset"]) if s["alert_count"] else "0"
+            out.append(f'{sid[-22:]:<28}{s["agent"][:15]:<16}'
+                       f'{_short(s["target"], 33):<34}{_short(s["current_url"], 39):<40}'
+                       f'{s["req_count"]:>6}{alerts:>8}  {scope}  {fmt_age(s["last_seen"])}')
+    if closed:
+        out.append(f'\n{C["dim"]}encerradas: {len(closed)} (detalhe: mitr3-flight-control -i <session_id>){C["reset"]}')
+    return "\n".join(out)
+
+
+def _short(s, n):
+    s = s or "-"
+    return s if len(s) <= n else s[: n - 1] + "…"
+
+
+def session_detail(sid, states, registry_path=REGISTRY):
+    s = states.get(sid)
+    if not s:
+        print(f'sessão não encontrada: {sid}')
+        return 1
+    print(f'{C["bold"]}sessão:{C["reset"]} {s["session_id"]}')
+    print(f'{C["bold"]}agente:{C["reset"]} {s["agent"]}  {C["bold"]}pid:{C["reset"]} {s["pid"]}  '
+          f'{C["bold"]}status:{C["reset"]} {s["status"]}  {C["bold"]}idade:{C["reset"]} {fmt_age(s["started"])}')
+    print(f'{C["bold"]}alvo:{C["reset"]} {s["target"]}  {C["bold"]}scope ok:{C["reset"]} {s["scope_allows"]}')
+    print(f'{C["bold"]}atual:{C["reset"]} {s["current_url"]}  {C["bold"]}reqs:{C["reset"]} {s["req_count"]}  '
+          f'{C["bold"]}alertas:{C["reset"]} {s["alert_count"]}')
+    print(f'{C["bold"]}feed:{C["reset"]} {s["feed"]}\n')
+
+    sitemap, indicators = {}, []
+    try:
+        with open(s["feed"], encoding="utf-8") as f:
+            for line in f:
+                try:
+                    e = json.loads(line)
+                except ValueError:
+                    continue
+                url = e.get("url") or (e.get("request") or {}).get("url")
+                if url:
+                    p = urllib.parse.urlsplit(url)
+                    key = p.netloc or "unknown"
+                    path = p.path or "/"
+                    sitemap.setdefault(key, {})
+                    sitemap[key][path] = sitemap[key].get(path, 0) + 1
+                for ind in e.get("indicators", []) or ([e] if e.get("category") in ("candidate_indicator", "diagnostic_indicator") else []):
+                    indicators.append(ind)
+    except OSError:
+        pass
+    print(f'{C["bold"]}sitemap:{C["reset"]}')
+    for host, paths in sorted(sitemap.items()):
+        print(f'  {C["cyan"]}{host}{C["reset"]} ({sum(paths.values())} reqs)')
+        for path, count in sorted(paths.items(), key=lambda kv: -kv[1])[:15]:
+            print(f'    {count:>4}  {path[:90]}')
+    if indicators:
+        print(f'\n{C["bold"]}indicadores ({len(indicators)}):{C["reset"]}')
+        for ind in indicators[-20:]:
+            sev = ind.get("severity", "?")
+            color = C["red"] if sev == "HIGH" else C["yellow"]
+            print(f'  [{color}{sev}{C["reset"]}] {ind.get("type")}: {ind.get("detail", "")[:100]}')
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser(description="MITR3 Flight Control — visão do operador sobre sessões live-browser dos agentes")
+    ap.add_argument("-i", "--inspect", metavar="SESSION_ID", help="detalhe de uma sessão (sitemap + indicadores)")
+    ap.add_argument("--watch", type=int, metavar="N", default=0, help="atualiza a cada N segundos (loop ao vivo)")
+    ap.add_argument("--all", action="store_true", help="inclui sessões encerradas")
+    args = ap.parse_args()
+
+    states = load_states()
+    if args.inspect:
+        return session_detail(args.inspect, states)
+    if args.watch:
+        try:
+            while True:
+                print("\033[2J\033[H", end="")
+                print(render_table(load_states() if args.all else states))
+                print(f'\n{C["dim"]}atualizando a cada {args.watch}s — ctrl-c sai{C["reset"]}')
+                time.sleep(args.watch)
+                states = load_states()
+        except KeyboardInterrupt:
+            pass
+        return 0
+    data = load_states()
+    print(render_table(data if args.all else data))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

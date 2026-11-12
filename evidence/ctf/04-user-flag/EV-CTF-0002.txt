@@ -1,1 +1,4 @@
-THM{CryptographyPwn007}
+Q1 (Attacker register password): QU9DMjAyNHtUaW55X1R (19 chars)
+Q2 (Captured password): pbnlfVGlueV9TaDNsbF (19 chars)
+Q3 (Zip file password transferred): 9jYW5fRW5jcnlwVF9iVXR (21 chars)
+Q4 (McSkidy database password): faXRfSXNfTjB0X0YwMGxwcm8wZn0= (29 chars)

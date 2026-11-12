@@ -1,0 +1,1 @@
+root.txt content: THM{w00t-w00t-y0u-escap3-the-may0r-permits}

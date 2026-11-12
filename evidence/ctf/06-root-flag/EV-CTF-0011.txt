@@ -1,0 +1,1 @@
+root.txt content: THM{krampu5_&_p0tat0_5alad}

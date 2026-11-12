@@ -43,6 +43,9 @@ RULES = [
         r"""(?i)\b(?:api[_-]?key|apikey|secret|token|passwd|password|passphrase|private[_-]?key)\b\s*[:=]\s*["']?([A-Za-z0-9_\-\.\+\*/=]{16,})""")),
 ]
 
+# benign assignments whose "value" is a stdlib call, not a credential (e.g. token = secrets.token_hex(8))
+BENIGN_ASSIGNMENTS = re.compile(r"=\s*secrets\.token_(?:hex|urlsafe|bytes)\s*\(")
+
 MAX_BYTES = 2 * 1024 * 1024  # skip huge files
 
 
@@ -92,6 +95,8 @@ def scan(path: Path, hits: list) -> None:
             m = rx.search(line)
             if not m:
                 continue
+            if name == "assigned_secret" and BENIGN_ASSIGNMENTS.search(line):
+                continue  # stdlib token generator, not a credential
             hits.append({
                 "path": str(path),
                 "line": lineno,

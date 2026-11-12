@@ -7,8 +7,10 @@ These tests run strictly offline with no live browser or external network connec
 import json
 import os
 import re
+import http.server
 import stat
 import tempfile
+import threading
 import unittest
 import unittest.mock
 import secrets
@@ -1308,6 +1310,87 @@ class TestCanaryLogEvidence(unittest.TestCase):
             self.assertEqual(len(log_path.read_text(encoding="utf-8").splitlines()), 1)  # 2nd hit
             self.assertTrue(json.loads(rotated.read_text(encoding="utf-8").splitlines()[0])["matched"])
 
+
+class TestFullCycleRealFetchSurface(unittest.TestCase):
+    """Rehearsal of the authorized cycle (probe → intruder → OOB) against a REAL local HTTP surface.
+    The fixture app is vulnerable-by-contract: /fetch?url=<value> performs a server-side fetch of the
+    value and reflects the response — the same shape the duo will meet on the next live target.
+    Loopback only; stdlib only."""
+
+    @staticmethod
+    def _start_app():
+        class VulnApp(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                q = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+                target = (q.get("url") or [""])[0]
+                if target:
+                    # direct opener: loopback fetch must not be hijacked by ambient proxy env
+                    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                    try:
+                        with opener.open(target, timeout=1) as resp:
+                            out = b"Fetched: " + resp.read(4096)
+                    except OSError as exc:
+                        out = f"Fetch failed: {exc}".encode()
+                else:
+                    out = b"no url param"
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain")
+                self.send_header("Content-Length", str(len(out)))
+                self.end_headers()
+                self.wfile.write(out)
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), VulnApp)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        return server
+
+    def setUp(self):
+        self.app = self._start_app()
+        self.addCleanup(self.app.shutdown)
+        self.addCleanup(self.app.server_close)
+        self.app_port = self.app.server_address[1]
+
+    def _cycle(self, log_file=None):
+        listener = CanaryListener(host="127.0.0.1", port=0, log_file=log_file)
+        listener.start()
+        self.addCleanup(listener.stop)
+        secret = secrets.token_hex(8)
+        listener.accept_path = secret  # single-endpoint: only this run's secret gets 200
+        canary_url = listener.canary_url(secret)
+        scope = ScopePolicy(allowed_origins=[f"http://127.0.0.1:{self.app_port}",
+                                             f"http://127.0.0.1:{listener.port}"])
+        request = {"raw_event": "request", "request_id": "cycle.1", "method": "GET",
+                   "url": f"http://127.0.0.1:{self.app_port}/fetch?url=start", "headers": {}}
+        return listener, secret, canary_url, scope, request
+
+    def test_probe_then_intruder_oob_lands_on_canary(self):
+        listener, secret, canary_url, scope, request = self._cycle()
+        probe = run_probe(request, scope, "ssrf", "url", canary_url, self_hosted=True)
+        self.assertEqual(probe["probe_type"], "ssrf")
+        self.assertGreaterEqual(len(listener.wait_hits(secret, timeout=1.0)), 1)  # probe alone reaches OOB
+        result = run_intruder(request, scope, "url", "ssrf", canary_url,
+                              delay=0.1, max_probes=30, self_hosted=True)
+        self.assertEqual(result["probes_sent"], 11)
+        self.assertTrue(result["canary_correlation"])
+        hits = listener.wait_hits(secret, timeout=3)
+        # 3 canary-bearing payloads in the ssrf family (plain, path, token_query) + 1 probe
+        self.assertGreaterEqual(len(hits), 4)
+        self.assertTrue(all(h["matched"] for h in hits))
+
+    def test_oob_callbacks_sealed_in_jsonl_log(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            listener, secret, canary_url, scope, request = self._cycle(
+                log_file=str(Path(tmpdir) / "probes" / "canary_hits.jsonl"))
+            run_probe(request, scope, "ssrf", "url", canary_url, self_hosted=True)
+            run_intruder(request, scope, "url", "ssrf", canary_url,
+                         delay=0.1, max_probes=30, self_hosted=True)
+            log_path = Path(tmpdir) / "probes" / "canary_hits.jsonl"
+            lines = log_path.read_text(encoding="utf-8").splitlines()
+            self.assertGreaterEqual(len(lines), 4)
+            parsed = [json.loads(line) for line in lines]
+            self.assertTrue(all(h["matched"] and h["source_ip"] == "127.0.0.1" for h in parsed))
 
 if __name__ == "__main__":
     unittest.main()
