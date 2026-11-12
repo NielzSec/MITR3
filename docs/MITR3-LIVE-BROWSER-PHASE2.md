@@ -63,3 +63,10 @@ Evidence is written under `human-only/probes/` with `0700` directory and
 JSON result before adding the digest field. Probe differences and markers are
 candidate signals only; they do not establish RCE, SSRF, or impact. An absent
 marker/callback does not rule out a vulnerability.
+
+## Registro de autorização — lane de execução sem TTY (M4/M5)
+
+- dj confirmou em sessão (2026-11-12): dispatch VANTA autorizado ("eu autorizei mesmo"); execução por agentes da lane liberada.
+- Morfeus (coordenação): "Lane de Execução (OpenCode + BlackOps): Liberados para operar sem travas artificiais" (2026-11-12).
+- Mecânica: `--agent-authorized` (em `replay`/`probe`/`intruder`) substitui a confirmação interativa de TTY pela autorização permanente do operador. Exige `MITR3_AGENT` (identidade); a autorização vai registrada dentro da evidência selada (`authorization.mode=agent_standing`). Escopo, preflight 0700/0600, rate-limit, fail-closed de redirect e sealing permanecem intactos.
+- Alvos autorizados em sessão: perímetro web próprio (MITR3-WEB) e labs TryHackMe em escopo via tun0 (ver #all-mitr3).

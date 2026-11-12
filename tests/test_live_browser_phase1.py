@@ -35,6 +35,8 @@ from tools.mitr3_live_browser import (
     _NoRedirectHandler,
     CanaryListener,
     _validate_ssrf_canary,
+    _confirm_phase2,
+    phase2_cli,
 )
 
 
@@ -1167,6 +1169,95 @@ class TestPhase5SelfHostedCanary(unittest.TestCase):
             run_intruder(self.request, self.scope, "url", "ssrf", canary_url="http://127.0.0.1:8993/x/",
                          transport=lambda *a: calls.append(a))
         self.assertEqual(calls, [])
+
+
+class TestAgentAuthorizedExecution(unittest.TestCase):
+    """Standing operator authorization: execution lane runs active ops without an interactive TTY.
+    Scope, preflight, evidence and identity gates stay intact."""
+
+    def _capture(self, tmpdir, url):
+        human = Path(tmpdir) / "human-only"
+        human.mkdir(mode=0o700)
+        capture = human / "s.raw.jsonl"
+        capture.write_text(json.dumps({
+            "raw_event": "request", "request_id": "req.1", "method": "GET",
+            "url": url, "headers": {}
+        }) + "\n", encoding="utf-8")
+        os.chmod(capture, 0o600)
+        return str(capture)
+
+    def test_agent_authorized_confirm_works_without_tty(self):
+        request = {"raw_event": "request", "request_id": "req.1", "method": "GET",
+                   "url": "https://target.example/x", "headers": {}}
+        with unittest.mock.patch("sys.stdin") as fake_stdin:
+            fake_stdin.isatty.return_value = False
+            with self.assertRaises(PermissionError):
+                _confirm_phase2("REPLAY", request)  # no TTY, no agent flag -> blocked
+            self.assertTrue(_confirm_phase2("REPLAY", request, agent_authorized=True))  # standing auth -> allowed
+
+    def test_agent_authorized_cli_end_to_end_loopback(self):
+        listener = CanaryListener(port=0)
+        listener.start()
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                capture = self._capture(tmpdir, f"http://127.0.0.1:{listener.port}/page")
+                scope_origin = f"http://127.0.0.1:{listener.port}"
+                with unittest.mock.patch.dict(os.environ, {"MITR3_AGENT": "opencode-exec"}):
+                    rc = phase2_cli("REPLAY", [capture, "--request-id", "req.1",
+                                               "--allow-origin", scope_origin, "--agent-authorized"])
+                self.assertEqual(rc, 0)
+                probes = sorted((Path(tmpdir) / "human-only" / "probes").glob("phase2_*.json"))
+                self.assertEqual(len(probes), 1)
+                sealed = json.load(open(probes[0]))
+                self.assertEqual(sealed["authorization"]["mode"], "agent_standing")
+                self.assertEqual(sealed["authorization"]["agent"], "opencode-exec")
+                self.assertEqual(sealed["response"]["status"], 200)
+        finally:
+            listener.stop()
+
+    def test_agent_authorized_requires_identity(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            capture = self._capture(tmpdir, "http://127.0.0.1:9/page")
+            env = {k: v for k, v in os.environ.items() if k != "MITR3_AGENT"}
+            with unittest.mock.patch.dict(os.environ, env, clear=True):
+                rc = phase2_cli("REPLAY", [capture, "--request-id", "req.1",
+                                           "--allow-origin", "http://127.0.0.1:9", "--agent-authorized"])
+            self.assertEqual(rc, 1)  # identity gate: no MITR3_AGENT, no run
+
+
+class TestCanaryHardening(unittest.TestCase):
+    """PIP's opsec notes: single accepted endpoint (rest 404), rotated JSONL callback log."""
+
+    def test_single_endpoint_404_and_match_flag(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log = str(Path(tmpdir) / "canary_hits.jsonl")
+            listener = CanaryListener(port=0, accept_path="SECRET123", log_file=log)
+            listener.start()
+            try:
+                with urllib.request.urlopen(listener.canary_url("SECRET123"), timeout=5) as r:
+                    self.assertEqual(r.status, 200)
+                with self.assertRaises(urllib.error.HTTPError) as ctx:
+                    urllib.request.urlopen(f"http://127.0.0.1:{listener.port}/other-path/", timeout=5)
+                self.assertEqual(ctx.exception.code, 404)
+                self.assertEqual(len(listener.hits), 2)  # the 404 probe is still evidence
+                self.assertEqual([h["matched"] for h in listener.hits], [True, False])
+            finally:
+                listener.stop()
+            lines = [json.loads(l) for l in open(log) if l.strip()]
+            self.assertEqual(len(lines), 2)
+
+    def test_log_rotation(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log = str(Path(tmpdir) / "canary_hits.jsonl")
+            listener = CanaryListener(port=0, accept_path=None, log_file=log, max_log_bytes=1)
+            listener.start()
+            try:
+                urllib.request.urlopen(listener.canary_url("a"), timeout=5).read()
+                urllib.request.urlopen(listener.canary_url("b"), timeout=5).read()
+            finally:
+                listener.stop()
+            self.assertTrue(os.path.exists(log + ".1"))  # tiny cap forces rotation
+            self.assertTrue(os.path.exists(log))
 
 
 if __name__ == "__main__":

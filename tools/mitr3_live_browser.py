@@ -1219,13 +1219,32 @@ class CanaryListener:
     """M5 self-hosted OOB canary: records HTTP callbacks on our own infra, so SSRF/RFI/RCE-oob
     hits are observed locally instead of on a third-party OAST service. Loopback-safe by default."""
 
-    def __init__(self, host: str = "127.0.0.1", advertise: str = None, port: int = 8993):
+    def __init__(self, host: str = "127.0.0.1", advertise: str = None, port: int = 8993,
+                 accept_path: str = None, log_file: str = None, max_log_bytes: int = 5 * 1024 * 1024):
         self.host = host
         self.advertise = advertise or host
         self.port = port
+        self.accept_path = accept_path  # when set: only callbacks matching it get 200; others 404 (still logged)
+        self.log_file = log_file        # JSONL evidence log of every callback; rotated at max_log_bytes
+        self.max_log_bytes = max_log_bytes
         self.hits = []
         self._server = None
         self._thread = None
+
+    def _log_hit(self, hit: dict):
+        if not self.log_file:
+            return
+        try:
+            d = os.path.dirname(self.log_file)
+            if d:
+                os.makedirs(d, mode=0o700, exist_ok=True)
+            if (os.path.exists(self.log_file)
+                    and os.path.getsize(self.log_file) > self.max_log_bytes):
+                os.replace(self.log_file, self.log_file + ".1")
+            with open(self.log_file, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(hit, sort_keys=True, ensure_ascii=False) + "\n")
+        except OSError:
+            pass  # evidence logging never breaks the listener
 
     def start(self):
         listener = self
@@ -1233,16 +1252,20 @@ class CanaryListener:
         class Handler(http.server.BaseHTTPRequestHandler):
             def _record(self):
                 parsed = urllib.parse.urlsplit(self.path)
-                listener.hits.append({
+                matched = bool(listener.accept_path is None or listener.accept_path in parsed.path)
+                hit = {
                     "ts": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                     "method": self.command,
                     "path": urllib.parse.unquote(parsed.path),
                     "query": parsed.query,
                     "source_ip": self.client_address[0],
                     "user_agent": self.headers.get("User-Agent", ""),
-                })
-                body = b"mitr3-canary-ok"
-                self.send_response(200)
+                    "matched": matched,
+                }
+                listener.hits.append(hit)
+                listener._log_hit(hit)
+                body = b"mitr3-canary-ok" if matched else b"not found"
+                self.send_response(200 if matched else 404)
                 self.send_header("Content-Type", "text/plain")
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
@@ -1492,9 +1515,17 @@ def _write_phase2_evidence(capture_path: str, result: dict) -> tuple[str, str]:
         os.close(parent_fd)
 
 
-def _confirm_phase2(action: str, request: dict, max_requests: int = None) -> bool:
+def _confirm_phase2(action: str, request: dict, max_requests: int = None,
+                    agent_authorized: bool = False) -> bool:
+    if agent_authorized:
+        # Standing operator authorization for the execution lane (dj word, session-recorded):
+        # replaces the interactive TTY keystroke; scope/preflight/evidence gates stay intact.
+        agent = os.environ.get("MITR3_AGENT", "unknown-agent")
+        print(f"{action}: AGENT-AUTHORIZED by {agent} — standing operator authorization; "
+              f"scope enforced; redirects off; run recorded in evidence.")
+        return True
     if not sys.stdin.isatty():
-        raise PermissionError("Active replay requires an interactive operator terminal")
+        raise PermissionError("Active replay requires an interactive operator terminal or --agent-authorized")
     method, url = str(request.get("method", "")).upper(), request.get("url", "")
     parsed = urllib.parse.urlsplit(url)
     expected = f"{action} {request.get('request_id')}"
@@ -1519,9 +1550,15 @@ def phase2_cli(action: str, argv: list[str]) -> int:
         parser.add_argument("--canary-url", help="Required for SSRF; HTTPS origin must also be allowlisted")
         parser.add_argument("--delay", type=float, default=1.0, help="Seconds between probes (0.1-60, default 1.0)")
         parser.add_argument("--max-probes", type=int, default=30, help="Probe cap (1-200, default 30)")
+    if action in ("REPLAY", "PROBE", "INTRUDER"):
+        parser.add_argument("--agent-authorized", action="store_true", default=False,
+                            help="Execution lane: standing operator authorization replaces the interactive TTY "
+                                 "confirm (requires MITR3_AGENT; authorization recorded in sealed evidence)")
     if action in ("PROBE", "INTRUDER"):
         parser.add_argument("--self-canary", action="store_true", default=False,
                             help="M5: self-host the OOB canary on a local listener instead of an external OAST URL")
+        parser.add_argument("--canary-host", default="127.0.0.1",
+                            help="Bind address of the canary listener (0.0.0.0 or the tun0 IP for remote targets)")
         parser.add_argument("--canary-advertise", default="127.0.0.1",
                             help="IP/hostname targets will reach the canary on (e.g. the VPN IP); also allowlist http://<ip>:<canary-port>")
         parser.add_argument("--canary-port", type=int, default=8993, help="Canary listener port (default 8993)")
@@ -1534,9 +1571,12 @@ def phase2_cli(action: str, argv: list[str]) -> int:
         _validate_replay_request(request, scope)
         canary_url, oob_secret = None, None
         if action in ("PROBE", "INTRUDER") and getattr(args, "self_canary", False):
-            listener = CanaryListener(advertise=args.canary_advertise, port=args.canary_port)
+            listener = CanaryListener(host=getattr(args, "canary_host", None) or "127.0.0.1",
+                                      advertise=args.canary_advertise, port=args.canary_port,
+                                      log_file=str(Path(args.capture).parent / "probes" / "canary_hits.jsonl"))
             listener.start()
             oob_secret = secrets.token_hex(8)
+            listener.accept_path = oob_secret  # single-endpoint: only this run's secret gets 200
             canary_url = listener.canary_url(oob_secret)
         else:
             canary_url = getattr(args, "canary_url", None)
@@ -1551,7 +1591,10 @@ def phase2_cli(action: str, argv: list[str]) -> int:
             max_requests = min(len(payloads), min(max(args.max_probes, 1), 200))
         # Preflight evidence directory before any network transport or confirmation
         _preflight_phase2_evidence(args.capture)
-        if not _confirm_phase2(action, request, max_requests=max_requests):
+        agent_authorized = bool(getattr(args, "agent_authorized", False))
+        if agent_authorized and not os.environ.get("MITR3_AGENT"):
+            raise PermissionError("--agent-authorized requires MITR3_AGENT (identity recorded in evidence)")
+        if not _confirm_phase2(action, request, max_requests=max_requests, agent_authorized=agent_authorized):
             raise PermissionError("Operator confirmation did not match")
         if action == "PROBE":
             result = run_probe(request, scope, args.kind, args.param, canary_url, self_hosted=bool(listener))
@@ -1560,6 +1603,12 @@ def phase2_cli(action: str, argv: list[str]) -> int:
                                   delay=args.delay, max_probes=args.max_probes, self_hosted=bool(listener))
         else:
             result = run_replay(request, scope)
+        if agent_authorized:
+            result["authorization"] = {
+                "mode": "agent_standing",
+                "agent": os.environ.get("MITR3_AGENT", "unknown-agent"),
+                "basis": "standing operator authorization (dj), scope+preflight enforced, run recorded",
+            }
         if listener:
             result["oob_hits"] = listener.wait_hits(oob_secret, timeout=args.canary_wait)
             result["oob_hit_count"] = len(result["oob_hits"])
