@@ -17,7 +17,9 @@ import datetime as dt
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path.home() / "MITR3"
+# This checkout. ~/MITR3 breaks every other clone: the answer CLI then
+# dies in evidence retrieval (EVIDENCE_COMMAND) before a model can abstain.
+ROOT = Path(__file__).resolve().parents[1]
 INTEL = ROOT / "bin/mitr3-rag-intel.py"
 URL = "https://nielz-aspire-a315-53.tailb82a64.ts.net/mcp"
 ID_RE = re.compile(r"^(?:CVE-\d{4}-\d{4,}|ASVS-V?\d+(?:\.\d+){2}|CASE-[a-z0-9._-]+|CWE-\d+)$",re.I)

@@ -4,10 +4,14 @@ import unittest
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-spec=importlib.util.spec_from_file_location("readback",ROOT/"bin/mitr3-rag-mcp-verify.py")
-module=importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+VERIFY=ROOT/"bin/mitr3-rag-mcp-verify.py"
+module=None
+if VERIFY.is_file():
+ spec=importlib.util.spec_from_file_location("readback",VERIFY)
+ module=importlib.util.module_from_spec(spec)
+ spec.loader.exec_module(module)
 
+@unittest.skipUnless(VERIFY.is_file(), "bin/mitr3-rag-mcp-verify.py is not in this checkout; remote readback QA skipped")
 class RedactionQaTests(unittest.TestCase):
  def test_placeholder_false_flag_is_inconsistency(self):
   obj={"found":True,"index_status":"ready","indexed_chunks":0,

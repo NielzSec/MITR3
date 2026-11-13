@@ -16,11 +16,17 @@ import unittest
 from unittest.mock import patch
 
 ENTRY = Path(__file__).resolve().parents[2] / "deploy/query_entry.py"
-spec = importlib.util.spec_from_file_location("staged_query_entry", ENTRY)
-entry = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(entry)
+entry = None
+if ENTRY.is_file():
+    spec = importlib.util.spec_from_file_location("staged_query_entry", ENTRY)
+    entry = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(entry)
 
 
+@unittest.skipUnless(
+    ENTRY.is_file(),
+    "hackbots/deploy/query_entry.py is not in this checkout; deployment preparation tests skipped",
+)
 class DeploymentPreparationTests(unittest.TestCase):
     def test_peer_credentials_reject_same_uid_root_and_wrong_caller(self):
         client, server = socket.socketpair()

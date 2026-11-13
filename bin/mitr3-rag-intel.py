@@ -11,6 +11,7 @@ from contextlib import closing
 
 ROOT=Path(__file__).resolve().parents[1]
 CACHE=ROOT/"knowledge/reference-datasets/cache"
+PINNED=ROOT/"knowledge/reference-datasets/pinned"
 DB=ROOT/"state/mitr3-intel.sqlite3"
 SOURCE=ROOT/"knowledge/public-cases/catalog.json"
 MANIFEST=CACHE/"manifest.json"
@@ -176,6 +177,40 @@ def public_rows(items=None,evidence=None):
 
 def count_feed(name,data):
  return len(data["vulnerabilities"]) if name=="cisa-kev" else len(list(asvs_rows(data)))
+
+def bootstrap():
+ """Copy pinned public feeds into the local cache and build the FTS index when stale.
+
+ The cache directory and SQLite index are generated and gitignored. A clean
+ clone still has the pinned JSON, so this step makes search reproducible
+ without hitting the network.
+ """
+ missing=[name for name in URLS if not (PINNED/(name+".json")).is_file()]
+ if missing:
+  raise FileNotFoundError("Pinned reference fixtures missing: "+", ".join(missing))
+ CACHE.mkdir(parents=True,exist_ok=True)
+ manifest={}
+ changed=not DB.exists()
+ for name in URLS:
+  raw=(PINNED/(name+".json")).read_bytes()
+  data=json.loads(raw)
+  check_structure(name,data)
+  digest=hashlib.sha256(raw).hexdigest()
+  dest=CACHE/(name+".json")
+  if not dest.is_file() or hashlib.sha256(dest.read_bytes()).hexdigest()!=digest:
+   atomic_bytes(dest,raw)
+   changed=True
+  manifest[name]={"source":name,"url":URLS[name],"bytes":len(raw),"sha256":digest,
+                  "checked_at":"pinned","item_count":count_feed(name,data)}
+ blob=json.dumps(manifest,ensure_ascii=False,indent=2).encode()+b"\n"
+ if not MANIFEST.is_file() or MANIFEST.read_bytes()!=blob:
+  atomic_bytes(MANIFEST,blob)
+  changed=True
+ if changed:
+  create()
+ else:
+  print("BOOTSTRAP_OK","unchanged",DB,flush=True)
+ return manifest
 
 def sync():
  CACHE.mkdir(parents=True,exist_ok=True)
@@ -428,6 +463,7 @@ def main():
  p=argparse.ArgumentParser(description="Offline FTS catalog of MITR3 case studies, CISA KEV, pinned OWASP ASVS 5")
  sub=p.add_subparsers(dest="action",required=True)
  sub.add_parser("sync",help="Fetch 2 signed-off public JSON datasets, bounded HTTPS")
+ sub.add_parser("bootstrap",help="Install pinned public feeds into the local cache and build the FTS index")
  sub.add_parser("build",help="Atomic local FTS rebuild from cached feeds + public cases")
  sub.add_parser("stats")
  sub.add_parser("bench")
@@ -449,6 +485,7 @@ def main():
  q.add_argument("--json",action="store_true")
  a=p.parse_args()
  if a.action=="sync":sync()
+ elif a.action=="bootstrap":bootstrap()
  elif a.action=="build":create()
  elif a.action=="stats":stats()
  elif a.action=="bench":raise SystemExit(0 if benchmark() else 3)
