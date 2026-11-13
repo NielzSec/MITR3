@@ -2,8 +2,11 @@
 """Offline ATT&CK graph: only active STIX entities and explicit relationships.
 
 Separate from the CVE/CWE/ASVS database. No text-derived or cross-catalog edges.
+Monthly sync retries a bad download and, when the bundle is still unusable, keeps the
+last verified cache instead of failing the refresh.
 """
 from __future__ import annotations
+import base64
 import collections
 from contextlib import closing, ExitStack
 import datetime as dt
@@ -15,7 +18,9 @@ from pathlib import Path
 import re
 import resource
 import sqlite3
+import sys
 import tempfile
+import time
 import urllib.parse
 import urllib.request
 
@@ -26,6 +31,9 @@ DB = ROOT / "state/mitr3-attack.sqlite3"
 URL = "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json"
 SOURCE = "mitre-attack-enterprise"
 MAX_SIZE = 80_000_000
+FETCH_TIMEOUT = 45
+FETCH_ATTEMPTS = 3
+FETCH_BACKOFF = 0.5
 ADDRESS_SPACE_LIMIT = 1_200_000_000
 ENTITY_TYPES = frozenset({"attack-pattern", "malware", "tool", "intrusion-set", "campaign", "course-of-action"})
 EDGE_TYPES = frozenset({"uses", "mitigates", "subtechnique-of", "attributed-to"})
@@ -117,39 +125,164 @@ def due_this_month(metadata):
         return True
 
 
-def sync_bundle():
-    """Refresh at most once per UTC calendar month; return the parsed bundle once."""
-    if MANIFEST.exists() and CACHE.exists():
-        metadata = json.loads(MANIFEST.read_text(encoding="utf8"))
-        if not due_this_month(metadata):
-            return load_cached()
-    CACHE.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(dir=CACHE.parent, prefix=".attack-download-")
+def header_value(headers, name):
+    if headers is None:
+        return None
+    if isinstance(headers, dict):
+        for key, value in headers.items():
+            if str(key).lower() == name.lower() and value not in (None, ""):
+                return value
+        return None
+    getter = getattr(headers, "get", None)
+    if getter is None:
+        return None
+    value = getter(name)
+    return value if value not in (None, "") else None
+
+
+_SHA_COLON = re.compile(r"(?i)(?:^|[\s,])sha-256\s*=\s*:([A-Za-z0-9+/=]+):")
+_SHA_EQ = re.compile(r"(?i)(?:^|[\s,])sha-256\s*=\s*([A-Za-z0-9+/=]+)(?:$|[\s,])")
+
+
+def _sha256_b64(token):
     try:
-        request = urllib.request.Request(URL, headers={"User-Agent": "MITR3-ATTACK-graph/1.0", "Accept": "application/json"})
-        opener = urllib.request.build_opener(PinnedRedirect())
-        size = 0
-        with os.fdopen(fd, "wb") as stream:
-            with opener.open(request, timeout=45) as response:
-                pinned_url(response.geturl())
-                while chunk := response.read(65536):
-                    size += len(chunk)
-                    if size > MAX_SIZE:
-                        raise ValueError("ATT&CK bundle over size limit")
-                    stream.write(chunk)
-            stream.flush()
-            os.fsync(stream.fileno())
-        bundle = load_bundle(Path(temporary))
-        metadata = {"source_id": SOURCE, "url": URL, "sha256": digest(Path(temporary)),
-                    "bytes": size, "checked_at": now(), "bundle_id": bundle.get("id"),
-                    "object_count": len(bundle["objects"])}
-        os.chmod(temporary, 0o600)
-        os.replace(temporary, CACHE)
-        atomic_json(MANIFEST, metadata)
+        raw = base64.b64decode(token, validate=True)
+    except ValueError as exc:
+        raise ValueError("Unreadable checksum header") from exc
+    if len(raw) != 32:
+        raise ValueError("Checksum is not sha-256")
+    return raw.hex()
+
+
+def declared_sha256(headers):
+    """Hex sha256 when the response declares one. None when the source sends no checksum."""
+    found = []
+    for key in ("x-checksum-sha256", "x-amz-checksum-sha256"):
+        raw = header_value(headers, key)
+        if raw is None:
+            continue
+        token = str(raw).strip().lower()
+        if token.startswith("sha256:"):
+            token = token[7:]
+        if not re.fullmatch(r"[0-9a-f]{64}", token):
+            raise ValueError("Unreadable checksum header")
+        found.append(token)
+    for key in ("Content-Digest", "Digest"):
+        raw = header_value(headers, key)
+        if raw is None:
+            continue
+        text = str(raw).strip()
+        if not re.search(r"(?i)sha-256", text):
+            raise ValueError("Checksum header has no sha-256")
+        match = _SHA_COLON.search(text) or _SHA_EQ.search(text)
+        if not match:
+            raise ValueError("Unreadable checksum header")
+        found.append(_sha256_b64(match.group(1)))
+    if not found:
+        return None
+    if any(item != found[0] for item in found):
+        raise ValueError("Conflicting checksum headers")
+    return found[0]
+
+
+def cache_age_seconds(checked_at, path):
+    stamp = None
+    if isinstance(checked_at, str) and checked_at:
+        try:
+            stamp = dt.datetime.fromisoformat(checked_at)
+        except ValueError:
+            stamp = None
+    if stamp is None:
+        stamp = dt.datetime.fromtimestamp(path.stat().st_mtime, dt.timezone.utc)
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=dt.timezone.utc)
+    return max(0, int((dt.datetime.now(dt.timezone.utc) - stamp).total_seconds()))
+
+
+def _fetch_bundle(fd, temporary):
+    request = urllib.request.Request(URL, headers={"User-Agent": "MITR3-ATTACK-graph/1.0", "Accept": "application/json"})
+    opener = urllib.request.build_opener(PinnedRedirect())
+    size = 0
+    headers = None
+    with os.fdopen(fd, "wb") as stream:
+        with opener.open(request, timeout=FETCH_TIMEOUT) as response:
+            pinned_url(response.geturl())
+            headers = getattr(response, "headers", None)
+            while chunk := response.read(65536):
+                size += len(chunk)
+                if size > MAX_SIZE:
+                    raise ValueError("ATT&CK bundle over size limit")
+                stream.write(chunk)
+        stream.flush()
+        os.fsync(stream.fileno())
+    path = Path(temporary)
+    file_sha = digest(path)
+    expected = declared_sha256(headers)
+    if expected is not None and file_sha != expected:
+        raise ValueError("Feed checksum mismatch")
+    bundle = load_bundle(path)
+    metadata = {"source_id": SOURCE, "url": URL, "sha256": file_sha,
+                "bytes": size, "checked_at": now(), "bundle_id": bundle.get("id"),
+                "object_count": len(bundle["objects"])}
+    os.chmod(temporary, 0o600)
+    os.replace(temporary, CACHE)
+    atomic_json(MANIFEST, metadata)
+    return bundle, metadata
+
+
+def sync_bundle():
+    """Refresh at most once per UTC calendar month; return the parsed bundle once.
+
+    A failed or corrupt download keeps the last verified cache and logs its age.
+    With no valid cache, the fetch error propagates.
+    """
+    cached_meta = None
+    if MANIFEST.exists() and CACHE.exists():
+        try:
+            cached_meta = json.loads(MANIFEST.read_text(encoding="utf8"))
+        except (OSError, ValueError):
+            cached_meta = None
+        if isinstance(cached_meta, dict) and not due_this_month(cached_meta):
+            return load_cached()
+        if not isinstance(cached_meta, dict):
+            cached_meta = None
+    CACHE.parent.mkdir(parents=True, exist_ok=True)
+    last = None
+    for attempt in range(FETCH_ATTEMPTS):
+        fd, temporary = tempfile.mkstemp(dir=CACHE.parent, prefix=".attack-download-")
+        try:
+            try:
+                return _fetch_bundle(fd, temporary)
+            except (OSError, ValueError) as exc:
+                last = exc
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+        if attempt + 1 >= FETCH_ATTEMPTS:
+            break
+        delay = FETCH_BACKOFF * (2 ** attempt)
+        print("FETCH_RETRY", SOURCE, "attempt", attempt + 1, "of", FETCH_ATTEMPTS,
+              "sleep_seconds", delay, "error", type(last).__name__, str(last)[:160],
+              file=sys.stderr, flush=True)
+        time.sleep(delay)
+    if cached_meta is not None:
+        try:
+            bundle, metadata = load_cached()
+        except (OSError, ValueError) as cache_exc:
+            print("FETCH_FAILED", SOURCE, "no_valid_cache", "error", type(last).__name__, str(last)[:160],
+                  "cache_error", type(cache_exc).__name__, str(cache_exc)[:160], file=sys.stderr, flush=True)
+            raise last from cache_exc
+        age = cache_age_seconds(metadata.get("checked_at"), CACHE)
+        print("FETCH_CACHE_FALLBACK", SOURCE, "cache_age_seconds", age,
+              "checked_at", metadata.get("checked_at"), "sha256", metadata.get("sha256"),
+              "reason", type(last).__name__ + ": " + str(last)[:160], file=sys.stderr, flush=True)
         return bundle, metadata
-    finally:
-        if os.path.exists(temporary):
-            os.unlink(temporary)
+    print("FETCH_FAILED", SOURCE, "no_valid_cache", "error",
+          type(last).__name__ if last else "None", str(last)[:160] if last else "",
+          file=sys.stderr, flush=True)
+    if last is None:
+        raise ValueError("ATT&CK fetch failed")
+    raise last
 
 
 def active(obj):

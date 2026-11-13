@@ -2,14 +2,17 @@
 from contextlib import closing
 import copy
 import datetime as dt
+import base64
 import hashlib
 import importlib.util
 import io
 import json
 from pathlib import Path
 import sqlite3
+import sys
 import tempfile
 import unittest
+import urllib.error
 from unittest import mock
 import uuid
 
@@ -179,15 +182,21 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(opener.open.call_args.args[0].full_url, graph.URL)
         self.assertEqual(manifest["sha256"], hashlib.sha256(raw).hexdigest())
         self.assertEqual(manifest["bytes"], len(raw))
-        # Oversize refresh cannot replace the prior, valid cache/manifest.
+        # Oversize refresh cannot replace the prior cache. The patched cap also
+        # rejects that cache, so the refresh fails closed after the retries.
         graph.MANIFEST.write_text(json.dumps(self.metadata))
-        opener.open.return_value = response()
-        with mock.patch.object(graph.urllib.request, "build_opener", return_value=opener):
-            with mock.patch.object(graph, "MAX_SIZE", len(raw) - 1):
-                with self.assertRaisesRegex(ValueError, "over size limit"):
-                    graph.sync_bundle()
+        opener.open.side_effect = lambda *args, **kwargs: response()
+        with mock.patch.object(graph.time, "sleep") as sleep, \
+             mock.patch.object(graph.urllib.request, "build_opener", return_value=opener), \
+             mock.patch.object(graph, "MAX_SIZE", len(raw) - 1), \
+             mock.patch("builtins.print") as printed:
+            with self.assertRaisesRegex(ValueError, "over size limit"):
+                graph.sync_bundle()
+        self.assertEqual(sleep.call_count, graph.FETCH_ATTEMPTS - 1)
         self.assertEqual(graph.CACHE.read_bytes(), raw)
         self.assertEqual(json.loads(graph.MANIFEST.read_text()), self.metadata)
+        failed = [call.args for call in printed.call_args_list if call.args and call.args[0] == "FETCH_FAILED"]
+        self.assertEqual(failed[0][2], "no_valid_cache")
         for bad in ("http://raw.githubusercontent.com/file", "https://example.org/file",
                     "https://raw.githubusercontent.com:8443/file", "https://user@raw.githubusercontent.com/file"):
             with self.subTest(url=bad):
@@ -195,6 +204,91 @@ class GraphTests(unittest.TestCase):
                     graph.pinned_url(bad)
         with self.assertRaises(ValueError):
             graph.PinnedRedirect().redirect_request(None, None, 302, "", {}, "https://example.org/file")
+
+    def _stream(self, body, headers=None, url=None):
+        stream = io.BytesIO(body)
+        stream.geturl = lambda: url or graph.URL
+        if headers is not None:
+            stream.headers = headers
+        return stream
+
+    def test_download_retries_then_succeeds(self):
+        self.metadata["checked_at"] = "2020-01-01T00:00:00+00:00"
+        graph.MANIFEST.write_text(json.dumps(self.metadata))
+        raw = graph.CACHE.read_bytes()
+        opener = mock.Mock()
+        opener.open.side_effect = [
+            urllib.error.URLError("reset"),
+            TimeoutError("timed out"),
+            self._stream(raw),
+        ]
+        with mock.patch.object(graph.time, "sleep") as sleep, \
+             mock.patch.object(graph.urllib.request, "build_opener", return_value=opener), \
+             mock.patch("builtins.print"):
+            _, manifest = graph.sync_bundle()
+        self.assertEqual(opener.open.call_count, 3)
+        self.assertEqual([call.args[0] for call in sleep.call_args_list], [graph.FETCH_BACKOFF, graph.FETCH_BACKOFF * 2])
+        self.assertEqual(manifest["sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertNotEqual(manifest["checked_at"], "2020-01-01T00:00:00+00:00")
+        self.assertEqual(opener.open.call_args.args[1] if len(opener.open.call_args.args) > 1 else opener.open.call_args.kwargs["timeout"], graph.FETCH_TIMEOUT)
+
+    def test_corrupt_payload_falls_back_to_cache_and_logs_age(self):
+        self.metadata["checked_at"] = "2020-06-01T00:00:00+00:00"
+        graph.MANIFEST.write_text(json.dumps(self.metadata))
+        raw = graph.CACHE.read_bytes()
+        opener = mock.Mock()
+        opener.open.side_effect = lambda *args, **kwargs: self._stream(b"{not-json")
+        with mock.patch.object(graph.time, "sleep") as sleep, \
+             mock.patch.object(graph.urllib.request, "build_opener", return_value=opener), \
+             mock.patch("builtins.print") as printed:
+            bundle, metadata = graph.sync_bundle()
+        self.assertEqual(opener.open.call_count, graph.FETCH_ATTEMPTS)
+        self.assertEqual(sleep.call_count, graph.FETCH_ATTEMPTS - 1)
+        self.assertEqual(bundle["id"], self.bundle["id"])
+        self.assertEqual(metadata["checked_at"], "2020-06-01T00:00:00+00:00")
+        self.assertEqual(graph.CACHE.read_bytes(), raw)
+        self.assertEqual(json.loads(graph.MANIFEST.read_text())["sha256"], self.metadata["sha256"])
+        fallback = [call.args for call in printed.call_args_list if call.args and call.args[0] == "FETCH_CACHE_FALLBACK"]
+        self.assertEqual(fallback[0][2], "cache_age_seconds")
+        self.assertGreater(fallback[0][3], 10_000_000)
+        self.assertEqual(fallback[0][5], "2020-06-01T00:00:00+00:00")
+        self.assertEqual(printed.call_args_list[-1].kwargs.get("file"), sys.stderr)
+
+    def test_checksum_mismatch_falls_back_and_match_is_accepted(self):
+        self.metadata["checked_at"] = "2020-01-01T00:00:00+00:00"
+        graph.MANIFEST.write_text(json.dumps(self.metadata))
+        raw = graph.CACHE.read_bytes()
+        bad = {"Content-Digest": "sha-256=:" + base64.b64encode(b"\x00" * 32).decode() + ":"}
+        opener = mock.Mock()
+        opener.open.side_effect = lambda *args, **kwargs: self._stream(raw, bad)
+        with mock.patch.object(graph.time, "sleep"), \
+             mock.patch.object(graph.urllib.request, "build_opener", return_value=opener), \
+             mock.patch("builtins.print"):
+            _, metadata = graph.sync_bundle()
+        self.assertEqual(metadata["checked_at"], "2020-01-01T00:00:00+00:00")
+        self.assertEqual(graph.CACHE.read_bytes(), raw)
+        good = {"Content-Digest": "sha-256=:" + base64.b64encode(hashlib.sha256(raw).digest()).decode() + ":"}
+        opener.open.side_effect = lambda *args, **kwargs: self._stream(raw, good)
+        with mock.patch.object(graph.urllib.request, "build_opener", return_value=opener), \
+             mock.patch("builtins.print"):
+            _, metadata = graph.sync_bundle()
+        self.assertEqual(metadata["sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertNotEqual(metadata["checked_at"], "2020-01-01T00:00:00+00:00")
+
+    def test_download_failure_without_cache_raises(self):
+        graph.CACHE.unlink()
+        graph.MANIFEST.unlink()
+        opener = mock.Mock()
+        opener.open.side_effect = urllib.error.URLError("down")
+        with mock.patch.object(graph.time, "sleep"), \
+             mock.patch.object(graph.urllib.request, "build_opener", return_value=opener), \
+             mock.patch("builtins.print") as printed:
+            with self.assertRaises(urllib.error.URLError):
+                graph.sync_bundle()
+        self.assertFalse(graph.CACHE.exists())
+        self.assertFalse(graph.MANIFEST.exists())
+        failed = [call.args for call in printed.call_args_list if call.args and call.args[0] == "FETCH_FAILED"]
+        self.assertEqual(failed[0][2], "no_valid_cache")
 
 
 @unittest.skipUnless(graph.CACHE.exists() and graph.MANIFEST.exists(), "Offline ATT&CK cache absent: run graph-refresh")
