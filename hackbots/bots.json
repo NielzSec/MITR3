@@ -25,7 +25,7 @@
       "default_state": "dormant",
       "can_issue_network": false,
       "backend": "opencode",
-      "tools": ["mitr3-burp-qa.py", "curl", "requests", "mitr3-web-api"]
+      "tools": ["curl", "requests"]
     },
     {
       "id": "glyph",
@@ -47,7 +47,7 @@
       "default_state": "dormant",
       "can_issue_network": false,
       "backend": "opencode",
-      "tools": ["chrome-devtools-mcp", "playwright-mcp", "semgrep", "mitr3-web-api"]
+      "tools": ["chrome-devtools-mcp", "playwright-mcp", "semgrep"]
     },
     {
       "id": "cipher",
@@ -58,7 +58,7 @@
       "default_state": "dormant",
       "can_issue_network": false,
       "backend": "opencode",
-      "tools": ["mitr3-twosession.py", "mitr3-burp-qa.py", "jwt-analyzers", "curl"]
+      "tools": ["jwt-analyzers", "curl"]
     },
     {
       "id": "ward",
@@ -69,7 +69,7 @@
       "default_state": "dormant",
       "can_issue_network": false,
       "backend": "opencode",
-      "tools": ["apisec-ng-mcp", "mitr3-web-api", "openapi-parsers", "curl"]
+      "tools": ["apisec-ng-mcp", "openapi-parsers", "curl"]
     },
     {
       "id": "relay",
@@ -80,7 +80,7 @@
       "default_state": "dormant",
       "can_issue_network": false,
       "backend": "opencode",
-      "tools": ["mitr3-web-api", "semgrep", "codeql", "nmap", "tshark", "curl"]
+      "tools": ["semgrep", "codeql", "nmap", "tshark", "curl"]
     },
     {
       "id": "obsidian",
@@ -102,7 +102,7 @@
       "default_state": "dormant",
       "can_issue_network": false,
       "backend": "antigravity_cli",
-      "tools": ["rea-mcp-android-tools", "jadx", "apktool", "frida", "mitr3-reverse-lowlevel"]
+      "tools": ["rea-mcp-android-tools", "jadx", "apktool", "frida"]
     },
     {
       "id": "nexa",
@@ -136,7 +136,7 @@
       "default_state": "active",
       "can_issue_network": false,
       "backend": "opencode",
-      "tools": ["mitr3-recon.sh", "mitr3-osint.py", "bounty-crawler", "notion-pipeline"]
+      "tools": ["mitr3-osint.py", "bounty-crawler", "notion-pipeline"]
     },
     {
       "id": "scribe",
@@ -212,5 +212,15 @@
       "status": "deactivated_by_operator",
       "reason": "non_functional"
     }
+  },
+  "public_tree": {
+    "note": "Entradas em tools são inventário de papel, não prova de que o binário existe. Os nomes abaixo foram citados como scripts deste repositório e não estão nesta árvore pública.",
+    "tools_not_in_tree": [
+      "mitr3-burp-qa.py",
+      "mitr3-recon.sh",
+      "mitr3-reverse-lowlevel",
+      "mitr3-twosession.py",
+      "mitr3-web-api"
+    ]
   }
 }

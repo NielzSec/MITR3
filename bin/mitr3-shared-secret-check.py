@@ -23,7 +23,9 @@ def check(base: Path, include_all_workspaces: bool = True) -> dict:
         [sys.executable, str(audit), *[str(p) for p in paths], "--json"],
         capture_output=True, text=True, timeout=40, check=False,
     )
-    if result.returncode != 0:
+    # 0 = clean scan, 2 = findings (the report is still on stdout). Other
+    # statuses mean the auditor did not produce a usable report.
+    if result.returncode not in (0, 2):
         raise RuntimeError("secret auditor returned nonzero status")
     source = json.loads(result.stdout)
     hits = [

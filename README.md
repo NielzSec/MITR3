@@ -2,6 +2,8 @@
 
 Host Linux (`Arch Linux`) · Orquestração via **Orca** & **Morfeus (OpenCode)** · Última sincronização de custódia: 11/11/2026.
 
+> **Uso autorizado e defensivo.** O MITR3 é uma ferramenta de segurança para pesquisa, auditoria e validação defensiva **somente com autorização explícita** de quem responde pelo ambiente, em laboratório isolado ou sistema de teste. Não a use contra sistemas de terceiros sem permissão. Acesso não autorizado é ilegal. Quem executa esta ferramenta é responsável por cumprir a lei e o escopo autorizado.
+
 ---
 
 ## 1. Visão Geral e Arquitetura
@@ -27,7 +29,7 @@ O **MITR3** é um ecossistema integrado para auditoria de segurança de alta pre
 │   ├── MITR3-ATTACK-GRAPH-LAYER3-20261110.md
 │   ├── MITR3-ATTACK-GRAPH-LAYER4-20261110.md
 │   ├── SCOPE.md                  # Procedimento e contrato de escopo humano (Nexus)
-│   └── TOOLCHAIN.md              # Matriz de cobertura e proveniência de ferramentas
+│   └── ARSENAL.md                # Inventário de ferramentas versionado neste repositório
 ├── hackbots/                     # Framework de Hackbots, contratos e Skill Builder
 │   ├── contracts/                # Schemas JSON para missões, steering e asserções
 │   └── skill-builder/            # Construtor determinístico obrigatório de mini-skills
@@ -36,8 +38,7 @@ O **MITR3** é um ecossistema integrado para auditoria de segurança de alta pre
 │   ├── test_graph_normalizer.py  # Testes da Camada 2
 │   ├── test_code_graph.py        # Testes da Camada 3
 │   └── test_graph_verify.py      # Testes da Camada 4
-└── tools/                        # Ferramentas operacionais e pontes de comunicação
-    └── mitr3_slack.py            # Bridge assíncrona Composio MCP para Slack (#all-mitr3)
+└── tools/                        # Ferramentas operacionais versionadas (ex.: tools/js_lab_sandbox.py)
 ```
 
 ---
@@ -74,15 +75,8 @@ A partir de 10/11/2026, o repositório opera sob estrita segregação de ambient
 - Morfeus/OpenCode é o coordenador lógico dos despachos.
 - Limite operacional estrito: máximo de 2 workers simultâneos na fase piloto, mantendo custo zero com provedores suportados e avaliação independente antes de qualquer promoção.
 
-### Doutrina Operacional de Comunicação (Slack Loop)
-- **Regra obrigatória**: Todo agente deve ler o canal `#all-mitr3` antes de iniciar qualquer tarefa operacional e publicar os resultados, commits e hashes SHA256 ao concluir:
-  ```bash
-  # Leitura de histórico recente
-  python3 tools/mitr3_slack.py
-
-  # Publicação de relatório
-  python3 tools/mitr3_slack.py post "Mensagem do relatório..."
-  ```
+### Comunicação no Slack
+Este repositório público **não inclui** `tools/mitr3_slack.py`. Publicar em canais Slack é um passo local do operador, fora desta árvore, e não é necessário para clonar, testar ou auditar o código.
 
 ---
 
@@ -173,16 +167,17 @@ O ambiente integra 16 servidores MCP configurados em `~/.config/opencode/opencod
 ```
 
 ### Execução da Suíte de Testes
-Para garantir isolamento em ambiente Arch Linux (PEP 668), execute os testes utilizando o virtualenv de referência:
+A suíte não exige pacotes Python de terceiros. Na raiz de um clone, o mesmo runner do CI:
 ```bash
-/opt/mitr3/cairn/cairn/.venv/bin/pytest tests/test_vuln_harness.py tests/test_graph_normalizer.py tests/test_code_graph.py tests/test_graph_verify.py -v
+python3 .github/ci_run_tests.py
 ```
+O workflow `.github/workflows/ci.yml` roda esse comando. Se existir um bootstrap de fixtures, ele roda antes. Dataset, índice local ou módulo opcional ausente vira skip; falha de asserção continua falhando.
 
 ### Auditoria de Segredos Pré-Commit
-Nenhum artefato deve ser commitado sem a execução prévia da auditoria determinística:
+Nenhum artefato deve ser commitado sem a auditoria. A stdout é um JSON (`hits`, `files_scanned`); o valor casado não é impresso. Código 0 = limpo, 2 = indício, 1 = erro de leitura:
 ```bash
 python3 bin/mitr3-secrets-audit.py <caminhos_a_commitar>
 ```
 
 ### Política de Skill Builder Obrigatório
-Toda nova skill ou mini-skill para os agentes MITR3 deve ser criada através de [`hackbots/skill-builder/skill_builder.py`](file:///home/nielz/MITR3/hackbots/skill-builder/skill_builder.py) com especificação `methodology.json`, testes no Evaluator e validação de QA independente. É estritamente proibida a criação manual de arquivos `SKILL.md` em diretórios ativos.
+Toda nova skill ou mini-skill para os agentes MITR3 deve ser criada através de [`hackbots/skill-builder/skill_builder.py`](hackbots/skill-builder/skill_builder.py) com especificação `methodology.json`, testes no Evaluator e validação de QA independente. É estritamente proibida a criação manual de arquivos `SKILL.md` em diretórios ativos.
