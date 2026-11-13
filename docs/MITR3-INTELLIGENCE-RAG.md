@@ -36,7 +36,7 @@ Atualização offline-first:
 
     ~/MITR3/bin/mitr3-rag-intel-refresh.py
 
-Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada download a 5 MB, confere o host após redirecionamentos, valida versões e formatos, gera hashes SHA256 e recompõe o índice por troca atômica. Não executa PoCs, exploits, templates, instaladores ou código de terceiros.
+Este comando busca apenas duas URLs fixas e oficiais via HTTPS. Limita cada download a 5 MB, confere o host após redirecionamentos, valida versões e formatos, gera hashes SHA256 e recompõe o índice por troca atômica. Cada feed tenta três vezes com timeout de 18s e backoff exponencial. O JSON tem de bater com o formato esperado; no KEV, o campo `count` publicado pela CISA tem de igualar `vulnerabilities`. Se a resposta trouxer checksum (`Content-Digest`, `Digest` ou `x-checksum-sha256`), o SHA256 do corpo é conferido. Download falho ou corpo inválido não apaga o cache: o refresh reutiliza o último cache local válido, registra `FETCH_CACHE_FALLBACK` com a idade (`cache_age_seconds` e `checked_at`) e segue o build. Sem cache válido, a falha continua explícita e o pipeline para. Não executa PoCs, exploits, templates, instaladores ou código de terceiros.
 
 ## Contrato de resposta do agente
 
@@ -152,7 +152,10 @@ descritor usado pelo parse. Falha de hash/parse/build não troca o grafo anterio
 Rebuild é idempotente nas entidades/arestas; `built_at` é metadado operacional.
 
 `graph-sync`/`graph-refresh` consultam a rede no máximo uma vez por mês UTC;
-no mesmo mês reaproveitam o cache verificado. `graph-build` nunca usa a rede.
+no mesmo mês reaproveitam o cache verificado. Se a tentativa mensal falhar, vier
+corrompida ou não bater com um checksum declarado, o comando reutiliza o último
+bundle verificado, registra `FETCH_CACHE_FALLBACK` (idade inclusa) em stderr e
+segue o build. Sem cache válido, o erro original segue. `graph-build` nunca usa a rede.
 O novo `mitr3-attack-refresh.timer` usa `OnCalendar=monthly`, com atraso
 aleatório de até 30 minutos, e está instalado/ativo neste host. Units
 versionadas em `systemd/user/`; para outro host, vincular essas duas units a

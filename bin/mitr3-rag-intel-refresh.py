@@ -101,9 +101,14 @@ def recent_by_added(current:dict,days:int=7):
   if 0<=(today-added).days<days:entries.append({"cve":k,"dateAdded":v["dateAdded"],"vendor":v["vendorProject"],"product":v["product"]})
  return sorted(entries,key=lambda x:(x["dateAdded"],x["cve"]),reverse=True)
 
-def run(action):
- r=subprocess.run([sys.executable,str(CLI),action],capture_output=True,text=True,timeout=110,check=False)
+def run(action,timeout=None):
+ # Three 18s attempts per feed, two feeds, plus backoff. Other actions stay short.
+ if timeout is None: timeout=180 if action=="sync" else 110
+ r=subprocess.run([sys.executable,str(CLI),action],capture_output=True,text=True,timeout=timeout,check=False)
  print(action.upper(),"exit",r.returncode,flush=True)
+ # Sync logs (retry and cache fallback) are the operator signal; keep them visible.
+ if action=="sync" and r.stdout:
+  print(r.stdout,end="" if r.stdout.endswith("\n") else "\n",flush=True)
  if r.returncode:
   print((r.stderr or r.stdout)[:280],file=sys.stderr)
   raise SystemExit(r.returncode)

@@ -8,4 +8,5 @@ LimitAS=1200000000
 MemoryMax=1200000000
 CPUQuota=65%
 Nice=10
-TimeoutStartSec=150
+# Three 45s download attempts plus local STIX parse.
+TimeoutStartSec=300

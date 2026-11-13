@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """MITR3 Intel RAG: independent local index of reviewed cases + pinned public JSON feeds.
 Uses only Python stdlib; no PoC execution, scanning, untrusted remote commands, or bulk MCP upload.
+Feed sync retries transient failures, checks structure and any declared checksum, and falls
+back to the last valid local cache so one bad response does not drop the refresh.
 """
 from __future__ import annotations
-import argparse, collections, datetime as dt, hashlib, json, os, re, sqlite3, sys, tempfile
-import urllib.request, urllib.parse
+import argparse, base64, collections, datetime as dt, hashlib, json, os, re, sqlite3, sys, tempfile, time
+import urllib.request, urllib.parse, urllib.error
 import unicodedata
 from pathlib import Path
 from contextlib import closing
@@ -15,6 +17,9 @@ DB=ROOT/"state/mitr3-intel.sqlite3"
 SOURCE=ROOT/"knowledge/public-cases/catalog.json"
 MANIFEST=CACHE/"manifest.json"
 MAX_SIZE=5_000_000
+FETCH_TIMEOUT=18
+FETCH_ATTEMPTS=3
+FETCH_BACKOFF=0.5
 URLS={
   "cisa-kev":"https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
   "owasp-asvs-5.0.0":"https://raw.githubusercontent.com/OWASP/ASVS/v5.0.0/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.json"
@@ -78,29 +83,147 @@ def sanitized(value:object,limit:int=900)->str:
  s=" ".join(value.split())[:limit]
  return s if not BLOCK.search(s) else "[REVIEW_REQUIRED:UNTRUSTED_CONTENT]"
 
-def download(name:str)->dict:
+def header_value(headers,name:str):
+ if headers is None: return None
+ if isinstance(headers,dict):
+  for key,value in headers.items():
+   if str(key).lower()==name.lower() and value not in (None,""): return value
+  return None
+ getter=getattr(headers,"get",None)
+ if getter is None: return None
+ value=getter(name)
+ return value if value not in (None,"") else None
+
+_SHA_COLON=re.compile(r"(?i)(?:^|[\s,])sha-256\s*=\s*:([A-Za-z0-9+/=]+):")
+_SHA_EQ=re.compile(r"(?i)(?:^|[\s,])sha-256\s*=\s*([A-Za-z0-9+/=]+)(?:$|[\s,])")
+
+def _sha256_b64(token:str)->str:
+ try:
+  raw=base64.b64decode(token,validate=True)
+ except ValueError as exc:
+  raise ValueError("Unreadable checksum header") from exc
+ if len(raw)!=32: raise ValueError("Checksum is not sha-256")
+ return raw.hex()
+
+def declared_sha256(headers)->str|None:
+ """Hex sha256 when the response declares one. None when the source sends no checksum."""
+ found=[]
+ for key in ("x-checksum-sha256","x-amz-checksum-sha256"):
+  raw=header_value(headers,key)
+  if raw is None: continue
+  token=str(raw).strip().lower()
+  if token.startswith("sha256:"): token=token[7:]
+  if not re.fullmatch(r"[0-9a-f]{64}",token):
+   raise ValueError("Unreadable checksum header")
+  found.append(token)
+ for key in ("Content-Digest","Digest"):
+  raw=header_value(headers,key)
+  if raw is None: continue
+  text=str(raw).strip()
+  if not re.search(r"(?i)sha-256",text):
+   raise ValueError("Checksum header has no sha-256")
+  match=_SHA_COLON.search(text) or _SHA_EQ.search(text)
+  if not match: raise ValueError("Unreadable checksum header")
+  found.append(_sha256_b64(match.group(1)))
+ if not found: return None
+ if any(item!=found[0] for item in found):
+  raise ValueError("Conflicting checksum headers")
+ return found[0]
+
+def verify_checksum(raw:bytes,headers)->None:
+ expected=declared_sha256(headers)
+ if expected is None: return
+ if hashlib.sha256(raw).hexdigest()!=expected:
+  raise ValueError("Feed checksum mismatch")
+
+def cache_age_seconds(checked_at:object,path:Path)->int:
+ stamp=None
+ if isinstance(checked_at,str) and checked_at:
+  try: stamp=dt.datetime.fromisoformat(checked_at)
+  except ValueError: stamp=None
+ if stamp is None:
+  stamp=dt.datetime.fromtimestamp(path.stat().st_mtime,dt.timezone.utc)
+ if stamp.tzinfo is None: stamp=stamp.replace(tzinfo=dt.timezone.utc)
+ return max(0,int((dt.datetime.now(dt.timezone.utc)-stamp).total_seconds()))
+
+def read_manifest()->dict:
+ if not MANIFEST.exists(): return {}
+ try: data=json.loads(MANIFEST.read_text(encoding="utf-8"))
+ except (OSError,ValueError): return {}
+ return data if isinstance(data,dict) else {}
+
+def fetch_once(name:str)->dict:
  url=URLS[name]
  # HTTPS+fixed allowlist; never follow redirects outside official hosts.
  req=urllib.request.Request(url,headers={"User-Agent":"MITR3-public-reference-catalog/1.0","Accept":"application/json"})
- with urllib.request.urlopen(req,timeout=18) as r:
+ with urllib.request.urlopen(req,timeout=FETCH_TIMEOUT) as r:
   final=urllib.parse.urlsplit(r.geturl())
   original=urllib.parse.urlsplit(url)
   if final.scheme!="https" or final.hostname!=original.hostname:
    raise ValueError("Redirect outside pinned source")
   raw=r.read(MAX_SIZE+1)
-  if len(raw)>MAX_SIZE: raise ValueError("Dataset over size limit")
+  headers=getattr(r,"headers",None)
+ if len(raw)>MAX_SIZE: raise ValueError("Dataset over size limit")
+ verify_checksum(raw,headers)
  data=json.loads(raw)
  check_structure(name,data)
- path=CACHE/(name+".json")
- atomic_bytes(path,raw)
+ atomic_bytes(CACHE/(name+".json"),raw)
  return {"source":name,"url":url,"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),
-         "checked_at":now(),"item_count":count_feed(name,data)}
+         "checked_at":now(),"item_count":count_feed(name,data),"fallback":False}
+
+def use_cached_feed(name:str,reason:BaseException)->dict:
+ """Last structurally valid cache. Does not rewrite the file or its checked_at."""
+ path=CACHE/(name+".json")
+ raw=path.read_bytes()
+ if len(raw)>MAX_SIZE: raise ValueError("Cached dataset over size limit")
+ digest=hashlib.sha256(raw).hexdigest()
+ recorded=read_manifest().get(name)
+ if not isinstance(recorded,dict): recorded={}
+ previous=recorded.get("sha256")
+ if isinstance(previous,str) and previous!=digest:
+  raise ValueError("Cached feed changed or corrupted: "+name)
+ data=json.loads(raw)
+ check_structure(name,data)
+ checked=recorded.get("checked_at") if isinstance(recorded.get("checked_at"),str) else None
+ age=cache_age_seconds(checked,path)
+ reason_text=type(reason).__name__+": "+str(reason)[:160]
+ print("FETCH_CACHE_FALLBACK",name,"cache_age_seconds",age,"checked_at",checked or "mtime",
+       "sha256",digest,"reason",reason_text,flush=True)
+ return {"source":name,"url":URLS[name],"bytes":len(raw),"sha256":digest,
+         "checked_at":checked or dt.datetime.fromtimestamp(path.stat().st_mtime,dt.timezone.utc).isoformat(),
+         "item_count":count_feed(name,data),"fallback":True,"cache_age_seconds":age,
+         "fallback_reason":reason_text,"fallback_at":now()}
+
+def download(name:str)->dict:
+ last:BaseException|None=None
+ for attempt in range(FETCH_ATTEMPTS):
+  try:
+   return fetch_once(name)
+  except (OSError,ValueError) as exc:
+   last=exc
+   if attempt+1>=FETCH_ATTEMPTS: break
+   delay=FETCH_BACKOFF*(2**attempt)
+   print("FETCH_RETRY",name,"attempt",attempt+1,"of",FETCH_ATTEMPTS,"sleep_seconds",delay,
+         "error",type(exc).__name__,str(exc)[:160],flush=True)
+   time.sleep(delay)
+ try:
+  return use_cached_feed(name,last if last else ValueError("fetch failed"))
+ except (OSError,ValueError) as cache_exc:
+  print("FETCH_FAILED",name,"no_valid_cache","error",type(last).__name__ if last else "None",
+        str(last)[:160] if last else "","cache_error",type(cache_exc).__name__,str(cache_exc)[:160],
+        file=sys.stderr,flush=True)
+  if last is None: raise cache_exc
+  raise last from cache_exc
 
 def check_structure(name:str,d:object):
  if not isinstance(d,dict): raise ValueError("Expected JSON object")
  if name=="cisa-kev":
   xs=d.get("vulnerabilities")
   if not isinstance(xs,list) or len(xs)<100 or len(xs)>20000: raise ValueError("Suspicious CISA count")
+  if "count" in d:
+   count=d["count"]
+   if isinstance(count,bool) or not isinstance(count,int) or count!=len(xs):
+    raise ValueError("CISA catalog count mismatch")
   for row in xs:
    if not isinstance(row,dict) or not CVE_RE.fullmatch(str(row.get("cveID",""))):
     raise ValueError("Invalid CVE entry")
@@ -179,12 +302,13 @@ def count_feed(name,data):
 
 def sync():
  CACHE.mkdir(parents=True,exist_ok=True)
- old=json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {}
+ old=read_manifest()
  for name in URLS:
   report=download(name)
   old[name]=report
   atomic_bytes(MANIFEST,json.dumps(old,ensure_ascii=False,indent=2).encode()+b"\n")
-  print("FETCH_OK",name,"records",report["item_count"],"bytes",report["bytes"],
+  label="FETCH_CACHE" if report.get("fallback") else "FETCH_OK"
+  print(label,name,"records",report["item_count"],"bytes",report["bytes"],
         "sha256",report["sha256"],flush=True)
 
 def check_manifest(name,manifest):
