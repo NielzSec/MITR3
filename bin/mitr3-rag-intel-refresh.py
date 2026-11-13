@@ -5,7 +5,7 @@ Initial run establishes baseline, never mislabels existing items as new.
 A successful refresh updates the previous snapshot only after index and QA succeed.
 """
 from __future__ import annotations
-import datetime,json,os,pathlib,subprocess,sys,tempfile,hashlib,re
+import datetime,json,os,pathlib,subprocess,sys,tempfile,hashlib,re,importlib.util
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 CLI=ROOT/"bin/mitr3-rag-intel.py"
 REPORT=ROOT/"state/mitr3-intel-refresh-latest.json"
@@ -101,6 +101,23 @@ def recent_by_added(current:dict,days:int=7):
   if 0<=(today-added).days<days:entries.append({"cve":k,"dateAdded":v["dateAdded"],"vendor":v["vendorProject"],"product":v["product"]})
  return sorted(entries,key=lambda x:(x["dateAdded"],x["cve"]),reverse=True)
 
+def attach_cve_now(delta, recent):
+ """Overlay cached cve.now fields onto the KEV bulletin. No network.
+
+ The delta lists stay the CISA fields. A missing module, a bad cache, or no
+ matching CVE leaves each alert unchanged.
+ """
+ try:
+  spec=importlib.util.spec_from_file_location("mitr3_cve_now", ROOT/"bin/mitr3-cve-now.py")
+  mod=importlib.util.module_from_spec(spec)
+  spec.loader.exec_module(mod)
+  added=delta.get("added") if isinstance(delta, dict) else None
+  count=mod.overlay_cached(added, recent)
+  if count:
+   print("CVE_NOW_OVERLAY", count, flush=True)
+ except Exception as exc:
+  print("CVE_NOW_SKIP", type(exc).__name__, file=sys.stderr)
+
 def run(action):
  r=subprocess.run([sys.executable,str(CLI),action],capture_output=True,text=True,timeout=110,check=False)
  print(action.upper(),"exit",r.returncode,flush=True)
@@ -122,6 +139,7 @@ def main():
  if baseline_reason=="schema_migration_v1_to_v2":
   delta["note"]="schema migration: v1 lacked description, notes, forensic triage and CWE hashes; rebaselined to avoid false updates"
  new_recent=recent_by_added(current)
+ attach_cve_now(delta, new_recent)
  timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
  digest=hashlib.sha256(FEED.read_bytes()).hexdigest()
  state={"at":timestamp,"stats":stats,
