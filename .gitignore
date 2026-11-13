@@ -32,6 +32,8 @@ state/public-rag-mcp-qa.json
 state/public-rag-mcp-receipts.json
 state/public-rag.sqlite3
 state/shared-secret-check-latest.json
+# Reproduction ledger for verify-before-claim. Saved output stays local.
+state/evidence-store/
 
 # Credenciais locais de OSINT (nunca versionar)
 *.env
