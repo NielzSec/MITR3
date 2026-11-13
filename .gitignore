@@ -32,6 +32,8 @@ state/public-rag-mcp-qa.json
 state/public-rag-mcp-receipts.json
 state/public-rag.sqlite3
 state/shared-secret-check-latest.json
+# Local multi-agent board. Operational log, not a finding.
+state/offensive/
 
 # Credenciais locais de OSINT (nunca versionar)
 *.env
