@@ -316,6 +316,22 @@ def routed_source(query,source):
   return "public-cases"
  return ""
 
+def attach_cve_now(matches):
+ """Add cached cve.now fields onto CVE alerts. Never contacts the network.
+
+ Failure, a missing cache, or a bad cache leaves the alert exactly as the
+ KEV/ASVS/case index built it. The import is local so a problem in the
+ overlay cannot break sync or build.
+ """
+ try:
+  import importlib.util
+  spec=importlib.util.spec_from_file_location("mitr3_cve_now",ROOT/"bin/mitr3-cve-now.py")
+  mod=importlib.util.module_from_spec(spec)
+  spec.loader.exec_module(mod)
+  mod.attach_cached(matches)
+ except Exception:
+  return
+
 def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
  raw=[t.lower() for t in re.findall(r"[\w]+",query,flags=re.UNICODE)]
  toks=[t for t in raw if t not in STOPWORDS][:15] or raw[:15]
@@ -376,6 +392,7 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
   for item in matches:
    item["related"]=[e[0] for e in con.execute(
     "SELECT target_id FROM related WHERE doc_id=?",(item["id"],)).fetchall()]
+ attach_cve_now(matches)
  if emit:
   if as_json:print(json.dumps(matches,ensure_ascii=False,indent=2))
   else:
@@ -386,6 +403,11 @@ def search(query,limit:int=6,source:str="",kind:str="",as_json=False,emit=True):
     print("  URL:",x["source_url"])
     print("  Contexto:",x["summary"][:270])
     if x["related"]:print("  Relacionados:",", ".join(x["related"][:10]))
+    extra=x.get("cve_now")
+    if isinstance(extra,dict):
+     kev="KEV" if (extra.get("kev") or {}).get("listed") else "sem-KEV"
+     epss="EPSS>=0.1" if (extra.get("epss") or {}).get("reached_0_1") else "EPSS<0.1"
+     print("  cve.now:",extra.get("url",""),kev,epss)
  return matches
 
 def stats():

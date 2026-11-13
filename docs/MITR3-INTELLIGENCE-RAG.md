@@ -4,7 +4,8 @@ Atualizado em 2026-10-19. Complementa docs/PUBLIC-RAG-WRITEUPS.md.
 
 ## Fontes e modelo de confiança
 
-- CISA KEV (https://www.cisa.gov/known-exploited-vulnerabilities-catalog): vulnerabilidades conhecidamente exploradas, data de inclusão, fornecedor, produto, descricao, ação recomendada e CWE quando publicada.
+- CISA KEV (https://www.cisa.gov/known-exploited-vulnerabilities-catalog): vulnerabilidades conhecidamente exploradas, data de inclusão, fornecedor, produto, descricao, ação recomendada e CWE quando publicada. Continua sendo a fonte do alerta e do delta.
+- cve.now (https://cve.now): camada opcional de enriquecimento do mesmo alerta (EPSS, KEV, links públicos de exploit/PoC, fontes mescladas). Não substitui o fetch do KEV nem o ASVS. Ver docs/MITR3-CVE-NOW.md.
 - OWASP ASVS v5.0.0 (https://github.com/OWASP/ASVS/tree/v5.0.0): 345 requisitos versionados. Licença CC BY-SA 4.0. Consultar IDs como ASVS-V1.2.5.
 - Catálogo MITR3: casos publicamente divulgados, write-ups de CTFs finalizados e fontes de referência, com autoria e links. Não copiar relatos integrais sem licença.
 
