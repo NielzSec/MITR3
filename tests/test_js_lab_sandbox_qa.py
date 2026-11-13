@@ -16,6 +16,8 @@ from unittest.mock import Mock, patch
 from test_js_lab import ROOT, entry, lab, scope_data
 
 HELPER = ROOT / "tools/js_lab_sandbox.py"
+BWRAP = Path("/usr/bin/bwrap")
+BWRAP_REASON = "NOT_RUN: /usr/bin/bwrap is not installed; real sandbox isolation was not executed"
 SPEC = importlib.util.spec_from_file_location("sandbox_qa_subject", HELPER)
 sandbox = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(sandbox)
@@ -88,6 +90,7 @@ print(json.dumps(result))
         self.assertGreater(observed["after"], observed["before"])
         self.assertEqual([observed[x] for x in ("socket", "socketpair", "exec")], [errno.EPERM] * 3)
 
+    @unittest.skipUnless(BWRAP.is_file() and os.access(BWRAP, os.X_OK), BWRAP_REASON)
     def test_real_bwrap_hides_canary_and_keeps_input_tmp_root_readonly(self):
         canary = self.directory / "host-only-canary"
         canary.write_text("SYNTHETIC_CANARY_NEVER_PRINTED")
@@ -186,6 +189,7 @@ print(json.dumps({{"canary_hidden": canary_hidden, "home_hidden": not Path("/hom
             with self.assertRaises(lab.LabError):
                 lab.verify_package(out)
 
+    @unittest.skipUnless(BWRAP.is_file() and os.access(BWRAP, os.X_OK), BWRAP_REASON)
     def test_public_contained_cli_generates_independently_verified_package(self):
         out = self.directory / "contained-cli"
         result = subprocess.run([sys.executable, str(ROOT / "bin/mitr3-js-lab.py"), *self.arguments(out)],
@@ -217,6 +221,7 @@ print(json.dumps({{"canary_hidden": canary_hidden, "home_hidden": not Path("/hom
         with patch.object(sandbox.subprocess, "Popen", side_effect=fake_worker), redirect_stdout(io.StringIO()):
             self.assertEqual(sandbox.launch(lab, self.arguments(output)), 2)
 
+    @unittest.skipUnless(BWRAP.is_file() and os.access(BWRAP, os.X_OK), BWRAP_REASON)
     def test_external_supervisor_reaps_real_stalled_bwrap_child(self):
         self.scope_file.write_bytes(lab.packed(scope_data(limits={"max_seconds": 1})))
         real_argv = sandbox.sandbox_argv

@@ -181,6 +181,8 @@ class BrokerTests(unittest.TestCase):
 
     def test_trace_passes_existing_execution_verifier_without_auto_approval(self):
         import subprocess, sys
+        # Empty fixture dirs are not in git; TemporaryDirectory requires the parent.
+        FIXTURES.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(prefix="ev-", dir=FIXTURES) as tmp:
             original = Path(tmp)/"fixture.js"
             original.write_bytes(b"aa\nbb\n")
