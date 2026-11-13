@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bubblewrap
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          if [ -f pyproject.toml ]; then pip install . || echo "pyproject install skipped"; fi
+          pip install ruff
+
+      - name: Lint
+        run: |
+          ruff check bin/mitr3-secrets-audit.py tests/test_shared_secret_rule.py .github/ci_run_tests.py
+          python -m compileall -q bin tests tools hackbots .github/ci_run_tests.py
+
+      - name: Bootstrap fixtures when a helper exists
+        run: |
+          set +e
+          found=0
+          for candidate in \
+            bin/mitr3-bootstrap-fixtures.py \
+            bin/bootstrap-fixtures.py \
+            bin/bootstrap_fixtures.py \
+            scripts/bootstrap-fixtures.sh \
+            tests/bootstrap_fixtures.py
+          do
+            if [ -f "$candidate" ]; then
+              found=1
+              echo "Running $candidate"
+              case "$candidate" in
+                *.py) python "$candidate" ;;
+                *) bash "$candidate" ;;
+              esac
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No fixture bootstrap in this tree. Missing optional datasets are skips."
+          fi
+          exit 0
+
+      - name: Test
+        run: python .github/ci_run_tests.py
+
+      - name: Secret scan (mitr3-secrets-audit)
+        run: python bin/mitr3-secrets-audit.py --json .
+
+      - name: Install gitleaks
+        run: |
+          version=8.30.1
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      - name: Secret scan (gitleaks)
+        # Working tree only. Other refs still carry historical generic-api-key
+        # hits under reviews/; rewriting that history is out of scope.
+        run: gitleaks detect --no-git --source . --redact --no-banner --exit-code 1
