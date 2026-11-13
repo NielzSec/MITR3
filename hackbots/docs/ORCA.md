@@ -21,6 +21,11 @@ gerenciado, mas esse executável não está no PATH. Por isso o vínculo de proj
 mensagens e lifecycle no Orca ainda não foram verificados por CLI nesta migração.
 Não afirmar que os nove papéis do catálogo são sessões em execução.
 
+Uma recomendação que precisa de mais de um agente passa pelo quadro em
+[MITR3-AGENT-DELIBERATION.md](../../docs/MITR3-AGENT-DELIBERATION.md). Morfeus abre
+o tópico; pelo menos dois agentes publicam uma posição; o id da decisão fica no
+JSONL. Esse registro não executa a fase e não substitui o aceite humano.
+
 O documento [MAESTRI.md](MAESTRI.md) e os relatórios anteriores são históricos.
 O antigo `team/DISPATCH_GUIDE.md` também é histórico: seu hash é citado em uma
 skill candidata e seus exemplos `maestri ask` não devem ser executados.
